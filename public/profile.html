@@ -73,6 +73,38 @@
 
     <div class="form-container mx-auto max-w-800">
         <h3>Family Details (Dependents)</h3>
+        
+        <div class="family-tree-container mb-6">
+            <div style="text-align: center; margin-bottom: -15px;">
+                <svg width="160" height="90" viewBox="0 0 160 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.9;">
+                    <path d="M80 5C80 5 65 45 15 50" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M80 5C80 5 95 45 145 50" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M80 2L80 80" stroke="#047857" stroke-width="6" stroke-linecap="round"/>
+                    <circle cx="80" cy="5" r="8" fill="#10b981"/>
+                    <circle cx="70" cy="16" r="7" fill="#34d399"/>
+                    <circle cx="90" cy="16" r="7" fill="#34d399"/>
+                    <circle cx="50" cy="28" r="9" fill="#059669"/>
+                    <circle cx="110" cy="28" r="9" fill="#059669"/>
+                    <circle cx="22" cy="42" r="8" fill="#10b981"/>
+                    <circle cx="138" cy="42" r="8" fill="#10b981"/>
+                </svg>
+            </div>
+            <div class="family-tree">
+                <ul>
+                    <li>
+                        <div class="family-tree-node root-node">
+                            <div style="font-weight: 800; color: var(--primary-color, #4f46e5); text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; margin-bottom: 4px;">Claimant / स्वयं</div>
+                            <div id="tree_self_name" style="font-weight: 700; font-size: 13px; color: #1e293b;">Claimant</div>
+                            <div style="color: #64748b; font-size: 10px; margin-top: 2px;">Self</div>
+                        </div>
+                        <ul id="dependents-tree-list">
+                            <!-- Dependents will hang dynamically here! -->
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
         <div class="table-container mb-6">
             <table>
                 <thead>

@@ -19,8 +19,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const tbody = document.getElementById('dependents-table');
                     tbody.innerHTML = '';
+                    
+                    const treeList = document.getElementById('dependents-tree-list');
+                    if (treeList) {
+                        treeList.innerHTML = '';
+                        document.getElementById('tree_self_name').textContent = user.name || 'Claimant';
+                    }
+
                     if (user.dependents && user.dependents.length > 0) {
                         user.dependents.forEach(dep => {
+                            // Populate Table Row
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td>${dep.name}</td>
@@ -33,6 +41,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </td>
                             `;
                             tbody.appendChild(tr);
+
+                            // Populate Family Tree Node
+                            if (treeList) {
+                                const li = document.createElement('li');
+                                li.innerHTML = `
+                                    <div class="family-tree-node" style="min-width: 130px; padding: 12px 10px;">
+                                        <div style="font-weight: 800; color: #64748b; font-size: 8px; text-transform: uppercase; margin-bottom: 2px;">Dependent</div>
+                                        <div style="font-weight: 700; font-size: 12px; color: #1e293b;">${dep.name}</div>
+                                        <div style="color: var(--primary-color, #4f46e5); font-size: 10px; font-weight: 600; margin-top: 2px;">${dep.relationship}</div>
+                                        <div style="margin-top: 8px; display: flex; justify-content: center; gap: 8px;">
+                                            <button type="button" style="border: none; background: #f1f5f9; color: #475569; border-radius: 4px; padding: 2px 6px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick='editDependent(${JSON.stringify(dep)})'>✎</button>
+                                            <button type="button" style="border: none; background: #fee2e2; color: #ef4444; border-radius: 4px; padding: 2px 6px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="deleteDependent(${dep.id})">✕</button>
+                                        </div>
+                                    </div>
+                                `;
+                                treeList.appendChild(li);
+                            }
                         });
                     } else {
                         tbody.innerHTML = '<tr><td colspan="5">No dependents added.</td></tr>';
