@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn("Tailwind CDN failed to load. Falling back to global style.css.");
         };
         document.head.appendChild(tw);
-        
+
         document.body.classList.add('bg-surface', 'font-body', 'text-on-surface');
     }
 
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const existingContent = document.body.innerHTML;
     document.body.innerHTML = appHtml;
     document.getElementById('content').innerHTML = existingContent;
-    
+
     if (savedTheme) {
         document.body.classList.add(savedTheme);
     }
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
                 document.body.classList.remove(...themes);
                 themeSwatches.forEach(s => s.classList.remove('active'));
-                
+
                 swatch.classList.add('active');
                 if (swatch.dataset.theme) {
                     document.body.classList.add(swatch.dataset.theme);
@@ -148,9 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (token) {
                     fetch('/api/auth/theme', {
                         method: 'POST',
-                        headers: { 
+                        headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}` 
+                            'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({ theme: swatch.dataset.theme })
                     }).catch(err => console.error('Failed to save theme to DB', err));
@@ -164,11 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         };
                         const primaryColor = getThemeColor('--primary-color', '#4f46e5');
                         const accentColor = getThemeColor('--accent-color', '#0d9488');
-                        
+
                         window.statusChartInstance.data.datasets[0].backgroundColor[0] = primaryColor;
                         window.statusChartInstance.data.datasets[0].backgroundColor[1] = accentColor;
                         window.statusChartInstance.update();
-                        
+
                         window.historyChartInstance.data.datasets[0].backgroundColor = primaryColor;
                         window.historyChartInstance.update();
                     }
@@ -189,54 +189,54 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/api/auth/me', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data && (data.name || data.username)) {
-                footerUser.textContent = data.name || data.username;
-            }
-            // Sync theme from DB if different
-            if (data && data.theme_pref !== undefined && data.theme_pref !== localStorage.getItem('themePref')) {
-                const dbTheme = data.theme_pref;
-                localStorage.setItem('themePref', dbTheme);
-                const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
-                document.body.classList.remove(...themes);
-                if (dbTheme) {
-                    document.body.classList.add(dbTheme);
+            .then(res => res.json())
+            .then(data => {
+                if (data && (data.name || data.username)) {
+                    footerUser.textContent = data.name || data.username;
                 }
-                // Update active swatch
-                themeSwatches.forEach(s => {
-                    s.classList.remove('active');
-                    if (s.dataset.theme === dbTheme) s.classList.add('active');
-                });
-            }
-        })
-        .catch(err => console.error('Failed to fetch user data', err));
+                // Sync theme from DB if different
+                if (data && data.theme_pref !== undefined && data.theme_pref !== localStorage.getItem('themePref')) {
+                    const dbTheme = data.theme_pref;
+                    localStorage.setItem('themePref', dbTheme);
+                    const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
+                    document.body.classList.remove(...themes);
+                    if (dbTheme) {
+                        document.body.classList.add(dbTheme);
+                    }
+                    // Update active swatch
+                    themeSwatches.forEach(s => {
+                        s.classList.remove('active');
+                        if (s.dataset.theme === dbTheme) s.classList.add('active');
+                    });
+                }
+            })
+            .catch(err => console.error('Failed to fetch user data', err));
 
         // Fetch Avatar
         fetch('/api/auth/avatar', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-        .then(res => {
-            if (!res.ok) throw new Error();
-            return res.blob();
-        })
-        .then(blob => {
-            const url = URL.createObjectURL(blob);
-            const footerAvatar = document.getElementById('footer-avatar');
-            if (footerAvatar) {
-                footerAvatar.src = url;
-                footerAvatar.style.display = 'block';
-            }
-            const profileAvatar = document.getElementById('profile-avatar');
-            if (profileAvatar) {
-                profileAvatar.src = url;
-            }
-            const sidebarAvatar = document.getElementById('sidebar-avatar');
-            if (sidebarAvatar) {
-                sidebarAvatar.src = url;
-            }
-        })
-        .catch(() => {});
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const footerAvatar = document.getElementById('footer-avatar');
+                if (footerAvatar) {
+                    footerAvatar.src = url;
+                    footerAvatar.style.display = 'block';
+                }
+                const profileAvatar = document.getElementById('profile-avatar');
+                if (profileAvatar) {
+                    profileAvatar.src = url;
+                }
+                const sidebarAvatar = document.getElementById('sidebar-avatar');
+                if (sidebarAvatar) {
+                    sidebarAvatar.src = url;
+                }
+            })
+            .catch(() => { });
     }
 
     if (window.MenuRenderer) {
