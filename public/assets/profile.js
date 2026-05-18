@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <td>${dep.dob ? new Date(dep.dob).toLocaleDateString() : '-'}</td>
                                 <td>
                                     <button type="button" class="btn-small" onclick='editDependent(${JSON.stringify(dep)})'>Edit</button>
-                                    <button type="button" class="btn-small" style="background:#dc3545;" onclick="deleteDependent(${dep.id})">Del</button>
+                                    <button type="button" class="btn-small btn-danger" onclick="deleteDependent(${dep.id})">Delete</button>
                                 </td>
                             `;
                             tbody.appendChild(tr);

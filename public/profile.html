@@ -51,25 +51,27 @@
                 </div>
             </div>
             <div id="profile-status-message" class="hidden" style="padding: 10px; margin-bottom: 15px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; text-align: center; transition: all 0.3s ease;"></div>
-            <button type="submit">Update Profile</button>
+            <button type="submit" class="btn-primary w-full">Update Profile</button>
         </form>
     </div>
 
     <div class="form-container mx-auto max-w-800">
         <h3>Family Details (Dependents)</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Relationship</th>
-                    <th>CGHS Card ID</th>
-                    <th>Date of Birth</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="dependents-table">
-            </tbody>
-        </table>
+        <div class="table-container mb-6">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Relationship</th>
+                        <th>CGHS Card ID</th>
+                        <th>Date of Birth</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="dependents-table">
+                </tbody>
+            </table>
+        </div>
 
         <h4 class="mt-5">Add / Edit Dependent</h4>
         <form id="dependent-form">
@@ -107,8 +109,10 @@
                     <input type="date" id="dep_dob">
                 </div>
             </div>
-            <button type="submit" id="btn-save-dep">Save Dependent</button>
-            <button type="button" id="btn-cancel-dep" class="secondary hidden">Cancel</button>
+            <div class="flex gap-4 mt-5">
+                <button type="submit" id="btn-save-dep" class="btn-primary">Save Dependent</button>
+                <button type="button" id="btn-cancel-dep" class="btn-draft hidden">Cancel</button>
+            </div>
         </form>
     </div>
 
