@@ -3,6 +3,36 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const userDir = path.join(__dirname, '..', 'server', 'storage', req.user.username);
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+        cb(null, userDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, 'avatar.jpg');
+    }
+});
+const upload = multer({ storage: storage });
+
+router.post('/avatar', require('./middleware').authenticateToken, upload.single('avatar'), (req, res) => {
+    res.json({ message: 'Profile photo updated successfully' });
+});
+
+router.get('/avatar', require('./middleware').authenticateToken, (req, res) => {
+    const avatarPath = path.join(__dirname, '..', 'server', 'storage', req.user.username, 'avatar.jpg');
+    if (fs.existsSync(avatarPath)) {
+        res.sendFile(avatarPath);
+    } else {
+        res.status(404).json({ message: 'Avatar not found' });
+    }
+});
 
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
@@ -43,8 +73,9 @@ router.post('/login', async (req, res) => {
         res.json({
             token,
             role: user.role_name,
-            usezrname: user.username,
-            must_reset_password: user.must_reset_password
+            username: user.username,
+            must_reset_password: user.must_reset_password,
+            theme_pref: user.theme_pref
         });
     } catch (err) {
         console.error(err);
@@ -54,7 +85,7 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', require('./middleware').authenticateToken, async (req, res) => {
     try {
-        const result = await db.query('SELECT id, username, name, designation, email, personal_no, role_id, cghs_ben_id, address, mobile_no, basic_pay, pay_level, orders_for_move, TO_CHAR(move_date, \'YYYY-MM-DD\') as move_date, authority, gpf_ac_no FROM users WHERE id = $1', [req.user.id]);
+        const result = await db.query('SELECT id, username, name, designation, email, personal_no, role_id, cghs_ben_id, address, mobile_no, basic_pay, pay_level, orders_for_move, TO_CHAR(move_date, \'YYYY-MM-DD\') as move_date, authority, gpf_ac_no, theme_pref FROM users WHERE id = $1', [req.user.id]);
         if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
 
         const user = result.rows[0];
@@ -134,6 +165,17 @@ router.post('/change-password', require('./middleware').authenticateToken, async
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.post('/theme', require('./middleware').authenticateToken, async (req, res) => {
+    try {
+        const { theme } = req.body;
+        await db.query('UPDATE users SET theme_pref = $1 WHERE id = $2', [theme || '', req.user.id]);
+        res.json({ message: 'Theme updated successfully' });
+    } catch (err) {
+        console.error('Update theme error:', err);
+        res.status(500).json({ message: 'Server error updating theme' });
     }
 });
 

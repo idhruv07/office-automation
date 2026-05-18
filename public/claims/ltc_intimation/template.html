@@ -13,6 +13,18 @@
         padding: 4px 8px !important;
         font-size: 12px !important;
         min-height: unset !important;
+        border: 1px solid var(--border-light) !important;
+        border-radius: 6px !important;
+        background: white !important;
+        color: var(--text-main) !important;
+        transition: all 0.2s ease !important;
+    }
+    .ltc-intimation-compact input:focus, 
+    .ltc-intimation-compact textarea:focus, 
+    .ltc-intimation-compact select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+        outline: none !important;
     }
     .ltc-intimation-compact .mb-4, 
     .ltc-intimation-compact .mb-6 {
@@ -22,20 +34,49 @@
         font-size: 18px !important;
         margin-bottom: 8px !important;
         line-height: 1.1;
+        color: var(--primary-color) !important;
+        text-align: center !important;
     }
     .ltc-intimation-compact h2 span {
         font-size: 14px !important;
+        color: var(--text-muted) !important;
     }
     .ltc-intimation-compact h3 {
         font-size: 13px !important;
         margin-bottom: 4px !important;
+        color: var(--primary-color) !important;
+        border-left: 3px solid var(--accent-color) !important;
+        padding-left: 0.5rem !important;
+        font-weight: 700 !important;
     }
     .ltc-intimation-compact .p-4 {
         padding: 8px !important;
     }
-    .ltc-intimation-compact table th, 
+    .ltc-intimation-compact table th {
+        background: var(--primary-color) !important;
+        color: white !important;
+        border: 1px solid var(--primary-color) !important;
+        font-weight: 600 !important;
+    }
     .ltc-intimation-compact table td {
         padding: 4px !important;
+        border: 1px solid var(--border-light) !important;
+    }
+    .ltc-intimation-compact .warning-box {
+        background: rgba(239, 68, 68, 0.04) !important;
+        border-left: 4px solid var(--danger-color) !important;
+        border-radius: 8px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 16px !important;
+        color: var(--text-main) !important;
+    }
+    .ltc-intimation-compact .warning-box p {
+        margin: 0 !important;
+        font-size: 11px !important;
+    }
+    .ltc-intimation-compact .warning-box p:first-child {
+        margin-bottom: 4px !important;
+        font-weight: 600 !important;
     }
     @media print {
         .ltc-intimation-compact {
@@ -113,7 +154,7 @@
             <tfoot class="no-print">
                 <tr>
                     <td colspan="3" class="p-1">
-                        <button type="button" id="ltc_int_add_family_btn" class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm" title="Add Member">+</button>
+                        <button type="button" id="ltc_int_add_family_btn" class="btn-primary w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm" title="Add Member" style="background: var(--primary-color) !important; color: white !important; border: none; border-radius: 50%;">+</button>
                     </td>
                 </tr>
             </tfoot>
@@ -146,8 +187,8 @@
         </table>
     </div>
 
-    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-        <p class="mb-2">यदि मैं यात्रा नहीं करता/करती अथवा निर्धारित अवधि में समायोजन बिल प्रस्तुत नहीं करता/करती हूँ, तो मुझे भुगतान की गई अग्रिम राशि दंडात्मक ब्याज सहित मेरे वेतन से वसूल की जा सकती है।</p>
+    <div class="warning-box">
+        <p>यदि मैं यात्रा नहीं करता/करती अथवा निर्धारित अवधि में समायोजन बिल प्रस्तुत नहीं करता/करती हूँ, तो मुझे भुगतान की गई अग्रिम राशि दंडात्मक ब्याज सहित मेरे वेतन से वसूल की जा सकती है।</p>
         <p>If I do not perform the journey or fail to submit the adjustment claim within the stipulated period, the advance paid to me is recoverable with penal interest from my salary.</p>
     </div>
 
@@ -184,9 +225,9 @@
     <!-- Action Buttons Row -->
     <div class="flex justify-end no-print mt-4 mb-6">
         <div class="flex gap-2">
-            <button type="button" id="ltc_int_btn_draft" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs border border-gray-300">Save as Draft</button>
-            <button type="button" id="ltc_int_btn_preview" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs border border-gray-300">Print Preview</button>
-            <button type="button" id="ltc_int_btn_submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">Submit Claim</button>
+            <button type="button" id="ltc_int_btn_draft" class="btn-draft px-3 py-1 text-xs">Save as Draft</button>
+            <button type="button" id="ltc_int_btn_preview" class="btn-preview px-3 py-1 text-xs">Print Preview</button>
+            <button type="button" id="ltc_int_btn_submit" class="btn-primary px-3 py-1 text-xs">Submit Claim</button>
         </div>
     </div>
 </div>

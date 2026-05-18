@@ -1,3 +1,28 @@
+<style>
+  /* Screen-Only Color Theming (Guarantees zero change to Print Preview) */
+  @media screen {
+    .cb-exp-table th,
+    .cb-pay-table th {
+      background-color: var(--primary-color) !important;
+      color: white !important;
+      border-color: var(--primary-color) !important;
+    }
+    .cb-btn-add-row {
+      background-color: var(--primary-color) !important;
+      color: white !important;
+      border: none !important;
+    }
+    .cb-btn-rm {
+      background-color: var(--danger-color) !important;
+      color: white !important;
+      border: none !important;
+    }
+    .cb-uline:focus {
+      border-bottom-color: var(--primary-color) !important;
+      background: white !important;
+    }
+  }
+</style>
 <div class="cb-page">
 
   <!-- ── Title ── -->

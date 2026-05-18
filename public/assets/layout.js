@@ -81,7 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const appHtml = `
         <div id="app-container">
             <aside id="sidebar">
-                <header>Office Auto</header>
+                <header style="display: flex; align-items: center; gap: 10px;">
+                    <img id="sidebar-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                    <span>Office Auto</span>
+                </header>
                 <nav style="flex: 1;">
                     <ul id="nav-menu">
                         <li><a href="/dashboard.html">Home (Static)</a></li>
@@ -99,14 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </aside>
             <main id="main-content">
-                <header id="header">
-                    <span id="user-info">Not Logged In</span>
-                </header>
                 <section id="content">
                     <!-- Page specific content will be moved here -->
                 </section>
                 <footer id="footer">
-                    &copy; 2026 Office Automation System
+                    <span>&copy; 2026 Office Automation System</span>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span id="footer-user-info" class="footer-user-badge"></span>
+                        <img id="footer-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    </div>
                 </footer>
             </main>
         </div>
@@ -136,12 +140,84 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.body.classList.add(swatch.dataset.theme);
                 }
                 localStorage.setItem('themePref', swatch.dataset.theme);
+
+                // Save to database
+                const token = localStorage.getItem('token');
+                if (token) {
+                    fetch('/api/auth/theme', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` 
+                        },
+                        body: JSON.stringify({ theme: swatch.dataset.theme })
+                    }).catch(err => console.error('Failed to save theme to DB', err));
+                }
             });
         });
     }
 
-    const role = localStorage.getItem('role') || 'Employee';
-    document.getElementById('user-info').textContent = `Role: ${role}`;
+    const footerUser = document.getElementById('footer-user-info');
+    if (footerUser) {
+        // Fallback placeholder while loading
+        let displayUser = localStorage.getItem('username');
+        if (!displayUser || displayUser === 'undefined') displayUser = 'Employee';
+        footerUser.textContent = displayUser;
+
+        // Fetch real name dynamically for accuracy
+        const token = localStorage.getItem('token');
+        fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && (data.name || data.username)) {
+                footerUser.textContent = data.name || data.username;
+            }
+            // Sync theme from DB if different
+            if (data && data.theme_pref !== undefined && data.theme_pref !== localStorage.getItem('themePref')) {
+                const dbTheme = data.theme_pref;
+                localStorage.setItem('themePref', dbTheme);
+                const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
+                document.body.classList.remove(...themes);
+                if (dbTheme) {
+                    document.body.classList.add(dbTheme);
+                }
+                // Update active swatch
+                themeSwatches.forEach(s => {
+                    s.classList.remove('active');
+                    if (s.dataset.theme === dbTheme) s.classList.add('active');
+                });
+            }
+        })
+        .catch(err => console.error('Failed to fetch user data', err));
+
+        // Fetch Avatar
+        fetch('/api/auth/avatar', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error();
+            return res.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const footerAvatar = document.getElementById('footer-avatar');
+            if (footerAvatar) {
+                footerAvatar.src = url;
+                footerAvatar.style.display = 'block';
+            }
+            const profileAvatar = document.getElementById('profile-avatar');
+            if (profileAvatar) {
+                profileAvatar.src = url;
+            }
+            const sidebarAvatar = document.getElementById('sidebar-avatar');
+            if (sidebarAvatar) {
+                sidebarAvatar.src = url;
+            }
+        })
+        .catch(() => {});
+    }
 
     if (window.MenuRenderer) {
         const menuRenderer = new window.MenuRenderer('nav-menu');

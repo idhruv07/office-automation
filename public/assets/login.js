@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('role', data.role);
                     localStorage.setItem('username', data.username);
                     localStorage.setItem('must_reset', data.must_reset_password);
+                    if (data.theme_pref) {
+                        localStorage.setItem('themePref', data.theme_pref);
+                    } else {
+                        localStorage.removeItem('themePref');
+                    }
                     
                     if (data.must_reset_password) {
                         window.location.href = '/change-password.html';

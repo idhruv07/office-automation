@@ -47,6 +47,42 @@
         margin: 0 !important;
         background: transparent !important;
     }
+    
+    /* Screen-Only Color Theming (Guarantees zero change to Print Preview) */
+    @media screen {
+        .mrc-compact h3 {
+            background: rgba(79, 70, 229, 0.04) !important;
+            border-left: 3px solid var(--accent-color) !important;
+            color: var(--primary-color) !important;
+            font-weight: 700 !important;
+        }
+        .mrc-compact table th {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border-color: var(--primary-color) !important;
+        }
+        .mrc-compact input:focus, 
+        .mrc-compact select:focus, 
+        .mrc-compact textarea:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+            outline: none !important;
+        }
+        .mrc-compact .mrc-doc-column-header {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            font-weight: 600 !important;
+        }
+        .mrc-compact .warning-box {
+            background: rgba(239, 68, 68, 0.04) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important;
+            border-left: 4px solid var(--danger-color) !important;
+            border-radius: 6px !important;
+            padding: 10px 14px !important;
+            color: var(--text-main) !important;
+        }
+    }
+
     @media print {
         .no-print { display: none !important; }
         body { margin: 0; padding: 0; }
@@ -234,7 +270,7 @@
         </div>
     </div>
 
-    <div class="mt-4 bg-yellow-50 p-2 border border-yellow-200 text-xs italic">
+    <div class="warning-box mt-4 p-2 border text-xs italic">
         <b>Note:</b> Misuse of CGHS facilities is a criminal offence. False statements may lead to disciplinary action.
     </div>
 

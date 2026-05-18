@@ -927,14 +927,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!selectedOpt) return;
         const h1 = document.querySelector('h1');
         if (!h1) return;
-        const folderName = selectedOpt.dataset.folder;
-        if (folderName === 'newspaper') {
-            h1.textContent = 'Newspaper';
-        } else if (selectedOpt.value === '7') { // Contingent Bill
-            h1.textContent = 'New ' + selectedOpt.textContent;
-        } else {
-            h1.textContent = 'Submit ' + selectedOpt.textContent;
-        }
+        
+        // Hide the page heading for all selected templates to prevent duplicate headings
+        h1.style.display = 'none';
     }
 
     // ── Claim type change handler ─────────────────────────────────────────────

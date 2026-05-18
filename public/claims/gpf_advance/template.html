@@ -173,6 +173,24 @@
     border-top: 1px solid #e2e8f0;
   }
 
+    /* Screen-Only Color Theming (Guarantees zero change to Print Preview) */
+  @media screen {
+    .gpf-section {
+      background: rgba(79, 70, 229, 0.04) !important;
+      border-left: 4px solid var(--accent-color) !important;
+      color: var(--primary-color) !important;
+    }
+    .gpf-balance-table th {
+      background-color: var(--primary-color) !important;
+      color: white !important;
+      border-color: var(--primary-color) !important;
+    }
+    .gpf-uline:focus {
+      border-bottom-color: var(--primary-color) !important;
+      background: white !important;
+    }
+  }
+
   @media print {
     .gpf-action-bar { display: none !important; }
     .gpf-uline:focus { background: transparent !important; }

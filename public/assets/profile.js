@@ -149,5 +149,55 @@ document.addEventListener('DOMContentLoaded', async () => {
                 else alert('Error deleting dependent');
             };
 
+            const avatarInput = document.getElementById('avatar-input');
+            const avatarStatus = document.getElementById('avatar-status');
+            if (avatarInput) {
+                avatarInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const formData = new FormData();
+                    formData.append('avatar', file);
+
+                    avatarStatus.textContent = 'Uploading...';
+                    avatarStatus.classList.remove('hidden');
+                    avatarStatus.style.color = 'var(--text-muted)';
+
+                    try {
+                        const res = await fetch('/api/auth/avatar', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: formData
+                        });
+
+                        if (res.ok) {
+                            avatarStatus.textContent = 'Upload successful!';
+                            avatarStatus.style.color = 'var(--success-color)';
+                            
+                            // Refresh avatars seamlessly
+                            const avatarUrl = URL.createObjectURL(file);
+                            const profileAvatar = document.getElementById('profile-avatar');
+                            const footerAvatar = document.getElementById('footer-avatar');
+                            const sidebarAvatar = document.getElementById('sidebar-avatar');
+                            if (profileAvatar) profileAvatar.src = avatarUrl;
+                            if (footerAvatar) {
+                                footerAvatar.src = avatarUrl;
+                                footerAvatar.style.display = 'block';
+                            }
+                            if (sidebarAvatar) {
+                                sidebarAvatar.src = avatarUrl;
+                            }
+                            
+                            setTimeout(() => avatarStatus.classList.add('hidden'), 3000);
+                        } else {
+                            throw new Error('Upload failed');
+                        }
+                    } catch (err) {
+                        avatarStatus.textContent = 'Failed to upload photo.';
+                        avatarStatus.style.color = 'var(--danger-color)';
+                    }
+                });
+            }
+
             loadProfile();
         });
