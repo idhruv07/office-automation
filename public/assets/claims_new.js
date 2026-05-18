@@ -139,11 +139,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const affidavitEl = document.getElementById('affidavitText');
             if (affidavitEl) {
-                let text = affidavitEl.value;
-                text = text.replace('[Your Name]', currentUser.name || '');
-                text = text.replace('[Employee Name]', currentUser.name || '');
-                text = text.replace('[Address]', currentUser.address || '');
-                affidavitEl.value = text;
+                affidavitEl.dataset.templateText = affidavitEl.value;
+                const updateAffidavit = () => {
+                    const name = currentUser.name || '';
+                    const address = document.getElementById('mrc_full_address')?.value || '';
+                    let text = affidavitEl.dataset.templateText;
+                    text = text.replace('[Your Name]', name);
+                    text = text.replace('[Employee Name]', name);
+                    text = text.replace('[Address]', address);
+                    affidavitEl.value = text;
+                };
+                const addressInput = document.getElementById('mrc_full_address');
+                if (addressInput) {
+                    addressInput.addEventListener('input', updateAffidavit);
+                }
+                updateAffidavit();
             }
 
             // ── Date helpers ──────────────────────────────────────────────────
