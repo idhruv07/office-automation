@@ -775,7 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!h1) return;
         const folderName = selectedOpt.dataset.folder;
         if (folderName === 'newspaper') {
-            h1.textContent = 'newspaper';
+            h1.textContent = 'Newspaper';
         } else if (selectedOpt.value === '7') { // Contingent Bill
             h1.textContent = 'New ' + selectedOpt.textContent;
         } else {
