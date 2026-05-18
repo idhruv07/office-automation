@@ -1232,10 +1232,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (res.ok) {
                 if (pendingStatus === 'Draft') {
-                    showCustomSuccessModal();
+                    showCustomSuccessModal('draft');
                 } else {
-                    alert('Claim submitted successfully!');
-                    window.location.href = '/claims/my.html';
+                    showCustomSuccessModal('submit');
                 }
             } else {
                 const data = await res.json();
@@ -1247,7 +1246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function showCustomSuccessModal() {
+    function showCustomSuccessModal(type) {
         let modal = document.getElementById('custom-success-modal');
         if (!modal) {
             modal = document.createElement('div');
@@ -1292,18 +1291,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
-                    <h3 style="
+                    <h3 id="success-modal-title" style="
                         color: #0f172a;
                         font-weight: 800;
                         font-size: 1.5rem;
                         margin: 0 0 0.25rem 0 !important;
                         font-family: 'Outfit', 'Inter', sans-serif;
                     ">Claim Saved</h3>
-                    <p style="
+                    <p id="success-modal-desc" style="
                         color: #64748b;
                         font-size: 0.95rem;
                         margin: 0 0 1.5rem 0 !important;
-                    ">Your claim has been successfully saved to drafts!</p>
+                    ">Your claim has been successfully saved!</p>
                     <div style="
                         border-radius: 16px;
                         overflow: hidden;
@@ -1313,7 +1312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         background: #f8fafc;
                         padding: 8px;
                     ">
-                        <img src="/assets/claim_joke.jpg" alt="Workers Compensation Cartoon" style="
+                        <img id="success-modal-img" src="" alt="Claim Cartoon" style="
                             width: 100%;
                             height: auto;
                             display: block;
@@ -1338,10 +1337,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.body.appendChild(modal);
 
             const closeBtn = document.getElementById('success-modal-close-btn');
-            closeBtn.addEventListener('click', () => {
-                modal.classList.remove('active');
-                modal.style.setProperty('display', 'none', 'important');
-            });
             closeBtn.addEventListener('mouseover', () => {
                 closeBtn.style.transform = 'translateY(-1px)';
                 closeBtn.style.boxShadow = '0 6px 20px rgba(79, 70, 229, 0.35)';
@@ -1350,6 +1345,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 closeBtn.style.transform = 'none';
                 closeBtn.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.2)';
             });
+        }
+
+        const titleEl = document.getElementById('success-modal-title');
+        const descEl = document.getElementById('success-modal-desc');
+        const imgEl = document.getElementById('success-modal-img');
+        const closeBtn = document.getElementById('success-modal-close-btn');
+
+        if (type === 'submit') {
+            titleEl.textContent = 'Claim Submitted';
+            descEl.textContent = 'Your claim has been successfully submitted for AN Section verification!';
+            imgEl.src = '/assets/submit_joke.jpg';
+            closeBtn.textContent = 'Awesome!';
+            closeBtn.onclick = () => {
+                modal.classList.remove('active');
+                modal.style.setProperty('display', 'none', 'important');
+                window.location.href = '/claims/my.html';
+            };
+        } else {
+            titleEl.textContent = 'Claim Saved';
+            descEl.textContent = 'Your claim has been successfully saved to drafts!';
+            imgEl.src = '/assets/claim_joke.jpg';
+            closeBtn.textContent = 'Got it, thanks!';
+            closeBtn.onclick = () => {
+                modal.classList.remove('active');
+                modal.style.setProperty('display', 'none', 'important');
+            };
         }
         
         modal.classList.add('active');
