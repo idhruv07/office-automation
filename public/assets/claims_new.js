@@ -197,6 +197,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setVal('ltc_final_basic_pay', payDisplay);
             }
 
+            // ── Permanent Transfer Template ──────────────────────────────────
+            if (folderName === 'permanent_transfer') {
+                setVal('td_orders_for_move', currentUser.orders_for_move);
+                setVal('td_move_date', currentUser.move_date);
+                setVal('td_authority', currentUser.authority);
+
+                const basicPay = currentUser.basic_pay || '';
+                let payLevel = currentUser.pay_level || '';
+                if (payLevel && !String(payLevel).toLowerCase().includes('level')) {
+                    payLevel = 'Level ' + payLevel;
+                }
+                const payDisplay = payLevel ? `${basicPay} + ${payLevel}` : basicPay;
+                setVal('ltc_final_basic_pay', payDisplay);
+            }
+
             // ── Newspaper Template ────────────────────────────────────────────
             if (folderName === 'newspaper') {
                 setVal('appName', currentUser.name);
