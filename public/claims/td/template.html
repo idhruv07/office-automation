@@ -297,9 +297,15 @@
     <h3>
         <span>3. भुगतान का प्रकार / MODE OF PAYMENT</span>
     </h3>
-    <div style="display: flex; gap: 20px; padding: 5px;">
-        <label><input type="radio" name="paymode" value="cheque"> चेक / Cheque</label>
-        <label><input type="radio" name="paymode" value="neft"> NEFT / RTGS</label>
+    <div style="display: flex; align-items: center; gap: 20px; padding: 5px; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 4px;"><input type="radio" name="paymode" value="cheque"> चेक / Cheque</label>
+        <label style="display: flex; align-items: center; gap: 4px;"><input type="radio" name="paymode" value="neft"> NEFT / RTGS</label>
+        <div id="bankDetailsContainer" style="display: flex; align-items: center; gap: 10px; margin-left: 20px;">
+            <span style="font-size: 11px; color: #475569;">Bank A/C No:</span>
+            <input type="text" name="bank_account_no" class="no-border-input" style="width: 150px; border-bottom: 1px solid #cbd5e1 !important; padding: 2px 4px !important;" placeholder="Enter Account Number">
+            <span style="font-size: 11px; color: #475569; margin-left: 10px;">IFSC:</span>
+            <input type="text" name="bank_ifsc" class="no-border-input" style="width: 100px; border-bottom: 1px solid #cbd5e1 !important; padding: 2px 4px !important;" placeholder="IFSC Code">
+        </div>
     </div>
 
     <div style="margin-top: 20px; display: flex; justify-content: space-between; border-top: 1px solid #ccc; pt-2;">
