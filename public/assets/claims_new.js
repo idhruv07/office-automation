@@ -769,9 +769,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function updatePageTitle(selectedOpt) {
+        if (!selectedOpt) return;
+        const h1 = document.querySelector('h1');
+        if (!h1) return;
+        const folderName = selectedOpt.dataset.folder;
+        if (folderName === 'newspaper') {
+            h1.textContent = 'newspaper';
+        } else if (selectedOpt.value === '7') { // Contingent Bill
+            h1.textContent = 'New ' + selectedOpt.textContent;
+        } else {
+            h1.textContent = 'Submit ' + selectedOpt.textContent;
+        }
+    }
+
     // ── Claim type change handler ─────────────────────────────────────────────
     document.getElementById('claim_type').addEventListener('change', async (e) => {
-        await loadTemplate(e.target.options[e.target.selectedIndex]);
+        const opt = e.target.options[e.target.selectedIndex];
+        await loadTemplate(opt);
+        updatePageTitle(opt);
     });
 
     const typeIdParam = new URLSearchParams(window.location.search).get('type_id');
@@ -795,6 +811,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (folderNameEl) folderNameEl.value = claim.folder_name || '';
 
                 await loadTemplate(typeSelect.options[typeSelect.selectedIndex], true);
+                updatePageTitle(typeSelect.options[typeSelect.selectedIndex]);
 
                 document.getElementById('claim_name').value = claim.claim_name;
                 const remarksEl = document.getElementById('remarks');
@@ -881,15 +898,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nameGroup = document.getElementById('group-claim-name');
             if (nameGroup) nameGroup.style.display = 'block';
 
-            const h1 = document.querySelector('h1');
-            if (h1) h1.textContent = 'Submit ' + typeSelect.options[typeSelect.selectedIndex].textContent;
+            updatePageTitle(typeSelect.options[typeSelect.selectedIndex]);
 
             if (typeIdParam === '7') {
                 const submitBtn = document.getElementById('btn-submit');
                 const draftBtn = document.getElementById('btn-save-draft');
                 if (submitBtn) submitBtn.style.display = 'none';
                 if (draftBtn) draftBtn.textContent = 'Save & Finalize';
-                if (h1) h1.textContent = 'New ' + typeSelect.options[typeSelect.selectedIndex].textContent;
             }
         }
     }
