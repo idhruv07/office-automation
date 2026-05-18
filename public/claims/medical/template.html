@@ -179,6 +179,19 @@
         </tr>
     </table>
 
+    <h3>5. Bank Details (for Reimbursement)</h3>
+    <table class="mb-4">
+        <tr>
+            <th style="width: 20%;">Bank A/C No</th>
+            <td style="width: 30%;"><input type="text" name="bank_account_no" class="no-border-input" placeholder="Enter Account Number"></td>
+            <th style="width: 20%;">IFSC</th>
+            <td style="width: 30%;"><input type="text" name="bank_ifsc" class="no-border-input" placeholder="IFSC Code"></td>
+        </tr>
+    </table>
+    <div style="font-size: 10px; color: #ef4444; padding-left: 5px; margin-top: -4px; margin-bottom: 8px; font-weight: 500;">
+        * Remarks: Bank A/c details not saved.
+    </div>
+
     <div class="mrc-doc-section mt-4">
         <div class="mrc-doc-header-grid-3">
             <div class="mrc-doc-column-header">Required Documents</div>
@@ -187,10 +200,10 @@
         </div>
         <div class="mrc-doc-body-grid-3">
             <div class="mrc-doc-column">
-                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_cghs" id="chk_cghs"> <label for="chk_cghs">CGHS Card</label></div>
-                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_permission" id="chk_perm"> <label for="chk_perm">Permission Letter</label></div>
-                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_emergency" id="chk_emerg"> <label for="chk_emerg">Emergency Cert.</label></div>
-                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_discharge" id="chk_disc"> <label for="chk_disc">Discharge Summary</label></div>
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_cghs" id="chk_cghs"> <label for="chk_cghs">CGHS Card</label></div>
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_permission" id="chk_perm"> <label for="chk_perm">Permission Letter</label></div>
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_emergency" id="chk_emerg"> <label for="chk_emerg">Emergency Cert.</label></div>
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_discharge" id="chk_disc"> <label for="chk_disc">Discharge Summary</label></div>
             </div>
             <div class="mrc-doc-column">
                 <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_ambulance" id="chk_amb"> <label for="chk_amb">Ambulance Cert.</label></div>
