@@ -1,3 +1,156 @@
+<style>
+  .news-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 15px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+  .news-field-row {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 15px;
+    gap: 8px;
+  }
+  .news-field-label {
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+  }
+  .news-uline {
+    border: none !important;
+    border-bottom: 1px dashed #64748b !important;
+    outline: none !important;
+    background: transparent !important;
+    padding: 2px 6px !important;
+    font-size: 14px !important;
+    color: #0f172a !important;
+    font-weight: 500 !important;
+    font-family: inherit !important;
+  }
+  .news-uline:focus {
+    border-bottom-color: #2563eb !important;
+  }
+  .news-uline-md {
+    flex-grow: 1;
+  }
+  .news-indent {
+    margin-left: 0;
+  }
+  .news-static-line {
+    border-bottom: 1px dashed #64748b;
+    padding: 2px 6px;
+    font-weight: 500;
+    color: #0f172a;
+    flex-grow: 1;
+  }
+  .news-certify-para {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-weight: 500;
+  }
+  .news-uline-amt {
+    width: 100px;
+    text-align: center;
+  }
+  .news-period-block {
+    margin-left: 20px;
+    margin-bottom: 15px;
+  }
+  .news-period-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .news-period-sel {
+    border: none !important;
+    border-bottom: 1px dashed #64748b !important;
+    background: transparent !important;
+    padding: 2px 6px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #0f172a !important;
+    outline: none !important;
+    cursor: pointer;
+  }
+  .news-year-wrap {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .news-year-input {
+    width: 40px;
+    text-align: center;
+  }
+  .news-tick-note {
+    font-size: 11px;
+    color: #64748b;
+    margin-left: 40px;
+    margin-top: -8px;
+    margin-bottom: 20px;
+  }
+  .news-declare-para {
+    background: #f8fafc;
+    border-left: 3px solid #3b82f6;
+    padding: 12px 18px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    text-align: justify;
+  }
+  .news-date-row {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 8px;
+    font-weight: 600;
+  }
+  .news-date-input {
+    width: 150px;
+  }
+  .news-sig-block {
+    float: right;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .news-sig-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    font-weight: 600;
+  }
+  .news-sig-input {
+    flex-grow: 1;
+  }
+  
+  @media print {
+    .news-page {
+      padding: 0;
+    }
+    .news-declare-para {
+      background: transparent !important;
+      border-left: 2px solid #64748b !important;
+      padding-left: 10px !important;
+    }
+    .news-period-sel {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border: none !important;
+      border-bottom: 1px dashed #64748b !important;
+    }
+  }
+</style>
+
 <div class="news-page">
 
   <!-- Annexure -->
@@ -8,41 +161,41 @@
     <div>Government of India</div>
     <div class="line" style="display: flex; justify-content: center; gap: 4px;">
       <span>Ministry of</span>
-      <span class="news-static-line" style="font-weight: bold;">Defence</span>
+      <span class="news-static-line" style="font-weight: bold; flex-grow: 0; border: none; padding: 0;">Defence</span>
     </div>
     <div class="line" style="display: flex; justify-content: center; gap: 4px;">
       <span>Department of</span>
-      <span class="news-static-line" style="font-weight: bold;">Defence Accounts</span>
+      <span class="news-static-line" style="font-weight: bold; flex-grow: 0; border: none; padding: 0;">Defence Accounts</span>
     </div>
   </div>
 
   <!-- Italic note -->
-  <div class="news-italic-note" style="text-align: center; margin-bottom: 20px; font-size: 11px; color: #475569;">
+  <div class="news-italic-note" style="text-align: center; margin-bottom: 25px; font-size: 11px; color: #475569;">
     [<em>Statement to be furnished on half-yearly basis by the Government Officer to Administration</em>]
   </div>
 
   <!-- Name -->
   <div class="news-field-row">
     <span class="news-field-label">Name of the Applicant:</span>
-    <input type="text" name="appName" class="news-uline news-uline-md" id="appName" placeholder="">
+    <input type="text" name="appName" class="news-uline news-uline-md" id="appName" placeholder="Dhruv Bhardwaj">
   </div>
 
   <!-- Designation -->
   <div class="news-field-row">
     <span class="news-field-label">Designation:</span>
-    <input type="text" name="designation" class="news-uline news-uline-md news-indent" id="designation" placeholder="">
+    <input type="text" name="designation" class="news-uline news-uline-md news-indent" id="designation" placeholder="AAO">
   </div>
 
   <!-- Department -->
   <div class="news-field-row">
     <span class="news-field-label">Department:</span>
-    <span class="news-static-line news-indent-lg">Department of Defence</span>
+    <span class="news-static-line" style="border-bottom: 1px dashed #64748b; padding: 2px 6px; font-weight: 500; color: #0f172a; flex-grow: 1;">Department of Defence</span>
   </div>
 
   <!-- Pay Level -->
   <div class="news-field-row">
     <span class="news-field-label">Pay Level &amp; Basic Pay (Rs.):</span>
-    <input type="text" name="payLevel" class="news-uline news-uline-md" id="payLevel" placeholder="">
+    <input type="text" name="payLevel" class="news-uline news-uline-md" id="payLevel" placeholder="Level 8, Rs. 50500">
   </div>
 
   <!-- Certify paragraph -->
@@ -58,12 +211,12 @@
       <span class="roman">i)</span>
       <select name="periodSel" class="news-period-sel" id="periodSel">
         <option value="">-- Select Period --</option>
-        <option value="jan">January–June</option>
+        <option value="jan" selected>January–June</option>
         <option value="jul">July–December</option>
       </select>
       <div class="news-year-wrap">
         <span>,&nbsp;20</span>
-        <input type="text" name="yearInput" class="news-uline news-year-input" id="yearInput" maxlength="2" placeholder="__">
+        <input type="text" name="yearInput" class="news-uline news-year-input" id="yearInput" maxlength="2" placeholder="__" value="26">
       </div>
     </div>
   </div>
