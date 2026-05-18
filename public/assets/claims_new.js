@@ -315,7 +315,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const threeQuarterBal = document.getElementById('gpf_three_quarter_balance');
                     if (threeQuarterBal) threeQuarterBal.value = '₹ ' + Math.round(net * 0.75).toLocaleString('en-IN');
 
-                    const payVal = parseFloat(document.getElementById('pay')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    // Robustly extract the first sequence of digits for the basic pay (ignores suffix/level strings like "Level 9")
+                    const payStr = (document.getElementById('pay')?.value || '').trim();
+                    const payMatch = payStr.match(/\d+/);
+                    const payVal = payMatch ? parseFloat(payMatch[0]) : 0;
+                    
                     const sixMonthsPay = document.getElementById('gpf_six_months_pay');
                     if (sixMonthsPay) sixMonthsPay.value = '₹ ' + Math.round(payVal * 6).toLocaleString('en-IN');
                 };
@@ -328,6 +332,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 const payEl = document.getElementById('pay');
                 if (payEl) payEl.addEventListener('input', recalcGPFFinalNet);
+
+                // Synchronize all three GPF A/C Number input fields in real-time
+                const gpfTop = document.getElementById('gpfno');
+                const gpfAcno = document.getElementById('acno');
+                const gpfSig = document.getElementById('siggpf');
+
+                const syncGPFAccount = (val) => {
+                    if (gpfTop && gpfTop.value !== val) gpfTop.value = val;
+                    if (gpfAcno && gpfAcno.value !== val) gpfAcno.value = val;
+                    if (gpfSig && gpfSig.value !== val) gpfSig.value = val;
+                };
+
+                [gpfTop, gpfAcno, gpfSig].forEach(el => {
+                    if (el) {
+                        el.addEventListener('input', (e) => syncGPFAccount(e.target.value));
+                    }
+                });
 
                 window.recalcGPFFinalNet = recalcGPFFinalNet;
                 recalcGPFFinalNet();
