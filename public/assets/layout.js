@@ -82,9 +82,29 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="app-container">
             <aside id="sidebar">
                 <header>
-                    <a href="/dashboard.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; width: 100%; cursor: pointer;">
-                        <img id="sidebar-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-                        <span>Office Auto</span>
+                    <a href="/dashboard.html" class="sidebar-logo-link" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; width: 100%; cursor: pointer;">
+                        <!-- Beautiful SVG Logo icon for IT&SDC -->
+                        <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 2px 6px rgba(56, 189, 248, 0.3)); flex-shrink: 0;">
+                            <defs>
+                                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#38bdf8" />
+                                    <stop offset="100%" stop-color="#4f46e5" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Outer glowing hex/shield shape -->
+                            <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="url(#logoGrad)" />
+                            <polygon points="50,11 84,28 84,72 50,89 16,72 16,28" fill="#1e1b4b" />
+                            <!-- Inner Core Globe/Lines of Network Connectivity -->
+                            <circle cx="50" cy="50" r="22" stroke="url(#logoGrad)" stroke-width="2.5" stroke-dasharray="4 2" />
+                            <!-- Dynamic tech letters IT inside -->
+                            <text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="900" font-size="24" fill="#ffffff" letter-spacing="1">IT</text>
+                        </svg>
+                        
+                        <!-- Title Text block -->
+                        <div style="display: flex; flex-direction: column; line-height: 1.1;">
+                            <span style="font-size: 15px; font-weight: 900; letter-spacing: 0.05em; color: white;">IT & SDC</span>
+                            <span style="font-size: 8px; font-weight: 700; opacity: 0.65; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.02em;">Systems Dev Center</span>
+                        </div>
                     </a>
                 </header>
                 <nav style="flex: 1;">
