@@ -924,11 +924,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const templateContainer = document.getElementById('dynamic-template-container');
+        
+        // Temporarily clear bank account and IFSC from the DOM before serializing to ensure they are NEVER saved/persisted on the server
+        const bankAcctEl = templateContainer.querySelector('input[name="bank_account_no"]');
+        const bankIfscEl = templateContainer.querySelector('input[name="bank_ifsc"]');
+        let originalAcct = '';
+        let originalIfsc = '';
+        if (bankAcctEl) {
+            originalAcct = bankAcctEl.value;
+            bankAcctEl.value = '';
+            bankAcctEl.removeAttribute('value');
+        }
+        if (bankIfscEl) {
+            originalIfsc = bankIfscEl.value;
+            bankIfscEl.value = '';
+            bankIfscEl.removeAttribute('value');
+        }
+
         const inputs = templateContainer.querySelectorAll('input, select, textarea');
         const formData = {};
 
         inputs.forEach(input => {
-            if (input.name) formData[input.name] = input.value;
+            if (input.name) {
+                // Do not serialize bank details into the formData payload
+                if (input.name === 'bank_account_no' || input.name === 'bank_ifsc') {
+                    return;
+                }
+                formData[input.name] = input.value;
+            }
 
             if (input.tagName === 'INPUT') {
                 if (input.type === 'checkbox' || input.type === 'radio') {
@@ -973,6 +996,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Send raw innerHTML only — backend wraps with proper <title> and embedded CSS
         const htmlContent = templateContainer.innerHTML;
+
+        // Restore bank account and IFSC details in the browser DOM so they remain visible for active view/printing
+        if (bankAcctEl) bankAcctEl.value = originalAcct;
+        if (bankIfscEl) bankIfscEl.value = originalIfsc;
 
         try {
             const payload = { type_id, claim_name, claim_date, remarks, folder_name, status: pendingStatus, formData, htmlContent };
