@@ -8,69 +8,144 @@
 </head>
 <body>
 
-    <div class="form-container mx-auto max-w-800">
-        <h3>Personal Details</h3>
-        <form id="profile-form">
-            <div class="profile-layout-grid">
-                <!-- Left Side: Inputs -->
-                <div class="profile-inputs-pane">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Name</label>
-                            <input type="text" id="prof_name" readonly class="bg-gray-100">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Personal No.</label>
-                            <input type="text" id="prof_personal_no" readonly class="bg-gray-100">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Email</label>
-                            <input type="email" id="prof_email">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Mobile Number</label>
-                            <input type="tel" id="prof_mobile_no">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>CGHS Beneficiary ID</label>
-                            <input type="text" id="prof_cghs_ben_id">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Pay Level</label>
-                            <input type="text" id="prof_pay_level">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Basic Pay (Rs.)</label>
-                            <input type="text" id="prof_basic_pay">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>GPF A/C No.</label>
-                            <input type="text" id="prof_gpf_ac_no" placeholder="e.g. 12345/AG">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0; grid-column: span 2;">
-                            <label>Full Address</label>
-                            <input type="text" id="prof_address">
-                        </div>
-                    </div>
-                    <div id="profile-status-message" class="hidden" style="padding: 10px; margin-bottom: 15px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; text-align: center; transition: all 0.3s ease;"></div>
-                    <button type="submit" class="btn-primary w-full">Update Profile</button>
+    <!-- ══════════════════════════════════════════════════
+         PERSONAL DETAILS — Premium Identity Card
+    ══════════════════════════════════════════════════ -->
+    <div class="profile-id-card-wrapper">
+
+        <!-- Animated hero banner background -->
+        <div class="profile-id-card">
+            <!-- Decorative blobs -->
+            <div class="profile-blob profile-blob-1"></div>
+            <div class="profile-blob profile-blob-2"></div>
+            <div class="profile-blob profile-blob-3"></div>
+
+            <!-- Avatar + name hero -->
+            <div class="profile-hero">
+                <div class="profile-avatar-wrap">
+                    <img id="profile-avatar"
+                        src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e0e7ff'/><circle cx='12' cy='8' r='4' fill='%236366f1'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%236366f1'/></svg>"
+                        alt="Profile Photo" class="profile-avatar-img">
+                    <label for="avatar-input" class="profile-avatar-edit" title="Change photo">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </label>
+                    <input type="file" id="avatar-input" accept="image/*" class="hidden">
                 </div>
-                
-                <!-- Right Side: Avatar -->
-                <div class="profile-avatar-pane">
-                    <div class="avatar-upload-container mx-auto">
-                        <img id="profile-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" alt="Profile Photo" class="avatar-image">
-                        <label for="avatar-input" class="avatar-edit-btn">
-                            <span class="material-symbols-outlined">edit</span>
-                        </label>
-                        <input type="file" id="avatar-input" accept="image/*" class="hidden">
-                    </div>
-                    <p id="avatar-status" class="text-sm mt-2 text-muted hidden" style="text-align: center; font-weight: 600;"></p>
+                <div class="profile-hero-text">
+                    <div class="profile-badge">Government Officer</div>
+                    <h2 id="hero-name" class="profile-hero-name">—</h2>
+                    <div id="hero-personal-no" class="profile-hero-sub">Personal No: —</div>
+                    <p id="avatar-status" class="hidden" style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.8);"></p>
                 </div>
             </div>
-        </form>
+
+            <!-- Info chips row (read-only quick view) -->
+            <div class="profile-chips-row">
+                <div class="profile-chip">
+                    <span class="profile-chip-icon">📧</span>
+                    <div>
+                        <div class="profile-chip-label">Email</div>
+                        <div id="chip-email" class="profile-chip-val">—</div>
+                    </div>
+                </div>
+                <div class="profile-chip">
+                    <span class="profile-chip-icon">📱</span>
+                    <div>
+                        <div class="profile-chip-label">Mobile</div>
+                        <div id="chip-mobile" class="profile-chip-val">—</div>
+                    </div>
+                </div>
+                <div class="profile-chip">
+                    <span class="profile-chip-icon">🏥</span>
+                    <div>
+                        <div class="profile-chip-label">CGHS ID</div>
+                        <div id="chip-cghs" class="profile-chip-val">—</div>
+                    </div>
+                </div>
+                <div class="profile-chip">
+                    <span class="profile-chip-icon">💰</span>
+                    <div>
+                        <div class="profile-chip-label">Pay Level / Basic</div>
+                        <div id="chip-pay" class="profile-chip-val">—</div>
+                    </div>
+                </div>
+                <div class="profile-chip">
+                    <span class="profile-chip-icon">📂</span>
+                    <div>
+                        <div class="profile-chip-label">GPF A/C</div>
+                        <div id="chip-gpf" class="profile-chip-val">—</div>
+                    </div>
+                </div>
+                <div class="profile-chip" style="grid-column: span 2;">
+                    <span class="profile-chip-icon">🏠</span>
+                    <div>
+                        <div class="profile-chip-label">Address</div>
+                        <div id="chip-address" class="profile-chip-val">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit toggle button -->
+            <div style="text-align:center; margin-top: 18px;">
+                <button type="button" id="profile-edit-toggle" class="profile-edit-toggle-btn">
+                    ✎ &nbsp;Edit Details
+                </button>
+            </div>
+        </div>
+
+        <!-- Edit Form — slides in below card -->
+        <div id="profile-edit-panel" class="profile-edit-panel" style="display:none;">
+            <form id="profile-form">
+                <div class="profile-edit-grid">
+                    <div class="profile-edit-field">
+                        <label>Name <span style="font-size:10px;color:#94a3b8;">(read-only)</span></label>
+                        <input type="text" id="prof_name" readonly class="bg-gray-100">
+                    </div>
+                    <div class="profile-edit-field">
+                        <label>Personal No. <span style="font-size:10px;color:#94a3b8;">(read-only)</span></label>
+                        <input type="text" id="prof_personal_no" readonly class="bg-gray-100">
+                    </div>
+                    <div class="profile-edit-field">
+                        <label>Email</label>
+                        <input type="email" id="prof_email" placeholder="your@email.com">
+                    </div>
+                    <div class="profile-edit-field">
+                        <label>Mobile Number</label>
+                        <input type="tel" id="prof_mobile_no" placeholder="+91 XXXXXXXXXX">
+                    </div>
+                    <div class="profile-edit-field">
+                        <label>CGHS Beneficiary ID</label>
+                        <input type="text" id="prof_cghs_ben_id" placeholder="CGHS ID">
+                    </div>
+                    <div class="profile-edit-field">
+                        <label>Pay Level</label>
+                        <input type="text" id="prof_pay_level" placeholder="e.g. 6">
+                    </div>
+                    <div class="profile-edit-field">
+                        <label>Basic Pay (₹)</label>
+                        <input type="text" id="prof_basic_pay" placeholder="e.g. 35400">
+                    </div>
+                    <div class="profile-edit-field">
+                        <label>GPF A/C No.</label>
+                        <input type="text" id="prof_gpf_ac_no" placeholder="e.g. 12345/AG">
+                    </div>
+                    <div class="profile-edit-field" style="grid-column: span 2;">
+                        <label>Full Address</label>
+                        <input type="text" id="prof_address" placeholder="House No, Street, City, PIN">
+                    </div>
+                </div>
+                <div id="profile-status-message" class="hidden" style="padding:10px;margin:12px 0;border-radius:8px;font-weight:600;font-size:0.9rem;text-align:center;"></div>
+                <div style="display:flex; gap:12px; margin-top:4px;">
+                    <button type="submit" class="btn-primary" style="flex:1;">✓ Save Changes</button>
+                    <button type="button" id="profile-edit-cancel" style="border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════
+         FAMILY DETAILS — Tree + Fruits
+    ══════════════════════════════════════════════════ -->
     <div class="form-container mx-auto max-w-800">
         <h3>Family Details (Dependents)</h3>
 
@@ -78,81 +153,52 @@
             <!-- Rich Organic Tree Header -->
             <div style="text-align: center; margin-bottom: 0; position: relative;">
                 <svg width="360" height="160" viewBox="0 0 360 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.12));">
-
-                    <!-- === TRUNK (textured, wide at base, narrows up) === -->
                     <path d="M175 158Q172 140 170 120Q168 100 172 80Q174 65 178 50" stroke="#92400e" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M185 158Q188 140 190 120Q192 100 188 80Q186 65 182 50" stroke="#78350f" stroke-width="10" stroke-linecap="round"/>
-                    <!-- Trunk bark highlights -->
                     <path d="M176 145Q174 130 175 115" stroke="#a16207" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
                     <path d="M183 135Q185 120 184 105" stroke="#a16207" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
-
-                    <!-- === MAIN BRANCHES === -->
-                    <!-- Left main branch -->
                     <path d="M178 80Q155 75 120 65Q90 58 55 50" stroke="#78350f" stroke-width="9" stroke-linecap="round"/>
-                    <!-- Right main branch -->
                     <path d="M182 80Q205 75 235 65Q260 58 305 52" stroke="#78350f" stroke-width="9" stroke-linecap="round"/>
-                    <!-- Center-left upper branch -->
                     <path d="M180 60Q165 48 145 35Q130 25 115 18" stroke="#78350f" stroke-width="6" stroke-linecap="round"/>
-                    <!-- Center-right upper branch -->
                     <path d="M180 60Q195 48 215 35Q228 25 245 20" stroke="#78350f" stroke-width="6" stroke-linecap="round"/>
-                    <!-- Small twig left -->
                     <path d="M120 65Q108 55 95 45" stroke="#92400e" stroke-width="4" stroke-linecap="round"/>
-                    <!-- Small twig right -->
                     <path d="M240 65Q252 55 265 48" stroke="#92400e" stroke-width="4" stroke-linecap="round"/>
-
-                    <!-- === LEAF CANOPY CLUSTERS (layered, overlapping) === -->
-
-                    <!-- Far left canopy -->
                     <ellipse cx="60" cy="44" rx="42" ry="30" fill="#059669" opacity="0.75" transform="rotate(-10 60 44)"/>
                     <ellipse cx="55" cy="38" rx="28" ry="20" fill="#10b981" opacity="0.85"/>
                     <ellipse cx="70" cy="48" rx="22" ry="16" fill="#34d399" opacity="0.5"/>
-
-                    <!-- Left-center canopy -->
                     <ellipse cx="120" cy="28" rx="38" ry="26" fill="#047857" opacity="0.8" transform="rotate(-5 120 28)"/>
                     <ellipse cx="115" cy="22" rx="24" ry="18" fill="#10b981" opacity="0.9"/>
                     <ellipse cx="130" cy="32" rx="20" ry="14" fill="#6ee7b7" opacity="0.55"/>
-
-                    <!-- Center top canopy (darkest, dominant) -->
                     <ellipse cx="180" cy="20" rx="44" ry="28" fill="#065f46" opacity="0.85"/>
                     <ellipse cx="175" cy="14" rx="30" ry="20" fill="#047857" opacity="0.9"/>
                     <ellipse cx="188" cy="24" rx="26" ry="18" fill="#10b981" opacity="0.6"/>
-                    <!-- Canopy highlight sparkle -->
                     <ellipse cx="170" cy="10" rx="10" ry="7" fill="#a7f3d0" opacity="0.45"/>
-
-                    <!-- Right-center canopy -->
                     <ellipse cx="240" cy="28" rx="38" ry="26" fill="#047857" opacity="0.8" transform="rotate(5 240 28)"/>
                     <ellipse cx="245" cy="22" rx="24" ry="18" fill="#10b981" opacity="0.9"/>
                     <ellipse cx="230" cy="32" rx="20" ry="14" fill="#6ee7b7" opacity="0.55"/>
-
-                    <!-- Far right canopy -->
                     <ellipse cx="300" cy="46" rx="42" ry="30" fill="#059669" opacity="0.75" transform="rotate(10 300 46)"/>
                     <ellipse cx="305" cy="40" rx="28" ry="20" fill="#10b981" opacity="0.85"/>
                     <ellipse cx="292" cy="50" rx="22" ry="16" fill="#34d399" opacity="0.5"/>
-
-                    <!-- Ground / grass base line -->
                     <ellipse cx="180" cy="158" rx="60" ry="8" fill="#15803d" opacity="0.2"/>
                     <ellipse cx="180" cy="156" rx="35" ry="5" fill="#16a34a" opacity="0.3"/>
                 </svg>
             </div>
 
-            <!-- Hanging Fruits (dependent nodes) hang below the tree illustration -->
             <div class="family-tree" style="margin-top: -10px;">
                 <ul>
                     <li>
                         <div class="family-tree-node root-node">
-                            <div style="font-weight: 800; color: var(--primary-color, #4f46e5); text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; margin-bottom: 4px;">Claimant / स्वयं</div>
-                            <div id="tree_self_name" style="font-weight: 700; font-size: 13px; color: #1e293b;">Claimant</div>
-                            <div style="color: #64748b; font-size: 10px; margin-top: 2px;">Self</div>
+                            <div style="font-weight:800;color:rgba(255,255,255,0.7);text-transform:uppercase;font-size:9px;letter-spacing:0.05em;margin-bottom:4px;">Claimant / स्वयं</div>
+                            <div id="tree_self_name" style="font-weight:700;font-size:13px;color:#fff;">Claimant</div>
+                            <div style="color:rgba(255,255,255,0.7);font-size:10px;margin-top:2px;">Self</div>
                         </div>
                         <ul id="dependents-tree-list">
-                            <!-- Dependents will hang dynamically here like fruits! -->
+                            <!-- Dependents hang dynamically here like fruits! -->
                         </ul>
                     </li>
                 </ul>
             </div>
         </div>
-
-
 
         <div class="table-container mb-6">
             <table>
@@ -165,12 +211,11 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="dependents-table">
-                </tbody>
+                <tbody id="dependents-table"></tbody>
             </table>
         </div>
 
-        <h4 class="mt-5">Add / Edit Dependent</h4>
+        <h4 class="mt-5">Add Dependent</h4>
         <form id="dependent-form">
             <input type="hidden" id="dep_id">
             <div class="flex gap-4">

@@ -186,6 +186,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('prof_basic_pay').value = user.basic_pay || '';
                     document.getElementById('prof_gpf_ac_no').value = user.gpf_ac_no || '';
 
+                    // ── Populate identity card chips ──
+                    const setChip = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+                    setChip('hero-name', user.name);
+                    setChip('hero-personal-no', user.personal_no ? `Personal No: ${user.personal_no}` : '');
+                    setChip('chip-email', user.email);
+                    setChip('chip-mobile', user.mobile_no);
+                    setChip('chip-cghs', user.cghs_ben_id);
+                    setChip('chip-pay', user.pay_level && user.basic_pay ? `L-${user.pay_level} / ₹${user.basic_pay}` : (user.pay_level || user.basic_pay || '—'));
+                    setChip('chip-gpf', user.gpf_ac_no);
+                    setChip('chip-address', user.address);
+                    if (user.avatar_url) {
+                        const avatarImg = document.getElementById('profile-avatar');
+                        if (avatarImg) avatarImg.src = user.avatar_url;
+                    }
+
                     const tbody = document.getElementById('dependents-table');
                     tbody.innerHTML = '';
                     
@@ -227,9 +242,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+            // ── Identity card Edit toggle ──────────────────────────────────
+            const editToggleBtn  = document.getElementById('profile-edit-toggle');
+            const editPanel      = document.getElementById('profile-edit-panel');
+            const editCancelBtn  = document.getElementById('profile-edit-cancel');
+
+            if (editToggleBtn && editPanel) {
+                editToggleBtn.addEventListener('click', () => {
+                    const open = editPanel.style.display !== 'none';
+                    editPanel.style.display = open ? 'none' : 'block';
+                    editToggleBtn.textContent = open ? '✎ \u00a0Edit Details' : '✕ \u00a0Close Editor';
+                });
+            }
+
+            if (editCancelBtn && editPanel) {
+                editCancelBtn.addEventListener('click', () => {
+                    editPanel.style.display = 'none';
+                    if (editToggleBtn) editToggleBtn.textContent = '✎ \u00a0Edit Details';
+                });
+            }
+
             document.getElementById('profile-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const statusMsg = document.getElementById('profile-status-message');
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn ? submitBtn.innerHTML : '✓ Save Changes';
+                
+                if (submitBtn) { submitBtn.innerHTML = '⏳ Saving...'; submitBtn.disabled = true; }
                 if (statusMsg) {
                     statusMsg.className = 'hidden';
                     statusMsg.textContent = '';
@@ -251,15 +290,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                         body: JSON.stringify(data)
                     });
 
+                    if (submitBtn) { submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false; }
+
                     if (res.ok) {
-                        if (statusMsg) {
-                            statusMsg.textContent = 'Profile updated successfully!';
-                            statusMsg.style.background = '#dcfce7';
-                            statusMsg.style.color = '#15803d';
-                            statusMsg.style.border = '1px solid #bbf7d0';
-                            statusMsg.className = '';
+                        // Close panel and refresh
+                        const editPanel = document.getElementById('profile-edit-panel');
+                        const editToggleBtn = document.getElementById('profile-edit-toggle');
+                        if (editPanel) editPanel.style.display = 'none';
+                        if (editToggleBtn) editToggleBtn.textContent = '✎ \u00a0Edit Details';
+                        
+                        // Briefly show a success message on the toggle button
+                        if (editToggleBtn) {
+                            editToggleBtn.textContent = '✓ \u00a0Saved successfully!';
+                            editToggleBtn.style.background = 'rgba(167,243,208,0.3)';
+                            editToggleBtn.style.color = '#10b981';
+                            editToggleBtn.style.borderColor = 'rgba(16,185,129,0.5)';
+                            setTimeout(() => {
+                                editToggleBtn.textContent = '✎ \u00a0Edit Details';
+                                editToggleBtn.style.background = '';
+                                editToggleBtn.style.color = '';
+                                editToggleBtn.style.borderColor = '';
+                            }, 2500);
                         }
-                        alert('Profile updated');
+                        
                         loadProfile();
                     } else {
                         const errData = await res.json().catch(() => ({}));
@@ -271,10 +324,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             statusMsg.style.border = '1px solid #fecaca';
                             statusMsg.className = '';
                         }
-                        alert(errMsg);
                     }
                 } catch (err) {
                     console.error('Failed to update profile:', err);
+                    if (submitBtn) { submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false; }
                     if (statusMsg) {
                         statusMsg.textContent = 'Network error. Please try again.';
                         statusMsg.style.background = '#fee2e2';
@@ -282,7 +335,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         statusMsg.style.border = '1px solid #fecaca';
                         statusMsg.className = '';
                     }
-                    alert('Network error. Please try again.');
                 }
             });
 
