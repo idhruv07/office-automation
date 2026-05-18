@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <p id="custom-modal-desc" style="color: #64748b; margin: 0 0 24px; font-size: 15px; line-height: 1.5;">Your personal details were saved successfully.</p>
                                     
                                     <div style="background: #f8fafc; border-radius: 16px; padding: 12px; margin-bottom: 24px; border: 2px dashed #cbd5e1;">
-                                        <img id="custom-modal-img" src="/assets/profile_dp_joke.png" alt="Profile Joke" style="max-width: 100%; border-radius: 12px;">
+                                        <img id="custom-modal-img" src="/assets/profile_dp_joke.jpg" alt="Profile Joke" style="max-width: 100%; border-radius: 12px;">
                                     </div>
 
                                     <button id="custom-modal-close" style="
