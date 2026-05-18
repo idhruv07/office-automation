@@ -6,6 +6,7 @@ A web application for government office claim management. This system allows ind
 - **Role-based Access Control**: Distinct features and views for `Admin` and `Individual` users.
 - **Dynamic Claim Templates**: Submit different claims through a generic form with tailored templates.
 - **Contingent Bill Security**: Special server-side security checks ensuring Individual-submitted Contingent Bills cannot be directly processed without Admin approval.
+- **Dynamic Ward Entitlements**: Automatically sets Ward Entitlement for Medical Reimbursement claims based on PostgreSQL database-defined pay thresholds, fully editable by Admins.
 - **Profile & Dependent Management**: Users can manage their personal profiles, designations, pay details, and dependents.
 - **Export to DOCX**: Claims can be exported to Word format for easy physical printing.
 
@@ -55,8 +56,8 @@ A web application for government office claim management. This system allows ind
 2. The application will be running at `http://localhost:3000`.
 
 ## Testing
-The application features a comprehensive integration test suite covering authentication, claims lifecycles, file path isolations, and RBAC rules.
-To run the full suite (77 tests):
+The application features a comprehensive integration test suite covering authentication, claims lifecycles, file path isolations, ward entitlement engines, and RBAC rules.
+To run the full suite (85 tests):
 ```bash
 node tests/run_tests.js
 ```

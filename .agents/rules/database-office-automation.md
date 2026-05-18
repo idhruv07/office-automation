@@ -15,6 +15,8 @@ DB
 Pending/approved/rejected claims cannot be deleted — only returned for correction
 DB
 audit_log rows are INSERT-only — no UPDATE or DELETE ever
+DB
+Ward entitlement thresholds are stored in `ward_entitlement_rules` table and fetched dynamically
 File system rules
 FS
 User folder /storage/{username}/ created atomically during user creation — if it fails, roll back DB insert
@@ -35,6 +37,8 @@ SEC
 must_reset_password=true forces redirect to change-password before any other page
 SEC
 Users can only read/write their own storage path — path validated server-side against token user_id
+SEC
+Only Admin role can modify dynamic ward entitlement thresholds (POST /api/claims/ward-entitlements)
 UI rules (reminder)
 UI
 No code in main HTML files — only script src references to global files
