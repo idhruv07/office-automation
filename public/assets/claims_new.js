@@ -248,6 +248,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setVal('gpf_date', `${dd}/${mm}/${yy}`);
             }
 
+            // ── GPF Final Withdrawal Template ─────────────────────────────────
+            if (folderName === 'gpf-final-withdrawl') {
+                setVal('gpfno', currentUser.personal_no || '');
+                setVal('name', currentUser.name);
+                setVal('acno', currentUser.personal_no || '');
+                setVal('desig', currentUser.designation);
+                setVal('pay', currentUser.basic_pay || '');
+                setVal('signame', (currentUser.name || '') + (currentUser.designation ? ' / ' + currentUser.designation : ''));
+                setVal('siggpf', currentUser.personal_no || '');
+
+                // Set today's date in dd/mm/yy format
+                const d = new Date();
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yy = String(d.getFullYear()).slice(-2);
+                setVal('dated', `${dd}/${mm}/${yy}`);
+            }
+
             // ── Contingent Bill Template ──────────────────────────────────────
             if (folderName === 'contingent') {
                 const expBody = document.getElementById('cbExpBody');
