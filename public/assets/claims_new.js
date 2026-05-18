@@ -764,8 +764,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <td class="border border-gray-400 p-1">
                             <input type="text" name="ltc_int_family_age_${rowCount}" class="w-full border-0 ltc-int-family-age" value="${age}" readonly placeholder="Auto">
                         </td>
-                        <td class="border border-gray-400 p-1 text-center no-print">
-                            <button type="button" class="ltc-int-del-family font-bold" style="font-size:12px;line-height:1;background:none;border:none;padding:0;cursor:pointer;color:red;">✕</button>
+                        <td class="border border-gray-400 p-1 text-center no-print" style="white-space: nowrap;">
+                            <button type="button" class="ltc-int-add-family font-bold" style="font-size:12px;line-height:1;background:none;border:none;padding:2px 4px;cursor:pointer;color:var(--primary-color);margin-right:6px;" title="Add Member">＋</button>
+                            <button type="button" class="ltc-int-del-family font-bold" style="font-size:12px;line-height:1;background:none;border:none;padding:2px 4px;cursor:pointer;color:var(--danger-color);" title="Remove Member">✕</button>
                         </td>
                     `;
                     intFamBody.appendChild(tr);
@@ -784,7 +785,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 }
 
-                if (intAddBtn) intAddBtn.addEventListener('click', () => ltcIntAddFamilyRow());
+                // Row addition handled contextually inside action column buttons
 
                 // Wire contextual action buttons → main buttons
                 const actionBar = document.querySelector('.claim-action-bar');
@@ -802,9 +803,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (intFamBody) {
                     intFamBody.addEventListener('click', (e) => {
                         if (e.target.classList.contains('ltc-int-del-family')) {
-                            e.target.closest('tr').remove();
-                            ltcIntRenumberFamily();
-                            ltcIntUpdateFamilyOptions();
+                            // Ensure we keep at least one row for validation and entry
+                            if (intFamBody.rows.length > 1) {
+                                e.target.closest('tr').remove();
+                                ltcIntRenumberFamily();
+                                ltcIntUpdateFamilyOptions();
+                            } else {
+                                alert('At least one family member/self row is required.');
+                            }
+                        } else if (e.target.classList.contains('ltc-int-add-family')) {
+                            ltcIntAddFamilyRow();
                         }
                     });
                     intFamBody.addEventListener('change', (e) => {
