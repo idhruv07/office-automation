@@ -224,6 +224,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
+            // ── GPF Advance Template ──────────────────────────────────────────
+            if (folderName === 'gpf_advance') {
+                setVal('gpf_name', currentUser.name);
+                setVal('gpf_designation', currentUser.designation);
+                setVal('gpf_sig_name', currentUser.name);
+                setVal('gpf_sig_desig', (currentUser.designation || '') + (currentUser.personal_no ? ' / ' + currentUser.personal_no : ''));
+                setVal('gpf_account_no', currentUser.personal_no || '');
+
+                // Format pay as "Basic Pay + Pay Level"
+                const gpfBasicPay = currentUser.basic_pay || '';
+                let gpfPayLevel = currentUser.pay_level || '';
+                if (gpfPayLevel && !String(gpfPayLevel).toLowerCase().includes('level')) {
+                    gpfPayLevel = 'Level ' + gpfPayLevel;
+                }
+                setVal('gpf_pay', gpfBasicPay ? `${gpfBasicPay}${gpfPayLevel ? ' (' + gpfPayLevel + ')' : ''}` : '');
+
+                // Set today's date
+                const gpfDateEl = document.getElementById('gpf_date');
+                if (gpfDateEl) gpfDateEl.value = new Date().toISOString().split('T')[0];
+            }
+
             // ── Contingent Bill Template ──────────────────────────────────────
             if (folderName === 'contingent') {
                 const expBody = document.getElementById('cbExpBody');

@@ -1,0 +1,359 @@
+<style>
+  .gpf-page {
+    font-family: 'Times New Roman', Times, serif;
+    color: #1e293b;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 18px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* Header */
+  .gpf-header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #1e293b;
+    padding-bottom: 10px;
+  }
+  .gpf-header .gpf-ministry {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #334155;
+    margin-bottom: 2px;
+  }
+  .gpf-header .gpf-title-main {
+    font-size: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 4px 0 2px;
+  }
+  .gpf-header .gpf-title-hindi {
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  /* Section headings */
+  .gpf-section {
+    background: #f1f5f9;
+    padding: 4px 10px;
+    margin: 16px 0 8px 0;
+    border-left: 4px solid #3b82f6;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #1e40af;
+  }
+
+  /* Two-column grid */
+  .gpf-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+    margin-bottom: 10px;
+  }
+  .gpf-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px 16px;
+    margin-bottom: 10px;
+  }
+
+  /* Field styling */
+  .gpf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .gpf-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+  }
+  .gpf-uline {
+    border: none !important;
+    border-bottom: 1px solid #94a3b8 !important;
+    outline: none !important;
+    background: transparent !important;
+    padding: 3px 4px !important;
+    font-size: 13px !important;
+    color: #0f172a !important;
+    font-family: inherit !important;
+    width: 100% !important;
+  }
+  .gpf-uline:focus {
+    border-bottom-color: #2563eb !important;
+    background: #f0f9ff !important;
+  }
+  textarea.gpf-uline {
+    resize: vertical;
+    min-height: 54px;
+    width: 100% !important;
+  }
+
+  /* Balance table */
+  .gpf-balance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 12px;
+    font-size: 12px;
+  }
+  .gpf-balance-table th,
+  .gpf-balance-table td {
+    border: 1px solid #cbd5e1;
+    padding: 5px 8px;
+    vertical-align: middle;
+  }
+  .gpf-balance-table th {
+    background: #e2e8f0;
+    font-weight: 700;
+    text-align: center;
+    font-size: 11px;
+  }
+  .gpf-balance-table td input {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    width: 100% !important;
+    font-size: 12px !important;
+    font-family: inherit !important;
+  }
+  .gpf-balance-table .net-row td {
+    background: #dbeafe;
+    font-weight: 700;
+  }
+  .gpf-net-val {
+    text-align: right;
+    font-weight: 700;
+    color: #1d4ed8;
+  }
+
+  /* Declaration box */
+  .gpf-declaration {
+    background: #f8fafc;
+    border-left: 3px solid #3b82f6;
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.7;
+    margin: 14px 0;
+  }
+
+  /* Signature row */
+  .gpf-sign-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 30px;
+    gap: 20px;
+  }
+  .gpf-sign-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 200px;
+  }
+  .gpf-sign-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+  }
+  .gpf-action-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  @media print {
+    .gpf-action-bar { display: none !important; }
+    .gpf-uline:focus { background: transparent !important; }
+    .gpf-page { padding: 0; }
+  }
+</style>
+
+<div class="gpf-page">
+
+  <!-- Header -->
+  <div class="gpf-header">
+    <div class="gpf-ministry">Ministry of Defence &nbsp;|&nbsp; Defence Accounts Department</div>
+    <div class="gpf-title-main">Proforma for Application of Advance from Provident Fund</div>
+    <div class="gpf-title-hindi">सामान्य भविष्य निधि से अग्रिम के लिए आवेदन प्रपत्र</div>
+  </div>
+
+  <!-- Ministry / Department row -->
+  <div class="gpf-grid-2" style="margin-bottom:14px;">
+    <div class="gpf-field">
+      <span class="gpf-label">Ministry of</span>
+      <input type="text" name="gpf_ministry" id="gpf_ministry" class="gpf-uline" value="Defence" placeholder="e.g. Finance">
+    </div>
+    <div class="gpf-field">
+      <span class="gpf-label">Department of</span>
+      <input type="text" name="gpf_dept" id="gpf_dept" class="gpf-uline" value="Defence Accounts" placeholder="e.g. Expenditure">
+    </div>
+  </div>
+
+  <!-- Section 1–4: Subscriber Details -->
+  <div class="gpf-section">1–4 &nbsp; Subscriber Details</div>
+  <div class="gpf-grid-2">
+    <div class="gpf-field">
+      <span class="gpf-label">1. Name of the Subscriber (अभिदाता का नाम)</span>
+      <input type="text" name="gpf_name" id="gpf_name" class="gpf-uline" placeholder="Full name">
+    </div>
+    <div class="gpf-field">
+      <span class="gpf-label">2. Account No. (with Departmental suffix)</span>
+      <input type="text" name="gpf_account_no" id="gpf_account_no" class="gpf-uline" placeholder="e.g. 12345/AG">
+    </div>
+    <div class="gpf-field">
+      <span class="gpf-label">3. Designation (पदनाम)</span>
+      <input type="text" name="gpf_designation" id="gpf_designation" class="gpf-uline" placeholder="e.g. Section Officer">
+    </div>
+    <div class="gpf-field">
+      <span class="gpf-label">4. Pay (वेतन) ₹</span>
+      <input type="text" name="gpf_pay" id="gpf_pay" class="gpf-uline" placeholder="e.g. 56100">
+    </div>
+  </div>
+
+  <!-- Section 5: Balance at Credit -->
+  <div class="gpf-section">5 &nbsp; Balance at Credit on Date of Application</div>
+  <table class="gpf-balance-table">
+    <thead>
+      <tr>
+        <th style="width:30px;">#</th>
+        <th>Particulars</th>
+        <th style="width:160px;">Amount (₹)</th>
+        <th style="width:140px;">Period (from – to)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:center;">(i)</td>
+        <td>Closing balance as per statement for year</td>
+        <td><input type="text" name="gpf_bal_closing" placeholder="₹ Amount"></td>
+        <td><input type="text" name="gpf_bal_closing_year" placeholder="e.g. 2023-24"></td>
+      </tr>
+      <tr>
+        <td style="text-align:center;">(ii)</td>
+        <td>Credit from contributions</td>
+        <td><input type="text" name="gpf_bal_contrib" placeholder="₹ Amount"></td>
+        <td><input type="text" name="gpf_bal_contrib_period" placeholder="Apr–Mar"></td>
+      </tr>
+      <tr>
+        <td style="text-align:center;">(iii)</td>
+        <td>Refunds</td>
+        <td><input type="text" name="gpf_bal_refund" placeholder="₹ Amount"></td>
+        <td><input type="text" name="gpf_bal_refund_period" placeholder="Apr–Mar"></td>
+      </tr>
+      <tr>
+        <td style="text-align:center;">(iv)</td>
+        <td>Withdrawals during period</td>
+        <td><input type="text" name="gpf_bal_withdrawal" placeholder="₹ Amount"></td>
+        <td><input type="text" name="gpf_bal_withdrawal_period" placeholder="Apr–Mar"></td>
+      </tr>
+      <tr class="net-row">
+        <td style="text-align:center;">(v)</td>
+        <td><strong>Net balance at credit (निवल शेष)</strong></td>
+        <td class="gpf-net-val" id="gpf_net_balance_display">₹ 0</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <input type="hidden" name="gpf_net_balance" id="gpf_net_balance" value="0">
+
+  <!-- Section 6: Outstanding Advance -->
+  <div class="gpf-section">6 &nbsp; Outstanding Advance</div>
+  <div class="gpf-field" style="margin-bottom:12px;">
+    <span class="gpf-label">Amount of advance outstanding (if any) and purpose for which advance was taken</span>
+    <textarea name="gpf_outstanding" class="gpf-uline" placeholder="Enter outstanding advance amount and its purpose, or write 'Nil'"></textarea>
+  </div>
+
+  <!-- Section 7–8: Advance Required -->
+  <div class="gpf-section">7–8 &nbsp; Advance Required</div>
+  <div class="gpf-grid-2">
+    <div class="gpf-field">
+      <span class="gpf-label">7. Amount of advance required (अग्रिम की वांछित राशि) ₹</span>
+      <input type="text" name="gpf_advance_req" class="gpf-uline" placeholder="₹ Amount required">
+    </div>
+    <div></div>
+    <div class="gpf-field">
+      <span class="gpf-label">8(a). Purpose for which advance required</span>
+      <textarea name="gpf_purpose" class="gpf-uline" placeholder="e.g. Purchase of house, marriage of daughter…"></textarea>
+    </div>
+    <div class="gpf-field">
+      <span class="gpf-label">8(b). Rules under which request is covered</span>
+      <input type="text" name="gpf_rules" class="gpf-uline" placeholder="e.g. Rule 12(1)(a) of GPF Rules 1960">
+    </div>
+    <div class="gpf-field">
+      <span class="gpf-label">9. Amount of consolidated advance (items 6 + advance required) ₹</span>
+      <input type="text" name="gpf_consolidated" class="gpf-uline" placeholder="₹ Consolidated amount">
+    </div>
+    <div class="gpf-field">
+      <span class="gpf-label">No. of monthly instalments for repayment</span>
+      <input type="text" name="gpf_instalments" class="gpf-uline" placeholder="e.g. 36">
+    </div>
+  </div>
+
+  <!-- Section 10–11: Justification & Withdrawal History -->
+  <div class="gpf-section">10–11 &nbsp; Justification &amp; Withdrawal History</div>
+  <div class="gpf-field" style="margin-bottom:10px;">
+    <span class="gpf-label">10. Full particulars of pecuniary circumstances justifying the advance application</span>
+    <textarea name="gpf_justification" class="gpf-uline" style="min-height:70px;" placeholder="Describe financial circumstances in detail…"></textarea>
+  </div>
+  <div class="gpf-field" style="margin-bottom:14px;">
+    <span class="gpf-label">11. Temporary / Prior withdrawals made during the last 5 years</span>
+    <textarea name="gpf_withdrawals" class="gpf-uline" style="min-height:60px;" placeholder="List all withdrawals with year, purpose and amount. If none, write 'Nil'."></textarea>
+  </div>
+
+  <!-- Applicant Declaration -->
+  <div class="gpf-section">Applicant Declaration</div>
+  <div class="gpf-declaration">
+    I hereby declare that the information furnished above is true and correct to the best of my knowledge and belief. I request that the advance may be sanctioned in my favour and the amount may be credited to my pay account / paid by cheque.
+  </div>
+
+  <div class="gpf-sign-row">
+    <div class="gpf-sign-block">
+      <span class="gpf-sign-label">Date (तिथि)</span>
+      <input type="date" name="gpf_date" id="gpf_date" class="gpf-uline">
+    </div>
+    <div class="gpf-sign-block">
+      <span class="gpf-sign-label">Signature / Name of Applicant</span>
+      <input type="text" name="gpf_sig_name" id="gpf_sig_name" class="gpf-uline" placeholder="Full name">
+    </div>
+    <div class="gpf-sign-block">
+      <span class="gpf-sign-label">Designation &amp; A/C No.</span>
+      <input type="text" name="gpf_sig_desig" id="gpf_sig_desig" class="gpf-uline" placeholder="Designation &amp; Account No.">
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  // Auto-calculate net balance when balance fields change
+  const fields = ['gpf_bal_closing', 'gpf_bal_contrib', 'gpf_bal_refund', 'gpf_bal_withdrawal'];
+  function recalcNet() {
+    const closing    = parseFloat(document.querySelector('[name="gpf_bal_closing"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+    const contrib    = parseFloat(document.querySelector('[name="gpf_bal_contrib"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+    const refunds    = parseFloat(document.querySelector('[name="gpf_bal_refund"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+    const withdrawal = parseFloat(document.querySelector('[name="gpf_bal_withdrawal"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+    const net = closing + contrib + refunds - withdrawal;
+    const display = document.getElementById('gpf_net_balance_display');
+    const hidden  = document.getElementById('gpf_net_balance');
+    if (display) display.textContent = '₹ ' + net.toLocaleString('en-IN');
+    if (hidden)  hidden.value = net;
+  }
+  fields.forEach(n => {
+    const el = document.querySelector(`[name="${n}"]`);
+    if (el) el.addEventListener('input', recalcNet);
+  });
+  recalcNet();
+})();
+</script>
