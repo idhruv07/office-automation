@@ -354,6 +354,7 @@
     const el = document.querySelector(`[name="${n}"]`);
     if (el) el.addEventListener('input', recalcNet);
   });
+  window.recalcGPFAdvanceNet = recalcNet;
   recalcNet();
 })();
 </script>

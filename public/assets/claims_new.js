@@ -257,6 +257,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const mm = String(d.getMonth() + 1).padStart(2, '0');
                 const yy = String(d.getFullYear()).slice(-2);
                 setVal('gpf_date', `${dd}/${mm}/${yy}`);
+
+                const recalcGPFAdvanceNet = () => {
+                    const closing    = parseFloat(document.querySelector('[name="gpf_bal_closing"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const contrib    = parseFloat(document.querySelector('[name="gpf_bal_contrib"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const refunds    = parseFloat(document.querySelector('[name="gpf_bal_refund"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const withdrawal = parseFloat(document.querySelector('[name="gpf_bal_withdrawal"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const net = closing + contrib + refunds - withdrawal;
+                    const display = document.getElementById('gpf_net_balance_display');
+                    const hidden  = document.getElementById('gpf_net_balance');
+                    if (display) display.textContent = '₹ ' + net.toLocaleString('en-IN');
+                    if (hidden)  hidden.value = net;
+                };
+
+                const balanceFields = ['gpf_bal_closing', 'gpf_bal_contrib', 'gpf_bal_refund', 'gpf_bal_withdrawal'];
+                balanceFields.forEach(n => {
+                    const el = document.querySelector(`[name="${n}"]`);
+                    if (el) el.addEventListener('input', recalcGPFAdvanceNet);
+                });
+                window.recalcGPFAdvanceNet = recalcGPFAdvanceNet;
+                recalcGPFAdvanceNet();
             }
 
             // ── GPF Final Withdrawal Template ─────────────────────────────────
@@ -275,6 +295,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const mm = String(d.getMonth() + 1).padStart(2, '0');
                 const yy = String(d.getFullYear()).slice(-2);
                 setVal('dated', `${dd}/${mm}/${yy}`);
+
+                const recalcGPFFinalNet = () => {
+                    const closing    = parseFloat(document.querySelector('[name="gpf_bal_closing"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const contrib    = parseFloat(document.querySelector('[name="gpf_bal_contrib"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const refunds    = parseFloat(document.querySelector('[name="gpf_bal_refund"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const withdrawal = parseFloat(document.querySelector('[name="gpf_bal_withdrawal"]')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    
+                    const net = closing + contrib + refunds - withdrawal;
+                    
+                    const netDisplay = document.getElementById('gpf_final_net_balance_display');
+                    const netHidden = document.getElementById('gpf_net_balance');
+                    if (netDisplay) netDisplay.textContent = '₹ ' + net.toLocaleString('en-IN');
+                    if (netHidden) netHidden.value = net;
+
+                    const halfBal = document.getElementById('gpf_half_balance');
+                    if (halfBal) halfBal.value = '₹ ' + Math.round(net / 2).toLocaleString('en-IN');
+
+                    const threeQuarterBal = document.getElementById('gpf_three_quarter_balance');
+                    if (threeQuarterBal) threeQuarterBal.value = '₹ ' + Math.round(net * 0.75).toLocaleString('en-IN');
+
+                    const payVal = parseFloat(document.getElementById('pay')?.value.replace(/[^0-9.-]/g,'')) || 0;
+                    const sixMonthsPay = document.getElementById('gpf_six_months_pay');
+                    if (sixMonthsPay) sixMonthsPay.value = '₹ ' + Math.round(payVal * 6).toLocaleString('en-IN');
+                };
+
+                const balanceFields = ['gpf_bal_closing', 'gpf_bal_contrib', 'gpf_bal_refund', 'gpf_bal_withdrawal'];
+                balanceFields.forEach(n => {
+                    const el = document.querySelector(`[name="${n}"]`);
+                    if (el) el.addEventListener('input', recalcGPFFinalNet);
+                });
+                
+                const payEl = document.getElementById('pay');
+                if (payEl) payEl.addEventListener('input', recalcGPFFinalNet);
+
+                window.recalcGPFFinalNet = recalcGPFFinalNet;
+                recalcGPFFinalNet();
             }
 
             // ── Contingent Bill Template ──────────────────────────────────────
@@ -955,6 +1011,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (typeof window.ltcFinalRecalcTotal === 'function') window.ltcFinalRecalcTotal();
                     if (typeof window.calcExpTotal === 'function') window.calcExpTotal();
                     if (typeof window.updateMRCTotal === 'function') window.updateMRCTotal();
+                    if (typeof window.recalcGPFAdvanceNet === 'function') window.recalcGPFAdvanceNet();
+                    if (typeof window.recalcGPFFinalNet === 'function') window.recalcGPFFinalNet();
                 }
             }
         } catch (e) {
