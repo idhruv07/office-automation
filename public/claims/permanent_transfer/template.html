@@ -100,6 +100,28 @@
         text-align: center;
     }
 
+    /* Hide number inputs spinner buttons */
+    .ltc-compact input::-webkit-outer-spin-button,
+    .ltc-compact input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .ltc-compact input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    .ltc-compact .reloc-label-en {
+        font-size: 12px !important;
+        font-weight: 700;
+        display: block;
+    }
+    .ltc-compact .reloc-label-hi {
+        font-size: 10px;
+        display: block;
+        color: #475569;
+        margin-top: 2px;
+    }
+
     /* Screen-Only Color Theming (Guarantees zero change to Print Preview) */
     @media screen {
         .ltc-compact h3 {
@@ -207,7 +229,7 @@
 
     <!-- Section 2: Family Details -->
     <h3>
-        <span>2. परिवार का ब्यौरा / FAMILY DETAILS</span>
+        <span>2. family DETAILS / परिवार का ब्यौरा</span>
         <button type="button" id="ltcFinalAddFamilyBtn" class="no-print" style="background: #3b82f6; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">+ Add Family Member</button>
     </h3>
     <table id="ltcFinalFamilyTable">
@@ -301,43 +323,45 @@
             <table class="journey-table" style="margin: 0;">
                 <thead>
                     <tr style="background: #f1f5f9;">
-                        <th style="text-align: left;">Relocation Expenses</th>
-                        <th style="width: 60px;">Weight (kg)</th>
-                        <th style="width: 120px;">Mode/Receipt No.</th>
-                        <th style="width: 100px;">Claim Amount</th>
+                        <th style="text-align: left; font-size: 11px;">Relocation Expenses</th>
+                        <th style="width: 90px; font-size: 11px;">Weight / Qty / Pay %</th>
+                        <th style="width: 140px; font-size: 11px;">Mode/Receipt No.</th>
+                        <th style="width: 110px; font-size: 11px;">Claim Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="text-align: left;">
-                            <strong>A) Transportation of Personal Effects</strong>
-                            <span style="font-size: 10px; display: block; color: #475569;">घर के सामान का परिवहन</span>
+                        <td style="text-align: left; vertical-align: middle;">
+                            <strong class="reloc-label-en">A) Transportation of Personal Effects</strong>
+                            <span class="reloc-label-hi">घर के सामान का परिवहन</span>
                         </td>
-                        <td><input type="number" name="td_hotel_days" class="no-border-input ltc-calc-trigger" style="text-align: center;" placeholder="Weight"></td>
-                        <td><input type="text" name="td_hotel_rate" class="no-border-input" style="text-align: left;" placeholder="Receipt/Mode"></td>
-                        <td><input type="number" name="td_hotel_total" class="no-border-input font-bold ltc-daily-total" style="text-align: right;"></td>
+                        <td><input type="number" name="pt_effects_weight" class="no-border-input pt-calc-trigger" style="text-align: center;" placeholder="Weight"></td>
+                        <td><input type="text" name="pt_effects_receipt" class="no-border-input" style="text-align: left;" placeholder="Receipt/Mode"></td>
+                        <td><input type="number" name="pt_effects_total" class="no-border-input font-bold pt-reloc-total pt-calc-trigger" style="text-align: right;" placeholder="Claim Amount"></td>
                     </tr>
                     <tr>
-                        <td style="text-align: left;">
-                            <strong>B) Transportation of Personal Vehicle</strong>
-                            <span style="font-size: 10px; display: block; color: #475569;">व्यक्तिगत वाहन का परिवहन</span>
+                        <td style="text-align: left; vertical-align: middle;">
+                            <strong class="reloc-label-en">B) Transportation of Personal Vehicle</strong>
+                            <span class="reloc-label-hi">व्यक्तिगत वाहन का परिवहन</span>
                         </td>
-                        <td><input type="number" name="td_rma_days" class="no-border-input ltc-calc-trigger" style="text-align: center;" placeholder="Qty"></td>
-                        <td><input type="text" name="td_rma_rate" class="no-border-input" style="text-align: left;" placeholder="Receipt/Mode"></td>
-                        <td><input type="number" name="td_rma_total" class="no-border-input font-bold ltc-daily-total" style="text-align: right;"></td>
+                        <td><input type="number" name="pt_vehicle_qty" class="no-border-input pt-calc-trigger" style="text-align: center;" placeholder="Qty"></td>
+                        <td><input type="text" name="pt_vehicle_receipt" class="no-border-input" style="text-align: left;" placeholder="Receipt/Mode"></td>
+                        <td><input type="number" name="pt_vehicle_total" class="no-border-input font-bold pt-reloc-total pt-calc-trigger" style="text-align: right;" placeholder="Claim Amount"></td>
                     </tr>
                     <tr>
-                        <td style="text-align: left;">
-                            <strong>C) Composite Transfer Grant (CTG)</strong>
-                            <span style="font-size: 10px; display: block; color: #475569;">समग्र स्थानांतरण अनुदान (80% of Pay)</span>
+                        <td style="text-align: left; vertical-align: middle;">
+                            <strong class="reloc-label-en">C) Composite Transfer Grant (CTG)</strong>
+                            <span class="reloc-label-hi">समग्र स्थानांतरण अनुदान (80% of Pay)</span>
                         </td>
-                        <td><input type="number" name="td_food_days" class="no-border-input ltc-calc-trigger" style="text-align: center;" placeholder="Pay %"></td>
-                        <td><input type="text" name="td_food_rate" class="no-border-input" style="text-align: left;" placeholder="Automatic / Entitled"></td>
-                        <td><input type="number" name="td_food_total" class="no-border-input font-bold ltc-daily-total" style="text-align: right;"></td>
+                        <td><input type="number" name="pt_ctg_percent" class="no-border-input pt-calc-trigger" style="text-align: center;" placeholder="Pay %"></td>
+                        <td><input type="text" name="pt_ctg_receipt" class="no-border-input" style="text-align: left;" placeholder="Automatic / Entitled"></td>
+                        <td><input type="number" name="pt_ctg_total" class="no-border-input font-bold pt-reloc-total pt-calc-trigger" style="text-align: right;" placeholder="Claim Amount"></td>
                     </tr>
                     <tr style="background: #f8fafc; font-weight: bold;">
                         <td colspan="3" style="text-align: right;">Total Relocation Expenses (A):</td>
-                        <td style="text-align: right;">₹ <span id="tdDailyExpensesSubtotal">0.00</span></td>
+                        <td style="text-align: right;">
+                            <input type="number" id="pt_reloc_expenses_subtotal" name="total_reloc_expenses" class="no-border-input font-bold" style="text-align: right;" readonly>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -367,8 +391,8 @@
         <span>5. भुगतान का प्रकार / MODE OF PAYMENT</span>
     </h3>
     <div style="display: flex; align-items: center; gap: 20px; padding: 5px; flex-wrap: wrap;">
-        <label style="display: flex; align-items: center; gap: 4px;"><input type="radio" name="paymode" value="cheque"> चेक / Cheque</label>
-        <label style="display: flex; align-items: center; gap: 4px;"><input type="radio" name="paymode" value="neft"> NEFT / RTGS</label>
+        <span style="font-weight: bold; font-size: 12px; color: #1e293b; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 4px; background: #f8fafc;">NEFT / RTGS</span>
+        <input type="hidden" name="paymode" value="neft">
         <div id="bankDetailsContainer" style="display: flex; align-items: center; gap: 10px; margin-left: 20px;">
             <span style="font-size: 11px; color: #475569;">Bank A/C No:</span>
             <input type="text" name="bank_account_no" class="no-border-input" style="width: 150px; border-bottom: 1px solid #cbd5e1 !important; padding: 2px 4px !important;" placeholder="Enter Account Number">

@@ -487,33 +487,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             // ── LTC calc listener (document-level, registered only once) ──────
             if (!window.ltcCalcInitialized) {
                 document.addEventListener('input', (e) => {
-                    if (!e.target.classList.contains('ltc-calc-trigger')) return;
+                    const isLtcTrigger = e.target.classList.contains('ltc-calc-trigger');
+                    const isPtTrigger = e.target.classList.contains('pt-calc-trigger');
+                    if (!isLtcTrigger && !isPtTrigger) return;
+
                     const tr = e.target.closest('tr');
-                    if (!tr) return;
+                    if (tr) {
+                        // Journey row: Fare × Persons
+                        const fareInp = tr.querySelector('input[name*="_fare_"]');
+                        const persInp = tr.querySelector('input[name*="_persons_"]');
+                        if (fareInp && persInp) {
+                            const fare = parseFloat(fareInp.value) || 0;
+                            const pers = parseFloat(persInp.value) || 0;
+                            const rowTotal = tr.querySelector('.ltc-journey-total-amt');
+                            if (rowTotal) rowTotal.value = (fare * pers) > 0 ? (fare * pers).toFixed(2) : '';
+                        }
 
-                    // Journey row: Fare × Persons
-                    const fareInp = tr.querySelector('input[name*="_fare_"]');
-                    const persInp = tr.querySelector('input[name*="_persons_"]');
-                    if (fareInp && persInp) {
-                        const fare = parseFloat(fareInp.value) || 0;
-                        const pers = parseFloat(persInp.value) || 0;
-                        const rowTotal = tr.querySelector('.ltc-journey-total-amt');
-                        if (rowTotal) rowTotal.value = (fare * pers) > 0 ? (fare * pers).toFixed(2) : '';
-                    }
-
-                    // Daily expense: Days × Rate
-                    const inputName = e.target.name || e.target.getAttribute('name');
-                    if (inputName && inputName.startsWith('td_')) {
-                        const lastUnderscore = inputName.lastIndexOf('_');
-                        if (lastUnderscore !== -1) {
-                            const prefix = inputName.substring(0, lastUnderscore);
-                            const daysInp = tr.querySelector(`input[name="${prefix}_days"]`);
-                            const rateInp = tr.querySelector(`input[name="${prefix}_rate"]`);
-                            const totalInp = tr.querySelector(`input[name="${prefix}_total"]`);
-                            if (daysInp && rateInp && totalInp) {
-                                const days = parseFloat(daysInp.value) || 0;
-                                const rate = parseFloat(rateInp.value) || 0;
-                                totalInp.value = (days * rate) > 0 ? (days * rate).toFixed(2) : '';
+                        // Daily expense: Days × Rate
+                        const inputName = e.target.name || e.target.getAttribute('name');
+                        if (inputName && inputName.startsWith('td_')) {
+                            const lastUnderscore = inputName.lastIndexOf('_');
+                            if (lastUnderscore !== -1) {
+                                const prefix = inputName.substring(0, lastUnderscore);
+                                const daysInp = tr.querySelector(`input[name="${prefix}_days"]`);
+                                const rateInp = tr.querySelector(`input[name="${prefix}_rate"]`);
+                                const totalInp = tr.querySelector(`input[name="${prefix}_total"]`);
+                                if (daysInp && rateInp && totalInp) {
+                                    const days = parseFloat(daysInp.value) || 0;
+                                    const rate = parseFloat(rateInp.value) || 0;
+                                    totalInp.value = (days * rate) > 0 ? (days * rate).toFixed(2) : '';
+                                }
                             }
                         }
                     }
@@ -576,25 +579,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const val = parseFloat(inp.value);
                         if (!isNaN(val)) journeySum += val;
                     });
-                    let dailySum = 0;
-                    document.querySelectorAll('.ltc-daily-total').forEach(inp => {
-                        const val = parseFloat(inp.value);
-                        if (!isNaN(val)) dailySum += val;
-                    });
 
-                    const totalJourneyField = document.getElementById('ltcFinalJourneyTotal');
-                    if (totalJourneyField) totalJourneyField.value = journeySum > 0 ? journeySum.toFixed(2) : '';
+                    // Check if we have Permanent Transfer relocation elements
+                    const ptTotals = document.querySelectorAll('.pt-reloc-total');
+                    if (ptTotals.length > 0) {
+                        let relocSum = 0;
+                        ptTotals.forEach(inp => {
+                            const val = parseFloat(inp.value);
+                            if (!isNaN(val)) relocSum += val;
+                        });
 
-                    const grandTotal = journeySum + dailySum;
-                    const totalClaimed = document.getElementById('ltcFinalTotalClaimed');
-                    if (totalClaimed) totalClaimed.value = grandTotal > 0 ? grandTotal.toFixed(2) : '';
+                        const relocSubtotalInput = document.getElementById('pt_reloc_expenses_subtotal');
+                        if (relocSubtotalInput) relocSubtotalInput.value = relocSum > 0 ? relocSum.toFixed(2) : '';
 
-                    const dailySubtotalSpan = document.getElementById('tdDailyExpensesSubtotal');
-                    if (dailySubtotalSpan) dailySubtotalSpan.textContent = dailySum.toFixed(2);
+                        const totalJourneyField = document.getElementById('ltcFinalJourneyTotal');
+                        if (totalJourneyField) totalJourneyField.value = journeySum > 0 ? journeySum.toFixed(2) : '';
 
-                    const lessAdvance = parseFloat(document.getElementById('ltcFinalLessAdvance')?.value) || 0;
-                    const balanceField = document.getElementById('ltcFinalBalanceDue');
-                    if (balanceField) balanceField.value = (grandTotal - lessAdvance) !== 0 ? (grandTotal - lessAdvance).toFixed(2) : '';
+                        const grandTotal = journeySum + relocSum;
+                        const totalClaimed = document.getElementById('ltcFinalTotalClaimed');
+                        if (totalClaimed) totalClaimed.value = grandTotal > 0 ? grandTotal.toFixed(2) : '';
+
+                        const lessAdvance = parseFloat(document.getElementById('ltcFinalLessAdvance')?.value) || 0;
+                        const balanceField = document.getElementById('ltcFinalBalanceDue');
+                        if (balanceField) balanceField.value = (grandTotal - lessAdvance) !== 0 ? (grandTotal - lessAdvance).toFixed(2) : '';
+                    } else {
+                        let dailySum = 0;
+                        document.querySelectorAll('.ltc-daily-total').forEach(inp => {
+                            const val = parseFloat(inp.value);
+                            if (!isNaN(val)) dailySum += val;
+                        });
+
+                        const totalJourneyField = document.getElementById('ltcFinalJourneyTotal');
+                        if (totalJourneyField) totalJourneyField.value = journeySum > 0 ? journeySum.toFixed(2) : '';
+
+                        const grandTotal = journeySum + dailySum;
+                        const totalClaimed = document.getElementById('ltcFinalTotalClaimed');
+                        if (totalClaimed) totalClaimed.value = grandTotal > 0 ? grandTotal.toFixed(2) : '';
+
+                        const dailySubtotalSpan = document.getElementById('tdDailyExpensesSubtotal');
+                        if (dailySubtotalSpan) dailySubtotalSpan.textContent = dailySum.toFixed(2);
+
+                        const lessAdvance = parseFloat(document.getElementById('ltcFinalLessAdvance')?.value) || 0;
+                        const balanceField = document.getElementById('ltcFinalBalanceDue');
+                        if (balanceField) balanceField.value = (grandTotal - lessAdvance) !== 0 ? (grandTotal - lessAdvance).toFixed(2) : '';
+                    }
                 };
 
                 function ltcFinalRecalcBalance() {
