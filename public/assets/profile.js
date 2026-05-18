@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         <!-- ── EDIT MODE (hidden by default) ── -->
                         <div class="fruit-edit-mode" style="display:none; background:rgba(255,255,255,0.92); border-radius:16px; padding:12px 10px; margin-top:4px; backdrop-filter:blur(8px);">
-                            <div style="font-size:8px;font-weight:800;color:#4f46e5;text-transform:uppercase;margin-bottom:8px;letter-spacing:0.06em;">✎ Edit Dependent</div>
+                            <div style="font-size:8px;font-weight:800;color:var(--primary-color);text-transform:uppercase;margin-bottom:8px;letter-spacing:0.06em;">✎ Edit Dependent</div>
                             <input type="text" class="fruit-edit-name" value="${dep.name}" placeholder="Name" style="
                                 width:100%;border:none;border-bottom:1.5px solid #cbd5e1;
                                 background:transparent;color:#1e293b;font-size:12px;font-weight:700;
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             ">
                             <div style="display:flex;gap:6px;justify-content:center;">
                                 <button type="button" class="fruit-save-btn" style="
-                                    border:none;background:#4f46e5;color:#fff;
+                                    border:none;background:var(--primary-color);color:#fff;
                                     border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;
                                     cursor:pointer;flex:1;
                                 ">✓ Save</button>
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     </div>
 
                                     <button id="custom-modal-close" style="
-                                        background: #4f46e5; color: white; border: none;
+                                        background: var(--primary-color); color: white; border: none;
                                         padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 16px;
                                         cursor: pointer; width: 100%; transition: background 0.2s;
                                     ">Got it, thanks!</button>
