@@ -81,9 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const appHtml = `
         <div id="app-container">
             <aside id="sidebar">
-                <header style="display: flex; align-items: center; gap: 10px;">
-                    <img id="sidebar-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-                    <span>Office Auto</span>
+                <header>
+                    <a href="/dashboard.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; width: 100%; cursor: pointer;">
+                        <img id="sidebar-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.6); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                        <span>Office Auto</span>
+                    </a>
                 </header>
                 <nav style="flex: 1;">
                     <ul id="nav-menu">
