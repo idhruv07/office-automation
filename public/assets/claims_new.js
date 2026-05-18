@@ -1232,7 +1232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (res.ok) {
                 if (pendingStatus === 'Draft') {
-                    alert('Claim Saved');
+                    showCustomSuccessModal();
                 } else {
                     alert('Claim submitted successfully!');
                     window.location.href = '/claims/my.html';
@@ -1245,6 +1245,115 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('[saveClaim] Network error:', err);
             alert('Network error. Please try again.');
         }
+    }
+
+    function showCustomSuccessModal() {
+        let modal = document.getElementById('custom-success-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'custom-success-modal';
+            modal.className = 'save-modal-overlay';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 23, 42, 0.6) !important;
+                backdrop-filter: blur(12px) !important;
+                display: none !important;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999 !important;
+            `;
+            modal.innerHTML = `
+                <div class="save-modal-box" style="
+                    background: white;
+                    padding: 2.5rem;
+                    border-radius: 24px;
+                    max-width: 480px;
+                    width: 90%;
+                    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                    text-align: center;
+                    border: 1px solid rgba(226, 232, 240, 0.8);
+                ">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 56px;
+                        height: 56px;
+                        background: #ecfdf5;
+                        border-radius: 50%;
+                        margin: 0 auto 1.25rem auto;
+                        border: 2px solid #a7f3d0;
+                    ">
+                        <svg style="width: 28px; height: 28px; color: #059669;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 style="
+                        color: #0f172a;
+                        font-weight: 800;
+                        font-size: 1.5rem;
+                        margin: 0 0 0.25rem 0 !important;
+                        font-family: 'Outfit', 'Inter', sans-serif;
+                    ">Claim Saved</h3>
+                    <p style="
+                        color: #64748b;
+                        font-size: 0.95rem;
+                        margin: 0 0 1.5rem 0 !important;
+                    ">Your claim has been successfully saved to drafts!</p>
+                    <div style="
+                        border-radius: 16px;
+                        overflow: hidden;
+                        border: 1px solid #e2e8f0;
+                        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                        margin-bottom: 1.75rem;
+                        background: #f8fafc;
+                        padding: 8px;
+                    ">
+                        <img src="/assets/claim_joke.jpg" alt="Workers Compensation Cartoon" style="
+                            width: 100%;
+                            height: auto;
+                            display: block;
+                            border-radius: 10px;
+                        ">
+                    </div>
+                    <button id="success-modal-close-btn" class="btn" style="
+                        background: var(--primary-color, #4f46e5);
+                        color: white !important;
+                        border: none;
+                        padding: 0.85rem 2rem;
+                        border-radius: 12px;
+                        font-weight: 700;
+                        width: 100%;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+                    ">Got it, thanks!</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const closeBtn = document.getElementById('success-modal-close-btn');
+            closeBtn.addEventListener('click', () => {
+                modal.classList.remove('active');
+                modal.style.setProperty('display', 'none', 'important');
+            });
+            closeBtn.addEventListener('mouseover', () => {
+                closeBtn.style.transform = 'translateY(-1px)';
+                closeBtn.style.boxShadow = '0 6px 20px rgba(79, 70, 229, 0.35)';
+            });
+            closeBtn.addEventListener('mouseout', () => {
+                closeBtn.style.transform = 'none';
+                closeBtn.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.2)';
+            });
+        }
+        
+        modal.classList.add('active');
+        modal.style.setProperty('display', 'flex', 'important');
     }
 
     function handleSaveClick(status) {
