@@ -1197,8 +1197,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             profileUpdate.mobile_no = document.getElementById('mrc_mobile_number')?.value || '';
             profileUpdate.email = document.getElementById('mrc_email')?.value || '';
         }
-        const basicPayEl = document.getElementById('ltc_final_basic_pay');
-        if (basicPayEl) profileUpdate.basic_pay = basicPayEl.value;
 
         if (Object.keys(profileUpdate).length > 0) {
             try {
