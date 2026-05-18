@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </span>
                             </td>
                             <td>
-                                <a href="/storage/${c.username}/claims/${c.folder_name ? c.folder_name + '/' : ''}${c.id}.html" target="_blank" style="display: block; color: #2563eb; font-weight: 700; margin-bottom: 4px; text-decoration: none;">View Claim</a>
+                                <a href="${c.file_path ? '/' + c.file_path.trim() : `/storage/${c.username}/claims/${c.folder_name ? c.folder_name + '/' : ''}${c.id}.html`}" target="_blank" style="display: block; color: #2563eb; font-weight: 700; margin-bottom: 4px; text-decoration: none;">View Claim</a>
                                 <a href="/admin/fwd_note.html?id=${c.id}" target="_blank" style="display: block; color: #6366f1; text-decoration: none; font-size: 11px; margin-bottom: 4px;">Forward Note</a>
                                 ${c.status !== 'Approved' && c.status !== 'Rejected' ? `
                                     <a href="/claims/new.html?edit_id=${c.id}" style="display: block; color: #3b82f6; text-decoration: none; font-size: 11px; font-weight: 700; margin-bottom: 4px;">Edit Bill</a>

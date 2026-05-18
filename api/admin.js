@@ -57,11 +57,12 @@ router.get('/claims', authenticateToken, authorizeRole('Admin'), async (req, res
     try {
         const { status, months, year, type_id } = req.query;
         let query = `
-            SELECT c.*, t.name as type_name, u.username, u.name as user_name, u.designation, u.personal_no, u.gender 
+            SELECT c.*, t.name as type_name, t.folder_name as type_folder_name, u.username, u.name as user_name, u.designation, u.personal_no, u.gender, bf.file_path 
             FROM claims c 
             JOIN claim_types t ON c.type_id = t.id 
             JOIN users u ON c.user_id = u.id
             JOIN roles r ON u.role_id = r.id
+            LEFT JOIN bill_files bf ON bf.claim_id = c.id AND bf.file_path LIKE '%.html'
         `;
         if (type_id === '7') {
             // Contingent bills: only Admin-role users; never show individual submissions

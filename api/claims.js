@@ -206,10 +206,11 @@ router.get('/', authenticateToken, async (req, res) => {
     try {
         const { status, months, year, type_id } = req.query;
         let query = `
-            SELECT c.*, t.name as type_name, t.folder_name, u.username 
+            SELECT c.*, t.name as type_name, t.folder_name as type_folder_name, u.username, bf.file_path 
             FROM claims c 
             JOIN claim_types t ON c.type_id = t.id 
             JOIN users u ON c.user_id = u.id
+            LEFT JOIN bill_files bf ON bf.claim_id = c.id AND bf.file_path LIKE '%.html'
             WHERE c.user_id = $1 
         `;
         let params = [req.user.id];
@@ -250,7 +251,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
     if (isNaN(req.params.id)) return res.status(400).json({ message: 'Invalid ID' });
     try {
         const result = await db.query(
-            'SELECT c.*, t.folder_name, t.name as type_name FROM claims c JOIN claim_types t ON c.type_id = t.id WHERE c.id = $1 AND c.user_id = $2',
+            'SELECT c.*, t.folder_name as type_folder_name, t.name as type_name FROM claims c JOIN claim_types t ON c.type_id = t.id WHERE c.id = $1 AND c.user_id = $2',
             [req.params.id, req.user.id]
         );
         if (result.rows.length === 0) return res.status(404).json({ message: 'Claim not found' });

@@ -1093,7 +1093,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const patientCghsInput = document.getElementById('mrc_patient_cghs');
-        if (patientCghsInput && !patientCghsInput.value.trim()) {
+        if (pendingStatus !== 'Draft' && patientCghsInput && !patientCghsInput.value.trim()) {
             const proceed = confirm("The patient's CGHS ID is missing. Continue without it? Click Cancel to update your profile.");
             if (!proceed) { window.location.href = '/profile.html'; return; }
         }

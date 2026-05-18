@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         </span>
                                     </td>
                                     <td style="padding: 12px 20px; font-size: 11px; text-align: center;">
-                                        <a href="/storage/${c.username}/claims/${c.folder_name ? c.folder_name + '/' : ''}${c.id}.html" target="_blank" style="display: block; color: #2563eb; font-weight: 700; margin-bottom: 4px; text-decoration: none;">View Claim</a>
+                                        <a href="${c.file_path ? '/' + c.file_path.trim() : `/storage/${c.username}/claims/${c.folder_name ? c.folder_name + '/' : ''}${c.id}.html`}" target="_blank" style="display: block; color: #2563eb; font-weight: 700; margin-bottom: 4px; text-decoration: none;">View Claim</a>
                                         <a href="/admin/fwd_note.html?id=${c.id}" target="_blank" style="display: block; color: #6366f1; text-decoration: none;">Forward Note</a>
                                     </td>
                                     <td style="padding: 12px 20px;">

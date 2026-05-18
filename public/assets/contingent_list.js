@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </span>
                             </td>
                             <td>
-                                <a href="/storage/${(() => { let u = c.username || currentUsername || localStorage.getItem('username') || ''; return (!u || u === 'undefined') ? 'default' : u; })()}/claims/${c.folder_name ? c.folder_name + '/' : ''}${c.id}.html" target="_blank" style="display: block; color: var(--primary-color); font-weight: 700; margin-bottom: 4px; text-decoration: none;">View Claim</a>
+                                <a href="${c.file_path ? '/' + c.file_path.trim() : `/storage/${(() => { let u = c.username || currentUsername || localStorage.getItem('username') || ''; return (!u || u === 'undefined') ? 'default' : u; })()}/claims/${c.folder_name ? c.folder_name + '/' : ''}${c.id}.html`}" target="_blank" style="display: block; color: var(--primary-color); font-weight: 700; margin-bottom: 4px; text-decoration: none;">View Claim</a>
                                 ${c.status === 'Draft' ? `
                                     <a href="/claims/new.html?edit_id=${c.id}" style="display: block; color: var(--secondary-color); text-decoration: none; font-size: 11px; font-weight: 700; margin-bottom: 4px;">Edit Bill</a>
                                     <button type="button" onclick="event.preventDefault(); event.stopPropagation(); deleteContingent(${c.id})" style="background: none; border: none; color: var(--danger-color); font-weight: 700; cursor: pointer; padding: 0; display: block; text-align: left; font-size: 11px;">Delete Bill</button>

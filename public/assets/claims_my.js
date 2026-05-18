@@ -194,18 +194,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.viewClaimPrint = function (id) {
         const claim = claimsById[id];
-        let username = (claim && claim.username) ? claim.username : '';
-        if (!username || username === 'undefined') {
-            username = currentUsername || localStorage.getItem('username') || '';
+        let url = '';
+        if (claim && claim.file_path && claim.file_path.trim() !== '') {
+            url = '/' + claim.file_path.trim();
+        } else {
+            let username = (claim && claim.username) ? claim.username : '';
             if (!username || username === 'undefined') {
-                username = 'default';
+                username = currentUsername || localStorage.getItem('username') || '';
+                if (!username || username === 'undefined') {
+                    username = 'default';
+                }
             }
+            const folderSegment = (claim && claim.folder_name && claim.folder_name.trim() !== '')
+                ? `${claim.folder_name.trim()}/`
+                : '';
+            url = `/storage/${username}/claims/${folderSegment}${id}.html`;
         }
-        // Include folder_name in path — files may be saved in subfolders
-        const folderSegment = (claim && claim.folder_name && claim.folder_name.trim() !== '')
-            ? `${claim.folder_name.trim()}/`
-            : '';
-        const url = `/storage/${username}/claims/${folderSegment}${id}.html`;
         const win = window.open(url, '_blank');
         if (!win) alert('Please allow popups to view the claim.');
     };
