@@ -10,6 +10,9 @@
     --warning-color: #f59e0b;
     --danger-color: #ef4444;
 
+    --header-grad-start: #38bdf8;
+    --header-grad-end: #2dd4bf;
+
     --bg-main: #f8fafc;
     --bg-card: #ffffff;
     --bg-sidebar: #0f172a;
@@ -32,6 +35,46 @@
 
     --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Theme 2: Emerald Wealth & Sage */
+body.theme-emerald {
+    --primary-color: #059669;
+    --primary-hover: #047857;
+    --secondary-color: #0d9488;
+    --bg-sidebar: #064E3B;
+    --header-grad-start: #34d399;
+    --header-grad-end: #5eead4;
+}
+
+/* Theme 3: Slate Gray & Electric Violet */
+body.theme-slate {
+    --primary-color: #7C3AED;
+    --primary-hover: #6D28D9;
+    --secondary-color: #8B5CF6;
+    --bg-sidebar: #171717;
+    --header-grad-start: #c4b5fd;
+    --header-grad-end: #e879f9;
+}
+
+/* Theme 4: Ocean Navy & Azure */
+body.theme-ocean {
+    --primary-color: #2563EB;
+    --primary-hover: #1D4ED8;
+    --secondary-color: #0284C7;
+    --bg-sidebar: #0F172A;
+    --header-grad-start: #60a5fa;
+    --header-grad-end: #38bdf8;
+}
+
+/* Theme 5: Midnight Charcoal & Amber */
+body.theme-amber {
+    --primary-color: #D97706;
+    --primary-hover: #B45309;
+    --secondary-color: #EA580C;
+    --bg-sidebar: #0a0a0a;
+    --header-grad-start: #fbbf24;
+    --header-grad-end: #fb923c;
 }
 
 /* Utility Classes */
