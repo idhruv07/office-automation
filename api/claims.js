@@ -15,6 +15,46 @@ router.get('/types', authenticateToken, async (req, res) => {
     }
 });
 
+// Fetch active ward entitlement rules
+router.get('/ward-entitlements', authenticateToken, async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM ward_entitlement_rules ORDER BY min_pay ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching ward entitlements' });
+    }
+});
+
+// Update ward entitlement rules (Admin only)
+router.post('/ward-entitlements', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'Admin') {
+        return res.status(403).json({ message: 'Forbidden' });
+    }
+    const { rules } = req.body;
+    if (!Array.isArray(rules)) {
+        return res.status(400).json({ message: 'Invalid rules array' });
+    }
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query('DELETE FROM ward_entitlement_rules');
+        for (const rule of rules) {
+            await client.query(
+                'INSERT INTO ward_entitlement_rules (min_pay, max_pay, ward_type) VALUES ($1, $2, $3)',
+                [rule.min_pay, rule.max_pay, rule.ward_type]
+            );
+        }
+        await client.query('COMMIT');
+        client.release();
+        res.json({ message: 'Ward entitlement rules updated successfully' });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        client.release();
+        res.status(500).json({ message: 'Error updating ward entitlements' });
+    }
+});
+
 // Create or Overwrite a claim (Draft or Pending)
 router.post('/', authenticateToken, async (req, res) => {
     const { type_id, claim_name, claim_date, remarks, status, formData, htmlContent, save_mode, parent_claim_id, folder_name } = req.body;

@@ -539,6 +539,52 @@ async function suiteClaimOverwrite() {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// SUITE 10 — Ward Entitlement Rules
+// ═════════════════════════════════════════════════════════════════════════════
+
+async function suiteWardEntitlements() {
+    // 10.1 Individual can fetch rules
+    const r1 = await api('GET', '/api/claims/ward-entitlements', null, individualToken);
+    ok('Individual can fetch ward entitlement rules (200)', r1.status === 200);
+    ok('Ward entitlement rules contains array', Array.isArray(r1.json) && r1.json.length >= 3);
+
+    // Verify initial rule thresholds match the specification
+    const general = r1.json?.find(r => r.ward_type === 'General');
+    const semiPrivate = r1.json?.find(r => r.ward_type === 'Semi-Private');
+    const privateWard = r1.json?.find(r => r.ward_type === 'Private');
+
+    ok('General entitlement min=0 max=36500', general?.min_pay === 0 && general?.max_pay === 36500);
+    ok('Semi-Private entitlement min=36501 max=50500', semiPrivate?.min_pay === 36501 && semiPrivate?.max_pay === 50500);
+    ok('Private entitlement min=50501 max=99999999', privateWard?.min_pay === 50501);
+
+    // 10.2 Non-admin cannot modify rules (403)
+    const r2 = await api('POST', '/api/claims/ward-entitlements', { rules: [] }, individualToken);
+    ok('Individual cannot update ward entitlement rules (403)', r2.status === 403);
+
+    // 10.3 Admin can modify rules
+    const testRules = [
+        { min_pay: 0, max_pay: 40000, ward_type: 'General' },
+        { min_pay: 40001, max_pay: 60000, ward_type: 'Semi-Private' },
+        { min_pay: 60001, max_pay: 99999999, ward_type: 'Private' }
+    ];
+    const r3 = await api('POST', '/api/claims/ward-entitlements', { rules: testRules }, adminToken);
+    ok('Admin can update ward entitlement rules (200)', r3.status === 200);
+
+    // Verify update
+    const r4 = await api('GET', '/api/claims/ward-entitlements', null, individualToken);
+    const updatedGeneral = r4.json?.find(r => r.ward_type === 'General');
+    ok('Dynamic rule thresholds updated correctly', updatedGeneral?.max_pay === 40000);
+
+    // Restore initial rules
+    const restoreRules = [
+        { min_pay: 0, max_pay: 36500, ward_type: 'General' },
+        { min_pay: 36501, max_pay: 50500, ward_type: 'Semi-Private' },
+        { min_pay: 50501, max_pay: 99999999, ward_type: 'Private' }
+    ];
+    await api('POST', '/api/claims/ward-entitlements', { rules: restoreRules }, adminToken);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // MAIN
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -560,6 +606,7 @@ async function main() {
     await suite('7 — Dependents CRUD',                  suiteDependents);
     await suite('8 — Admin User Management & RBAC',     suiteAdminUsers);
     await suite('9 — Claim Overwrite & Save-as-New',    suiteClaimOverwrite);
+    await suite('10 — Ward Entitlement Rules',          suiteWardEntitlements);
 
     // ── Final Report ────────────────────────────────────────────────────────
     const total = passed + failed;
