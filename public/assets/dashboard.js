@@ -1,1 +1,172 @@
-document.getElementById('display-username').textContent = localStorage.getItem('username');
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    // Set dynamic date in hero
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('current-date-str').textContent = `Workspace Overview • ${new Date().toLocaleDateString('en-US', options)}`;
+
+    // Fetch User Details to greet them professionally
+    try {
+        const resMe = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const user = await resMe.json();
+        if (user && (user.name || user.username)) {
+            document.getElementById('welcome-message').textContent = `Welcome back, ${user.name || user.username}! 👋`;
+        }
+    } catch (err) {
+        console.error('Failed to fetch profile info', err);
+    }
+
+    // Fetch Claims to populate charts and counters
+    try {
+        const resClaims = await fetch('/api/claims?months=12', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const claims = await resClaims.json();
+
+        // 1. Calculate counter values
+        let countSubmitted = 0;
+        let countDrafts = 0;
+        let countReturned = 0;
+        const categories = new Set();
+
+        // Monthly data array (Jan = index 0 to Dec = index 11)
+        const monthlySubmissions = new Array(12).fill(0);
+
+        claims.forEach(c => {
+            if (c.status === 'Draft') {
+                countDrafts++;
+            } else if (c.status === 'Returned') {
+                countReturned++;
+            } else {
+                countSubmitted++;
+            }
+
+            if (c.type_name) {
+                categories.add(c.type_name);
+            }
+
+            // Parse claim date to update monthly submission activity chart
+            if (c.claim_date) {
+                const dateObj = new Date(c.claim_date);
+                if (!isNaN(dateObj.getTime())) {
+                    const monthIndex = dateObj.getMonth();
+                    monthlySubmissions[monthIndex]++;
+                }
+            }
+        });
+
+        // Set counters in DOM
+        document.getElementById('val-submitted').textContent = countSubmitted;
+        document.getElementById('val-drafts').textContent = countDrafts;
+        document.getElementById('val-returned').textContent = countReturned;
+        document.getElementById('val-categories').textContent = categories.size;
+
+        // 2. Fetch computed CSS theme colors dynamically for native integration
+        const getThemeColor = (varName, fallback) => {
+            return getComputedStyle(document.body).getPropertyValue(varName).trim() || fallback;
+        };
+
+        const primaryColor = getThemeColor('--primary-color', '#4f46e5');
+        const accentColor = getThemeColor('--accent-color', '#0d9488');
+        const dangerColor = getThemeColor('--danger-color', '#ef4444');
+        const warningColor = getThemeColor('--warning-color', '#f59e0b');
+        const textMain = getThemeColor('--text-main', '#1e293b');
+
+        // 3. Render Status Doughnut Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        window.statusChartInstance = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Submitted', 'Drafts', 'Returned'],
+                datasets: [{
+                    data: [countSubmitted, countDrafts, countReturned],
+                    backgroundColor: [
+                        primaryColor,
+                        accentColor,
+                        dangerColor
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: textMain,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                weight: '600',
+                                size: 12
+                            },
+                            padding: 15
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // 4. Render Monthly Activity Bar Chart
+        const historyCtx = document.getElementById('historyChart').getContext('2d');
+        window.historyChartInstance = new Chart(historyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Claims Submitted',
+                    data: monthlySubmissions,
+                    backgroundColor: primaryColor,
+                    borderRadius: 6,
+                    borderWidth: 0,
+                    barThickness: 24
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: textMain,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                weight: '600'
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(226, 232, 240, 0.6)'
+                        },
+                        ticks: {
+                            color: textMain,
+                            precision: 0,
+                            font: {
+                                family: 'Inter, sans-serif'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error('Failed to load dashboard workspace metrics', err);
+    }
+});

@@ -155,6 +155,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ theme: swatch.dataset.theme })
                     }).catch(err => console.error('Failed to save theme to DB', err));
                 }
+
+                // Real-time chart hot-reloading
+                setTimeout(() => {
+                    if (window.statusChartInstance && window.historyChartInstance) {
+                        const getThemeColor = (varName, fallback) => {
+                            return getComputedStyle(document.body).getPropertyValue(varName).trim() || fallback;
+                        };
+                        const primaryColor = getThemeColor('--primary-color', '#4f46e5');
+                        const accentColor = getThemeColor('--accent-color', '#0d9488');
+                        
+                        window.statusChartInstance.data.datasets[0].backgroundColor[0] = primaryColor;
+                        window.statusChartInstance.data.datasets[0].backgroundColor[1] = accentColor;
+                        window.statusChartInstance.update();
+                        
+                        window.historyChartInstance.data.datasets[0].backgroundColor = primaryColor;
+                        window.historyChartInstance.update();
+                    }
+                }, 50);
             });
         });
     }

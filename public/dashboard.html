@@ -5,24 +5,287 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Office Auto</title>
     <link rel="stylesheet" href="/assets/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Beautiful Dashboard Grid & Styling */
+        .dash-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .dash-hero::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+        }
+        .dash-hero-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .dash-hero-sub {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        /* Metric Cards Grid */
+        .dash-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-color);
+        }
+        .metric-card.returned-highlight {
+            border-left: 4px solid var(--danger-color);
+        }
+        .metric-card.returned-highlight:hover {
+            border-color: var(--danger-color);
+        }
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .metric-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+        .metric-icon {
+            font-size: 28px;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--border-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .metric-card.returned-highlight .metric-icon {
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--danger-color);
+        }
+
+        /* Charts Layout Grid */
+        .dash-charts-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 1024px) {
+            .dash-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        /* Quick Navigation Actions Card */
+        .quick-actions-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .action-button-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--border-light);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .action-button-card:hover {
+            background: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+        }
+        .action-button-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        .action-button-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .action-button-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Dashboard</h1>
-    <div class="dashboard-grid">
-        <div class="dashboard-card primary-border">
-            <h3>My Claims</h3>
-            <p>View and manage your submissions.</p>
-            <a href="/claims/my.html">View Claims</a>
+    
+    <!-- Hero Banner -->
+    <div class="dash-hero">
+        <h1 class="dash-hero-title" id="welcome-message">Welcome back, Employee! 👋</h1>
+        <p class="dash-hero-sub" id="current-date-str">Loading workspace data...</p>
+    </div>
+
+    <!-- Metrics Cards Grid -->
+    <div class="dash-metrics-grid">
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="metric-label">Submitted Claims</span>
+                <span class="metric-value" id="val-submitted">0</span>
+            </div>
+            <div class="metric-icon">📑</div>
         </div>
-        <div class="dashboard-card success-border">
-            <h3>New Claim</h3>
-            <p>Submit a new reimbursement request.</p>
-            <a href="/claims/new.html">Create New</a>
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="metric-label">Draft Claims</span>
+                <span class="metric-value" id="val-drafts">0</span>
+            </div>
+            <div class="metric-icon">✏️</div>
         </div>
-        <div class="dashboard-card info-border">
-            <h3>Profile</h3>
-            <p>Update your personal and family details.</p>
-            <a href="/profile.html">Go to Profile</a>
+        <div class="metric-card returned-highlight">
+            <div class="metric-info">
+                <span class="metric-label">Returned for Action</span>
+                <span class="metric-value" id="val-returned">0</span>
+            </div>
+            <div class="metric-icon">⚠️</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="metric-label">Claim Categories</span>
+                <span class="metric-value" id="val-categories">0</span>
+            </div>
+            <div class="metric-icon">🗂️</div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="dash-charts-grid">
+        <!-- Activity History Bar Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">📊 Submission History</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+        <!-- Status Doughnut Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">🎯 Status Distribution</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Ledger -->
+    <div class="quick-actions-card">
+        <div class="chart-header" style="border: none; padding-bottom: 0;">
+            <h3 class="chart-title">🚀 Quick Actions Navigation</h3>
+        </div>
+        <div class="quick-actions-grid">
+            <a href="/claims/new.html" class="action-button-card">
+                <div class="action-button-icon">➕</div>
+                <h4 class="action-button-title">Create New Claim</h4>
+                <p class="action-button-desc">Submit a new request</p>
+            </a>
+            <a href="/claims/my.html" class="action-button-card">
+                <div class="action-button-icon">📂</div>
+                <h4 class="action-button-title">My Claims</h4>
+                <p class="action-button-desc">View existing submissions</p>
+            </a>
+            <a href="/profile.html" class="action-button-card">
+                <div class="action-button-icon">👤</div>
+                <h4 class="action-button-title">My Profile</h4>
+                <p class="action-button-desc">Update personal information</p>
+            </a>
         </div>
     </div>
 
