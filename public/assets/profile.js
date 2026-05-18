@@ -2,6 +2,175 @@ document.addEventListener('DOMContentLoaded', async () => {
             const token = localStorage.getItem('token');
             if (!token) { window.location.href = '/'; return; }
 
+            // ── Relationship → fruit CSS class ─────────────────────────────
+            function fruitClass(rel) {
+                const r = (rel || '').toLowerCase();
+                if (r.includes('spouse') || r.includes('wife') || r.includes('husband')) return 'spouse-fruit';
+                if (r.includes('son'))      return 'son-fruit';
+                if (r.includes('daughter')) return 'daughter-fruit';
+                if (r.includes('father') || r.includes('mother')) return 'parent-fruit';
+                return '';
+            }
+
+            // ── Build a single fruit <li> ───────────────────────────────────
+            function buildFruitLi(dep) {
+                const fc = fruitClass(dep.relationship);
+                const dobDisplay = dep.dob ? new Date(dep.dob).toLocaleDateString('en-IN') : '—';
+                const dobValue   = dep.dob ? dep.dob.substring(0, 10) : '';
+
+                const li = document.createElement('li');
+                li.dataset.depId = dep.id;
+                li.innerHTML = `
+                    <div class="fruit-card family-tree-node ${fc}" style="min-width: 155px; padding: 14px 12px 12px; position: relative;">
+
+                        <!-- ── VIEW MODE ── -->
+                        <div class="fruit-view">
+                            <div style="font-weight:800;color:rgba(255,255,255,0.7);font-size:8px;text-transform:uppercase;margin-bottom:3px;letter-spacing:0.06em;">Dependent</div>
+                            <div class="fruit-name" style="font-weight:700;font-size:13px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.25);">${dep.name}</div>
+                            <div class="fruit-rel" style="font-size:10px;font-weight:600;margin-top:2px;color:rgba(255,255,255,0.85);">${dep.relationship}</div>
+                            <div class="fruit-dob" style="font-size:9px;margin-top:1px;color:rgba(255,255,255,0.7);">${dobDisplay}</div>
+                            <div style="margin-top:10px;display:flex;justify-content:center;gap:8px;">
+                                <button type="button" class="fruit-edit-btn" title="Edit" style="
+                                    border:none;background:rgba(255,255,255,0.25);backdrop-filter:blur(4px);
+                                    color:#fff;border-radius:8px;padding:4px 10px;font-size:11px;
+                                    cursor:pointer;font-weight:600;transition:background 0.2s;
+                                ">✎ Edit</button>
+                                <button type="button" class="fruit-del-btn" title="Delete" style="
+                                    border:none;background:rgba(0,0,0,0.2);backdrop-filter:blur(4px);
+                                    color:#fff;border-radius:8px;padding:4px 10px;font-size:11px;
+                                    cursor:pointer;font-weight:600;transition:background 0.2s;
+                                ">✕</button>
+                            </div>
+                        </div>
+
+                        <!-- ── EDIT MODE (hidden by default) ── -->
+                        <div class="fruit-edit-mode" style="display:none; background:rgba(255,255,255,0.92); border-radius:16px; padding:12px 10px; margin-top:4px; backdrop-filter:blur(8px);">
+                            <div style="font-size:8px;font-weight:800;color:#4f46e5;text-transform:uppercase;margin-bottom:8px;letter-spacing:0.06em;">✎ Edit Dependent</div>
+                            <input type="text" class="fruit-edit-name" value="${dep.name}" placeholder="Name" style="
+                                width:100%;border:none;border-bottom:1.5px solid #cbd5e1;
+                                background:transparent;color:#1e293b;font-size:12px;font-weight:700;
+                                padding:2px 0 5px;margin-bottom:7px;outline:none;box-sizing:border-box;
+                            ">
+                            <select class="fruit-edit-rel" style="
+                                width:100%;border:none;border-bottom:1.5px solid #cbd5e1;
+                                background:transparent;color:#1e293b;font-size:11px;
+                                padding:2px 0 5px;margin-bottom:7px;outline:none;cursor:pointer;
+                                appearance:none;-webkit-appearance:none;
+                            ">
+                                ${['Spouse','Husband','Wife','Son','Daughter','Father','Mother','Brother','Sister','Father-in-law','Mother-in-law']
+                                    .map(r => `<option value="${r}" ${r === dep.relationship ? 'selected' : ''} style="color:#1e293b;">${r}</option>`).join('')}
+                            </select>
+                            <input type="text" class="fruit-edit-cghs" value="${dep.cghs_ben_id || ''}" placeholder="CGHS ID (optional)" style="
+                                width:100%;border:none;border-bottom:1.5px solid #cbd5e1;
+                                background:transparent;color:#1e293b;font-size:11px;
+                                padding:2px 0 5px;margin-bottom:7px;outline:none;box-sizing:border-box;
+                            ">
+                            <input type="date" class="fruit-edit-dob" value="${dobValue}" style="
+                                width:100%;border:none;border-bottom:1.5px solid #cbd5e1;
+                                background:transparent;color:#1e293b;font-size:11px;
+                                padding:2px 0 5px;margin-bottom:10px;outline:none;box-sizing:border-box;
+                            ">
+                            <div style="display:flex;gap:6px;justify-content:center;">
+                                <button type="button" class="fruit-save-btn" style="
+                                    border:none;background:#4f46e5;color:#fff;
+                                    border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;
+                                    cursor:pointer;flex:1;
+                                ">✓ Save</button>
+                                <button type="button" class="fruit-cancel-btn" style="
+                                    border:none;background:#e2e8f0;color:#475569;
+                                    border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;
+                                    cursor:pointer;
+                                ">✕</button>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+
+                const card    = li.querySelector('.fruit-card');
+                const viewEl  = li.querySelector('.fruit-view');
+                const editEl  = li.querySelector('.fruit-edit-mode');
+
+                // Edit button → flip to edit mode
+                li.querySelector('.fruit-edit-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    viewEl.style.display = 'none';
+                    editEl.style.display = 'block';
+                    card.style.transform = 'none'; // disable hover lift while editing
+                });
+
+                // Cancel → flip back to view mode
+                li.querySelector('.fruit-cancel-btn').addEventListener('click', () => {
+                    editEl.style.display = 'none';
+                    viewEl.style.display = 'block';
+                });
+
+                // Save → call API, refresh
+                li.querySelector('.fruit-save-btn').addEventListener('click', async () => {
+                    const saveBtn = li.querySelector('.fruit-save-btn');
+                    saveBtn.textContent = '…';
+                    saveBtn.disabled = true;
+                    const payload = {
+                        id:           dep.id,
+                        name:         li.querySelector('.fruit-edit-name').value.trim(),
+                        relationship: li.querySelector('.fruit-edit-rel').value,
+                        cghs_ben_id:  li.querySelector('.fruit-edit-cghs').value.trim(),
+                        dob:          li.querySelector('.fruit-edit-dob').value
+                    };
+                    try {
+                        const res = await fetch('/api/auth/dependents', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) {
+                            loadProfile();
+                        } else {
+                            saveBtn.textContent = '✓ Save';
+                            saveBtn.disabled = false;
+                            alert('Error saving. Please try again.');
+                        }
+                    } catch {
+                        saveBtn.textContent = '✓ Save';
+                        saveBtn.disabled = false;
+                        alert('Network error.');
+                    }
+                });
+
+                // Delete → inline confirmation
+                li.querySelector('.fruit-del-btn').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const delBtn = li.querySelector('.fruit-del-btn');
+                    if (delBtn.dataset.confirming === 'true') {
+                        // Second click — confirmed, do delete
+                        delBtn.textContent = '…';
+                        delBtn.disabled = true;
+                        try {
+                            const res = await fetch(`/api/auth/dependents/${dep.id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (res.ok) { loadProfile(); }
+                            else { alert('Error deleting.'); delBtn.textContent = '✕'; delBtn.disabled = false; }
+                        } catch { alert('Network error.'); delBtn.textContent = '✕'; delBtn.disabled = false; }
+                    } else {
+                        // First click — ask for confirmation inline
+                        delBtn.dataset.confirming = 'true';
+                        delBtn.textContent = 'Sure?';
+                        delBtn.style.background = 'rgba(239,68,68,0.5)';
+                        setTimeout(() => {
+                            if (delBtn.dataset.confirming === 'true') {
+                                delBtn.dataset.confirming = '';
+                                delBtn.textContent = '✕';
+                                delBtn.style.background = 'rgba(0,0,0,0.2)';
+                            }
+                        }, 2500);
+                    }
+                });
+
+                return li;
+            }
+
             async function loadProfile() {
                 try {
                     const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -42,33 +211,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             `;
                             tbody.appendChild(tr);
 
-                            // Populate Family Tree Node
+                            // Populate fruit tree node with inline edit/delete
                             if (treeList) {
-                                let fruitClass = '';
-                                const rel = (dep.relationship || '').toLowerCase();
-                                if (rel.includes('spouse') || rel.includes('wife') || rel.includes('husband')) {
-                                    fruitClass = 'spouse-fruit';
-                                } else if (rel.includes('son')) {
-                                    fruitClass = 'son-fruit';
-                                } else if (rel.includes('daughter')) {
-                                    fruitClass = 'daughter-fruit';
-                                } else if (rel.includes('father') || rel.includes('mother')) {
-                                    fruitClass = 'parent-fruit';
-                                }
-
-                                const li = document.createElement('li');
-                                li.innerHTML = `
-                                    <div class="family-tree-node ${fruitClass}" style="min-width: 130px; padding: 12px 10px;">
-                                        <div style="font-weight: 800; color: #64748b; font-size: 8px; text-transform: uppercase; margin-bottom: 2px;">Dependent</div>
-                                        <div style="font-weight: 700; font-size: 12px; color: #1e293b;">${dep.name}</div>
-                                        <div style="color: var(--primary-color, #4f46e5); font-size: 10px; font-weight: 600; margin-top: 2px;">${dep.relationship}</div>
-                                        <div style="margin-top: 8px; display: flex; justify-content: center; gap: 8px;">
-                                            <button type="button" style="border: none; background: #f1f5f9; color: #475569; border-radius: 4px; padding: 2px 6px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick='editDependent(${JSON.stringify(dep)})'>✎</button>
-                                            <button type="button" style="border: none; background: #fee2e2; color: #ef4444; border-radius: 4px; padding: 2px 6px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="deleteDependent(${dep.id})">✕</button>
-                                        </div>
-                                    </div>
-                                `;
-                                treeList.appendChild(li);
+                                treeList.appendChild(buildFruitLi(dep));
                             }
                         });
                     } else {
@@ -78,6 +223,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.error(e);
                 }
             }
+
+
+
 
             document.getElementById('profile-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
