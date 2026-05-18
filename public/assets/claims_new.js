@@ -1231,8 +1231,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             if (res.ok) {
-                alert(`Claim ${pendingStatus === 'Draft' ? 'saved as draft' : 'submitted successfully'}!`);
-                window.location.href = '/claims/my.html';
+                if (pendingStatus === 'Draft') {
+                    alert('Claim Saved');
+                } else {
+                    alert('Claim submitted successfully!');
+                    window.location.href = '/claims/my.html';
+                }
             } else {
                 const data = await res.json();
                 alert(data.message || 'Error saving claim');
