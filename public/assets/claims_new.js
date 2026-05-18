@@ -240,9 +240,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 setVal('gpf_pay', gpfBasicPay ? `${gpfBasicPay}${gpfPayLevel ? ' (' + gpfPayLevel + ')' : ''}` : '');
 
-                // Set today's date
-                const gpfDateEl = document.getElementById('gpf_date');
-                if (gpfDateEl) gpfDateEl.value = new Date().toISOString().split('T')[0];
+                // Set today's date in dd/mm/yy format
+                const d = new Date();
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yy = String(d.getFullYear()).slice(-2);
+                setVal('gpf_date', `${dd}/${mm}/${yy}`);
             }
 
             // ── Contingent Bill Template ──────────────────────────────────────
