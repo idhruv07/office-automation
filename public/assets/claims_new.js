@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             setVal('mrc_full_address', currentUser.address);
             setVal('mrc_mobile_number', currentUser.mobile_no);
             setVal('mrc_email', currentUser.email);
+            setVal('declaration_name_desig', (currentUser.name || '') + (currentUser.designation ? ', ' + currentUser.designation : ''));
 
             const affidavitEl = document.getElementById('affidavitText');
             if (affidavitEl) {
@@ -824,6 +825,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const el = document.querySelector(`input[name="${n}"]`);
                 if (el) el.addEventListener('input', updateMRCTotal);
             });
+            window.updateMRCTotal = updateMRCTotal;
             updateMRCTotal();
 
         } catch (err) {
@@ -942,6 +944,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (typeof window.ltcFinalRecalcTotal === 'function') window.ltcFinalRecalcTotal();
                     if (typeof window.calcExpTotal === 'function') window.calcExpTotal();
+                    if (typeof window.updateMRCTotal === 'function') window.updateMRCTotal();
                 }
             }
         } catch (e) {
