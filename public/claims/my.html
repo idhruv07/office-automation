@@ -8,8 +8,87 @@
     <style>
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
-        th { background-color: #f8f9fa; }
-        .btn-sm { padding: 4px 8px; font-size: 12px; }
+        th { background-color: var(--border-light); color: var(--text-main); font-weight: 700; }
+        
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .btn-sm:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        /* Premium Theme Buttons */
+        #btn-show-all, #btn-show-submitted, #btn-show-drafts, #btn-show-returned {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #btn-show-all:hover, #btn-show-submitted:hover, #btn-show-drafts:hover, #btn-show-returned:hover {
+            background: var(--border-light);
+            border-color: var(--primary-color);
+        }
+        #btn-show-all.active, #btn-show-submitted.active, #btn-show-drafts.active, #btn-show-returned.active {
+            background: var(--primary-color) !important;
+            color: white !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        }
+
+        /* View Period Box */
+        .view-period-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--border-light) !important;
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1.5px solid var(--border-color) !important;
+            transition: all 0.2s ease;
+        }
+        .view-period-box:hover {
+            border-color: var(--primary-color) !important;
+        }
+        .view-period-box label {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-main);
+            margin: 0;
+            cursor: pointer;
+        }
+        .view-period-box select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .view-period-box select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -17,18 +96,18 @@
     
     <div style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
         <div style="display: flex; gap: 10px;">
-            <button id="btn-show-all" type="button" style="background: #334155;">All Claims</button>
-            <button id="btn-show-submitted" type="button" style="background: var(--primary-color);">Submitted Claims</button>
-            <button id="btn-show-drafts" type="button" style="background: #6c757d;">My Drafts</button>
-            <button id="btn-show-returned" type="button" style="background: #dc3545; position: relative;">
+            <button id="btn-show-all" type="button" class="active">All Claims</button>
+            <button id="btn-show-submitted" type="button">Submitted Claims</button>
+            <button id="btn-show-drafts" type="button">My Drafts</button>
+            <button id="btn-show-returned" type="button" style="position: relative;">
                 Returned Claims
-                <span id="returned-count" style="display: none; position: absolute; top: -10px; right: -10px; background: white; color: #dc3545; border: 2px solid #dc3545; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; align-items: center; justify-content: center;">0</span>
+                <span id="returned-count" style="display: none; position: absolute; top: -10px; right: -10px; background: white; color: var(--danger-color); border: 2px solid var(--danger-color); border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; align-items: center; justify-content: center;">0</span>
             </button>
         </div>
         
-        <div style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 15px; border-radius: 20px; border: 1px solid #e2e8f0;">
-            <label for="filter-year" style="font-weight: bold; font-size: 14px;">View Period:</label>
-            <select id="filter-year" style="padding: 5px; border-radius: 4px; border: 1px solid #cbd5e1;">
+        <div class="view-period-box">
+            <label for="filter-year">View Period:</label>
+            <select id="filter-year">
                 <option value="">Recent (6 Months)</option>
                 <!-- Years will be populated by JS -->
             </select>

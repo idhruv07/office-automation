@@ -115,26 +115,44 @@ document.addEventListener('DOMContentLoaded', () => {
         loadClaims(currentStatusFilter);
     });
 
+    function setActiveButton(activeId) {
+        const buttons = ['btn-show-all', 'btn-show-submitted', 'btn-show-drafts', 'btn-show-returned'];
+        buttons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                if (id === activeId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+        });
+    }
+
     document.getElementById('btn-show-all').addEventListener('click', (e) => {
         e.preventDefault();
+        setActiveButton('btn-show-all');
         viewTitle.textContent = 'All Claims';
         loadClaims('');
     });
 
     document.getElementById('btn-show-submitted').addEventListener('click', (e) => {
         e.preventDefault();
+        setActiveButton('btn-show-submitted');
         viewTitle.textContent = 'Submitted Claims';
         loadClaims('Submitted');
     });
 
     document.getElementById('btn-show-drafts').addEventListener('click', (e) => {
         e.preventDefault();
+        setActiveButton('btn-show-drafts');
         viewTitle.textContent = 'My Drafts';
         loadClaims('Draft');
     });
 
     document.getElementById('btn-show-returned').addEventListener('click', (e) => {
         e.preventDefault();
+        setActiveButton('btn-show-returned');
         viewTitle.textContent = 'Returned Claims';
         loadClaims('Returned');
     });
