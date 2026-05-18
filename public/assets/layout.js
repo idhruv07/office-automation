@@ -82,22 +82,25 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="app-container">
             <aside id="sidebar">
                 <header>Office Auto</header>
-                <nav>
+                <nav style="flex: 1;">
                     <ul id="nav-menu">
                         <li><a href="/dashboard.html">Home (Static)</a></li>
                     </ul>
                 </nav>
+                <div class="theme-selector">
+                    <p class="theme-title">Theme Palette</p>
+                    <div class="theme-swatches" id="theme-swatch-container">
+                        <button type="button" class="theme-swatch" data-theme="" style="background: linear-gradient(135deg, #4f46e5 50%, #0d9488 50%);" title="Royal Indigo & Teal"></button>
+                        <button type="button" class="theme-swatch" data-theme="theme-emerald" style="background: linear-gradient(135deg, #059669 50%, #0d9488 50%);" title="Emerald Wealth & Sage"></button>
+                        <button type="button" class="theme-swatch" data-theme="theme-slate" style="background: linear-gradient(135deg, #7C3AED 50%, #8B5CF6 50%);" title="Slate Gray & Violet"></button>
+                        <button type="button" class="theme-swatch" data-theme="theme-ocean" style="background: linear-gradient(135deg, #2563EB 50%, #0284C7 50%);" title="Ocean Navy & Azure"></button>
+                        <button type="button" class="theme-swatch" data-theme="theme-amber" style="background: linear-gradient(135deg, #D97706 50%, #0a0a0a 50%);" title="Midnight Charcoal & Amber"></button>
+                    </div>
+                </div>
             </aside>
             <main id="main-content">
                 <header id="header">
                     <span id="user-info">Not Logged In</span>
-                    <select id="theme-switcher" style="margin-left: auto; margin-right: 1rem; padding: 0.3rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-size: 0.875rem; font-family: var(--font-body); font-weight: 600; cursor: pointer;">
-                        <option value="">Theme: Royal Indigo & Teal</option>
-                        <option value="theme-emerald">Theme: Emerald Wealth & Sage</option>
-                        <option value="theme-slate">Theme: Slate Gray & Violet</option>
-                        <option value="theme-ocean">Theme: Ocean Navy & Azure</option>
-                        <option value="theme-amber">Theme: Midnight Charcoal & Amber</option>
-                    </select>
                 </header>
                 <section id="content">
                     <!-- Page specific content will be moved here -->
@@ -117,16 +120,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add(savedTheme);
     }
 
-    const themeSwitcher = document.getElementById('theme-switcher');
-    if (themeSwitcher) {
-        themeSwitcher.value = savedTheme;
-        themeSwitcher.addEventListener('change', (e) => {
-            const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
-            document.body.classList.remove(...themes);
-            if (e.target.value) {
-                document.body.classList.add(e.target.value);
+    const themeSwatches = document.querySelectorAll('.theme-swatch');
+    if (themeSwatches.length > 0) {
+        themeSwatches.forEach(swatch => {
+            if (swatch.dataset.theme === savedTheme) {
+                swatch.classList.add('active');
             }
-            localStorage.setItem('themePref', e.target.value);
+            swatch.addEventListener('click', () => {
+                const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
+                document.body.classList.remove(...themes);
+                themeSwatches.forEach(s => s.classList.remove('active'));
+                
+                swatch.classList.add('active');
+                if (swatch.dataset.theme) {
+                    document.body.classList.add(swatch.dataset.theme);
+                }
+                localStorage.setItem('themePref', swatch.dataset.theme);
+            });
         });
     }
 

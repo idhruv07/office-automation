@@ -158,6 +158,47 @@ h6 {
     letter-spacing: 0.05em;
 }
 
+.theme-selector {
+    margin-top: auto;
+    padding: 1.5rem 0.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(248, 250, 252, 0.5);
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+
+.theme-swatches {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.theme-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.theme-swatch:hover {
+    transform: scale(1.15);
+}
+
+.theme-swatch.active {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    transform: scale(1.15);
+}
+
 #sidebar ul {
     list-style: none;
     padding: 0;
