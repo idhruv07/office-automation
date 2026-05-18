@@ -1464,10 +1464,10 @@ tr:hover td {
 
 /* ── VISUAL FAMILY TREE LAYOUT ── */
 .family-tree-container {
-    padding: 24px;
-    background: #f8fafc;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    padding: 28px 24px 32px;
+    background: linear-gradient(160deg, #f0fdf4 0%, #f8fafc 60%, #f0f4ff 100%);
+    border-radius: 20px;
+    border: 1px solid #d1fae5;
     margin-bottom: 20px;
     overflow-x: auto;
     width: 100%;
@@ -1483,12 +1483,12 @@ tr:hover td {
 }
 
 .family-tree ul {
-    padding-top: 24px;
+    padding-top: 28px;
     position: relative;
     transition: all 0.5s;
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 24px;
     margin: 0;
     padding-left: 0;
 }
@@ -1497,28 +1497,28 @@ tr:hover td {
     text-align: center;
     list-style-type: none;
     position: relative;
-    padding: 24px 8px 0 8px;
+    padding: 28px 8px 0 8px;
     transition: all 0.5s;
 }
 
-/* We will use ::before and ::after to draw the connector lines */
+/* Connector lines — warm tree-branch brown colour */
 .family-tree li::before, .family-tree li::after {
     content: '';
     position: absolute;
     top: 0;
     right: 50%;
-    border-top: 2px solid #cbd5e1;
+    border-top: 2.5px solid #a16207;
     width: 50%;
-    height: 24px;
+    height: 28px;
 }
 
 .family-tree li::after {
     right: auto;
     left: 50%;
-    border-left: 2px solid #cbd5e1;
+    border-left: 2.5px solid #a16207;
 }
 
-/* We need to remove left-right connectors from elements without siblings */
+/* Remove connectors from only-child */
 .family-tree li:only-child::after, .family-tree li:only-child::before {
     display: none;
 }
@@ -1532,50 +1532,135 @@ tr:hover td {
 }
 
 .family-tree li:last-child::before {
-    border-right: 2px solid #cbd5e1;
-    border-radius: 0 8px 0 0;
+    border-right: 2.5px solid #a16207;
+    border-radius: 0 10px 0 0;
 }
 
 .family-tree li:first-child::after {
-    border-radius: 8px 0 0 0;
+    border-radius: 10px 0 0 0;
 }
 
-/* Time to add downward connectors from parents */
+/* Downward connector from root node to children row */
 .family-tree ul ul::before {
     content: '';
     position: absolute;
     top: 0;
     left: 50%;
-    border-left: 2px solid #cbd5e1;
+    border-left: 2.5px solid #a16207;
     width: 0;
-    height: 24px;
+    height: 28px;
 }
 
-/* Styled Tree Card Nodes */
+/* ── FRUIT NODE STYLES ── */
+
+/* Base node — default red apple */
 .family-tree-node {
-    border: 1.5px solid #cbd5e1;
-    padding: 14px;
-    text-decoration: none;
+    border: 2.5px solid rgba(255,255,255,0.8) !important;
+    padding: 18px 14px 14px;
     color: #1e293b;
     font-size: 11px;
     display: inline-block;
-    border-radius: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: white;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%; /* Fruit-like bottom-round shape */
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.4),
+                box-shadow 0.35s ease,
+                filter 0.35s ease;
+    background: linear-gradient(160deg, #fca5a5 0%, #ef4444 60%, #dc2626 100%);
+    box-shadow:
+        inset -3px -4px 8px rgba(0,0,0,0.12),
+        inset 4px 4px 10px rgba(255,255,255,0.35),
+        0 8px 20px -4px rgba(239, 68, 68, 0.35);
     position: relative;
-    min-width: 150px;
+    min-width: 130px;
+    cursor: default;
 }
 
+/* Fruit stem on top of each dependent node */
+.family-tree-node::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 12px;
+    background: linear-gradient(to bottom, #78350f, #a16207);
+    border-radius: 2px;
+}
+
+/* Fruit shine / specular highlight */
+.family-tree-node::after {
+    content: '';
+    position: absolute;
+    top: 18%;
+    left: 20%;
+    width: 28%;
+    height: 18%;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    transform: rotate(-30deg);
+    pointer-events: none;
+}
+
+/* Root (self) node — rich indigo grape */
 .family-tree-node.root-node {
-    border-color: var(--primary-color, #4f46e5);
-    background: #f5f3ff;
-    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1), 0 4px 6px -2px rgba(79, 70, 229, 0.05);
+    background: linear-gradient(160deg, #a5b4fc 0%, #6366f1 60%, #4f46e5 100%) !important;
+    box-shadow:
+        inset -3px -4px 8px rgba(0,0,0,0.15),
+        inset 4px 4px 10px rgba(255,255,255,0.2),
+        0 10px 24px -4px rgba(79, 70, 229, 0.4);
+    border-radius: 20px;
+    border-color: rgba(255,255,255,0.6) !important;
+    color: white !important;
 }
 
-/* Hover effects */
-.family-tree-node:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-    border-color: var(--primary-color, #4f46e5);
+.family-tree-node.root-node * { color: rgba(255,255,255,0.95) !important; }
+
+/* Spouse / Wife / Husband — Soft Rose Peach */
+.family-tree-node.spouse-fruit {
+    background: linear-gradient(160deg, #fbcfe8 0%, #ec4899 60%, #db2777 100%) !important;
+    box-shadow:
+        inset -3px -4px 8px rgba(0,0,0,0.12),
+        inset 4px 4px 10px rgba(255,255,255,0.35),
+        0 8px 20px -4px rgba(236, 72, 153, 0.4);
 }
+
+/* Son — Sky blue plum */
+.family-tree-node.son-fruit {
+    background: linear-gradient(160deg, #bae6fd 0%, #0ea5e9 60%, #0284c7 100%) !important;
+    box-shadow:
+        inset -3px -4px 8px rgba(0,0,0,0.12),
+        inset 4px 4px 10px rgba(255,255,255,0.35),
+        0 8px 20px -4px rgba(14, 165, 233, 0.4);
+}
+
+/* Daughter — Warm amber mango */
+.family-tree-node.daughter-fruit {
+    background: linear-gradient(160deg, #fde68a 0%, #f59e0b 60%, #d97706 100%) !important;
+    box-shadow:
+        inset -3px -4px 8px rgba(0,0,0,0.12),
+        inset 4px 4px 10px rgba(255,255,255,0.35),
+        0 8px 20px -4px rgba(245, 158, 11, 0.4);
+}
+
+/* Father / Mother — Fresh green apple */
+.family-tree-node.parent-fruit {
+    background: linear-gradient(160deg, #bbf7d0 0%, #22c55e 60%, #16a34a 100%) !important;
+    box-shadow:
+        inset -3px -4px 8px rgba(0,0,0,0.12),
+        inset 4px 4px 10px rgba(255,255,255,0.35),
+        0 8px 20px -4px rgba(34, 197, 94, 0.4);
+}
+
+/* Hover — swell like a ripe fruit being picked + bright glow */
+.family-tree-node:hover {
+    transform: scale(1.15) translateY(-8px) rotate(-2deg);
+    box-shadow:
+        inset -3px -4px 8px rgba(0,0,0,0.12),
+        inset 4px 4px 10px rgba(255,255,255,0.4),
+        0 24px 40px -8px rgba(0,0,0,0.25),
+        0 0 0 4px rgba(255,255,255,0.6),
+        0 0 30px 6px rgba(255,255,255,0.2);
+    filter: saturate(1.2) brightness(1.06);
+    z-index: 20;
+}
+

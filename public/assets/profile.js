@@ -44,9 +44,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                             // Populate Family Tree Node
                             if (treeList) {
+                                let fruitClass = '';
+                                const rel = (dep.relationship || '').toLowerCase();
+                                if (rel.includes('spouse') || rel.includes('wife') || rel.includes('husband')) {
+                                    fruitClass = 'spouse-fruit';
+                                } else if (rel.includes('son')) {
+                                    fruitClass = 'son-fruit';
+                                } else if (rel.includes('daughter')) {
+                                    fruitClass = 'daughter-fruit';
+                                } else if (rel.includes('father') || rel.includes('mother')) {
+                                    fruitClass = 'parent-fruit';
+                                }
+
                                 const li = document.createElement('li');
                                 li.innerHTML = `
-                                    <div class="family-tree-node" style="min-width: 130px; padding: 12px 10px;">
+                                    <div class="family-tree-node ${fruitClass}" style="min-width: 130px; padding: 12px 10px;">
                                         <div style="font-weight: 800; color: #64748b; font-size: 8px; text-transform: uppercase; margin-bottom: 2px;">Dependent</div>
                                         <div style="font-weight: 700; font-size: 12px; color: #1e293b;">${dep.name}</div>
                                         <div style="color: var(--primary-color, #4f46e5); font-size: 10px; font-weight: 600; margin-top: 2px;">${dep.relationship}</div>

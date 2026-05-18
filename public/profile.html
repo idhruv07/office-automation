@@ -73,23 +73,70 @@
 
     <div class="form-container mx-auto max-w-800">
         <h3>Family Details (Dependents)</h3>
-        
+
         <div class="family-tree-container mb-6">
-            <div style="text-align: center; margin-bottom: -15px;">
-                <svg width="160" height="90" viewBox="0 0 160 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.9;">
-                    <path d="M80 5C80 5 65 45 15 50" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M80 5C80 5 95 45 145 50" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M80 2L80 80" stroke="#047857" stroke-width="6" stroke-linecap="round"/>
-                    <circle cx="80" cy="5" r="8" fill="#10b981"/>
-                    <circle cx="70" cy="16" r="7" fill="#34d399"/>
-                    <circle cx="90" cy="16" r="7" fill="#34d399"/>
-                    <circle cx="50" cy="28" r="9" fill="#059669"/>
-                    <circle cx="110" cy="28" r="9" fill="#059669"/>
-                    <circle cx="22" cy="42" r="8" fill="#10b981"/>
-                    <circle cx="138" cy="42" r="8" fill="#10b981"/>
+            <!-- Rich Organic Tree Header -->
+            <div style="text-align: center; margin-bottom: 0; position: relative;">
+                <svg width="360" height="160" viewBox="0 0 360 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.12));">
+
+                    <!-- === TRUNK (textured, wide at base, narrows up) === -->
+                    <path d="M175 158Q172 140 170 120Q168 100 172 80Q174 65 178 50" stroke="#92400e" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M185 158Q188 140 190 120Q192 100 188 80Q186 65 182 50" stroke="#78350f" stroke-width="10" stroke-linecap="round"/>
+                    <!-- Trunk bark highlights -->
+                    <path d="M176 145Q174 130 175 115" stroke="#a16207" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+                    <path d="M183 135Q185 120 184 105" stroke="#a16207" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+                    <!-- === MAIN BRANCHES === -->
+                    <!-- Left main branch -->
+                    <path d="M178 80Q155 75 120 65Q90 58 55 50" stroke="#78350f" stroke-width="9" stroke-linecap="round"/>
+                    <!-- Right main branch -->
+                    <path d="M182 80Q205 75 235 65Q260 58 305 52" stroke="#78350f" stroke-width="9" stroke-linecap="round"/>
+                    <!-- Center-left upper branch -->
+                    <path d="M180 60Q165 48 145 35Q130 25 115 18" stroke="#78350f" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Center-right upper branch -->
+                    <path d="M180 60Q195 48 215 35Q228 25 245 20" stroke="#78350f" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Small twig left -->
+                    <path d="M120 65Q108 55 95 45" stroke="#92400e" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Small twig right -->
+                    <path d="M240 65Q252 55 265 48" stroke="#92400e" stroke-width="4" stroke-linecap="round"/>
+
+                    <!-- === LEAF CANOPY CLUSTERS (layered, overlapping) === -->
+
+                    <!-- Far left canopy -->
+                    <ellipse cx="60" cy="44" rx="42" ry="30" fill="#059669" opacity="0.75" transform="rotate(-10 60 44)"/>
+                    <ellipse cx="55" cy="38" rx="28" ry="20" fill="#10b981" opacity="0.85"/>
+                    <ellipse cx="70" cy="48" rx="22" ry="16" fill="#34d399" opacity="0.5"/>
+
+                    <!-- Left-center canopy -->
+                    <ellipse cx="120" cy="28" rx="38" ry="26" fill="#047857" opacity="0.8" transform="rotate(-5 120 28)"/>
+                    <ellipse cx="115" cy="22" rx="24" ry="18" fill="#10b981" opacity="0.9"/>
+                    <ellipse cx="130" cy="32" rx="20" ry="14" fill="#6ee7b7" opacity="0.55"/>
+
+                    <!-- Center top canopy (darkest, dominant) -->
+                    <ellipse cx="180" cy="20" rx="44" ry="28" fill="#065f46" opacity="0.85"/>
+                    <ellipse cx="175" cy="14" rx="30" ry="20" fill="#047857" opacity="0.9"/>
+                    <ellipse cx="188" cy="24" rx="26" ry="18" fill="#10b981" opacity="0.6"/>
+                    <!-- Canopy highlight sparkle -->
+                    <ellipse cx="170" cy="10" rx="10" ry="7" fill="#a7f3d0" opacity="0.45"/>
+
+                    <!-- Right-center canopy -->
+                    <ellipse cx="240" cy="28" rx="38" ry="26" fill="#047857" opacity="0.8" transform="rotate(5 240 28)"/>
+                    <ellipse cx="245" cy="22" rx="24" ry="18" fill="#10b981" opacity="0.9"/>
+                    <ellipse cx="230" cy="32" rx="20" ry="14" fill="#6ee7b7" opacity="0.55"/>
+
+                    <!-- Far right canopy -->
+                    <ellipse cx="300" cy="46" rx="42" ry="30" fill="#059669" opacity="0.75" transform="rotate(10 300 46)"/>
+                    <ellipse cx="305" cy="40" rx="28" ry="20" fill="#10b981" opacity="0.85"/>
+                    <ellipse cx="292" cy="50" rx="22" ry="16" fill="#34d399" opacity="0.5"/>
+
+                    <!-- Ground / grass base line -->
+                    <ellipse cx="180" cy="158" rx="60" ry="8" fill="#15803d" opacity="0.2"/>
+                    <ellipse cx="180" cy="156" rx="35" ry="5" fill="#16a34a" opacity="0.3"/>
                 </svg>
             </div>
-            <div class="family-tree">
+
+            <!-- Hanging Fruits (dependent nodes) hang below the tree illustration -->
+            <div class="family-tree" style="margin-top: -10px;">
                 <ul>
                     <li>
                         <div class="family-tree-node root-node">
@@ -98,12 +145,14 @@
                             <div style="color: #64748b; font-size: 10px; margin-top: 2px;">Self</div>
                         </div>
                         <ul id="dependents-tree-list">
-                            <!-- Dependents will hang dynamically here! -->
+                            <!-- Dependents will hang dynamically here like fruits! -->
                         </ul>
                     </li>
                 </ul>
             </div>
         </div>
+
+
 
         <div class="table-container mb-6">
             <table>
