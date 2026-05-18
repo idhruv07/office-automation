@@ -175,6 +175,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setVal('td_orders_for_move', currentUser.orders_for_move);
                 setVal('td_move_date', currentUser.move_date);
                 setVal('td_authority', currentUser.authority);
+
+                // Format: Basic Pay + Pay Level (e.g., 56100 + Level 8)
+                const basicPay = currentUser.basic_pay || '';
+                let payLevel = currentUser.pay_level || '';
+                if (payLevel && !String(payLevel).toLowerCase().includes('level')) {
+                    payLevel = 'Level ' + payLevel;
+                }
+                const payDisplay = payLevel ? `${basicPay} + ${payLevel}` : basicPay;
+                setVal('ltc_final_basic_pay', payDisplay);
             }
 
             // ── Newspaper Template ────────────────────────────────────────────
