@@ -206,9 +206,10 @@ router.get('/', authenticateToken, async (req, res) => {
     try {
         const { status, months, year, type_id } = req.query;
         let query = `
-            SELECT c.*, t.name as type_name, t.folder_name 
+            SELECT c.*, t.name as type_name, t.folder_name, u.username 
             FROM claims c 
             JOIN claim_types t ON c.type_id = t.id 
+            JOIN users u ON c.user_id = u.id
             WHERE c.user_id = $1 
         `;
         let params = [req.user.id];

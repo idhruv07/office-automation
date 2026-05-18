@@ -5,6 +5,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Map of claim id -> claim object so viewClaimPrint can look up folder_name
     let claimsById = {};
+    let currentUsername = localStorage.getItem('username') || '';
+
+    // Verify and fetch accurate username from session to prevent 'undefined' issues
+    if (token) {
+        fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.username) {
+                currentUsername = data.username;
+                localStorage.setItem('username', data.username); // heal localStorage too
+            }
+        })
+        .catch(err => console.error('Failed to pre-fetch profile username', err));
+    }
 
     async function updateReturnedCount() {
         try {
@@ -177,8 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.viewClaimPrint = function (id) {
-        const username = localStorage.getItem('username');
         const claim = claimsById[id];
+        let username = (claim && claim.username) ? claim.username : '';
+        if (!username || username === 'undefined') {
+            username = currentUsername || localStorage.getItem('username') || '';
+            if (!username || username === 'undefined') {
+                username = 'default';
+            }
+        }
         // Include folder_name in path — files may be saved in subfolders
         const folderSegment = (claim && claim.folder_name && claim.folder_name.trim() !== '')
             ? `${claim.folder_name.trim()}/`
