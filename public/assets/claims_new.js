@@ -140,9 +140,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const affidavitEl = document.getElementById('affidavitText');
             if (affidavitEl) {
                 let text = affidavitEl.value;
-                text = text.replace('[Your Name]', currentUser.name || '[Your Name]');
-                text = text.replace('[Employee Name]', currentUser.name || '[Employee Name]');
-                text = text.replace('[Address]', currentUser.address || '[Address]');
+                text = text.replace('[Your Name]', currentUser.name || '');
+                text = text.replace('[Employee Name]', currentUser.name || '');
+                text = text.replace('[Address]', currentUser.address || '');
                 affidavitEl.value = text;
             }
 
