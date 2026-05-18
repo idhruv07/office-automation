@@ -1,0 +1,1 @@
+ALTER TABLE claim_types ADD COLUMN is_active BOOLEAN DEFAULT TRUE;

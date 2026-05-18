@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Claim - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <h1>Submit New Claim</h1>
+
+    <div class="form-container">
+        <form id="new-claim-form">
+            <div id="metadata-fields">
+                <div class="form-group" id="group-claim-type">
+                    <label for="claim_type">Claim Type:</label>
+                    <select id="claim_type" required>
+                        <option value="">Select Type...</option>
+                    </select>
+                    <p id="claim-type-error" class="field-error" style="display:none;">Unable to load claim types. Please refresh or log in again.</p>
+                </div>
+
+                <div class="form-group" id="group-claim-name">
+                    <label for="claim_name">
+                        Claim Name / Title: 
+                        <span class="info-tooltip-icon" title="This name is used as the filename for your saved document. It's auto-generated for consistency but you can customize it if needed.">i</span>
+                    </label>
+                    <input type="text" id="claim_name" required>
+                </div>
+
+                <div class="form-group" id="group-claim-date">
+                    <label for="claim_date">Claim Date:</label>
+                    <input type="date" id="claim_date" required>
+                </div>
+
+                <div class="form-group" id="group-folder-name">
+                    <label for="folder_name">
+                        Subfolder (Optional): 
+                        <span class="info-tooltip-icon" title="Optionally save this claim into a specific subfolder within your storage. Example: May-2026">i</span>
+                    </label>
+                    <input type="text" id="folder_name" placeholder="Leave empty for root">
+                </div>
+
+                <div class="form-group" id="group-remarks">
+                    <label for="remarks">Remarks:</label>
+                    <textarea id="remarks"></textarea>
+                </div>
+                <hr class="form-divider" id="metadata-divider">
+            </div>
+
+            <div id="dynamic-template-container">
+                <!-- Template will be loaded here -->
+            </div>
+
+            <div class="claim-action-bar">
+                <button type="button" id="btn-save-draft" class="btn-draft">Save as Draft</button>
+                <button type="button" id="btn-print-preview" class="btn-preview no-print">Print Preview</button>
+                <button type="button" id="btn-submit">Submit Claim</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Edit Mode Save Modal -->
+    <div id="save-modal" class="save-modal-overlay">
+        <div class="save-modal-box">
+            <h3>Save Edited Claim</h3>
+            <p class="save-modal-desc">You are editing an existing claim. How would you like to save it?</p>
+            <button id="btn-modal-savenew" class="btn-modal-savenew">Save as New Claim</button>
+            <button id="btn-modal-overwrite" class="btn-modal-overwrite">Overwrite Existing</button>
+            <button id="btn-modal-cancel" class="btn-modal-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/claims_new.js"></script>
+</body>
+</html>

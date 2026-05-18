@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Claim Types - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .btn-sm { padding: 4px 8px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Manage Claim Types</h1>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h2>Create New Claim Type</h2>
+        <form id="new-type-form" enctype="multipart/form-data">
+            <div style="margin-bottom: 10px;">
+                <label>Claim Name:</label>
+                <input type="text" id="type_name" required style="width:100%; padding:8px;">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label>Active:</label>
+                <select id="type_active" style="width:100%; padding:8px;">
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label>Upload Template HTML:</label>
+                <input type="file" id="type_template" accept=".html" required style="width:100%; padding:8px;">
+            </div>
+            <button type="submit" style="background: var(--primary-color);">Create Claim Type</button>
+        </form>
+    </div>
+
+    <div style="background: white; padding: 20px; border-radius: 8px;">
+        <h2>Existing Claim Types</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Folder (Slug)</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="types-table-body">
+                <tr><td colspan="5">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/admin_templates.js"></script>
+</body>
+</html>

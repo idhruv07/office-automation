@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <h1 class="text-gradient mb-8 font-extrabold text-3xl">User Management</h1>
+    
+    <div id="create-user-section" class="form-container mx-auto max-w-[800px]">
+        <h2>Create New Individual User</h2>
+        <form id="create-user-form">
+            <div class="form-group">
+                <label for="new-username">Username</label>
+                <input type="text" id="new-username" required placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label for="new-password">Password</label>
+                <input type="password" id="new-password" required placeholder="Enter temporary password">
+            </div>
+            <div class="form-group">
+                <label for="new-name">Full Name</label>
+                <input type="text" id="new-name" required placeholder="Enter employee full name">
+            </div>
+            <div class="form-group">
+                <label for="new-designation">Designation</label>
+                <input type="text" id="new-designation" required placeholder="e.g. Section Officer">
+            </div>
+            <div class="form-group">
+                <label for="new-email">Email</label>
+                <input type="email" id="new-email" required placeholder="e.g. employee@domain.com">
+            </div>
+            <div class="form-group">
+                <label for="new-personal_no">Personal No</label>
+                <input type="text" id="new-personal_no" required placeholder="Enter unique personal number">
+            </div>
+            <div class="form-group">
+                <label for="new-gender">Gender</label>
+                <select id="new-gender" required>
+                    <option value="" disabled selected>Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary mt-4">Create User</button>
+        </form>
+    </div>
+
+    <div class="adm-table-section mx-auto max-w-[1200px]" style="margin-top: 2.5rem;">
+        <div class="adm-table-header" style="flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h3 style="margin: 0;">Active Users</h3>
+                <span id="result-count" style="font-size: 0.8rem; color: #64748b; font-weight: 600;">0 Users</span>
+            </div>
+            <div class="adm-filter-bar" style="margin-bottom: 0;">
+                <button type="button" id="filter-all" class="adm-filter-btn active">All Users</button>
+                <button type="button" id="filter-online" class="adm-filter-btn">Logged In Only</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Designation</th>
+                        <th>Personal No.</th>
+                        <th>Last Login</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Loaded dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/admin_users.js"></script>
+</body>
+</html>

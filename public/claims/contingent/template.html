@@ -1,0 +1,232 @@
+<div class="cb-page">
+
+  <!-- ── Title ── -->
+  <div class="cb-title-block">
+    <div class="cb-title-sub">In lieu of IAFA 115 (small) &nbsp;/&nbsp; <span style="font-size:11px;">IAFA 115 (छोटे) के
+        स्थान पर</span></div>
+    <div class="cb-title-main">CONTINGENT BILL &nbsp;/&nbsp; <span class="cb-title-hi">आकस्मिक बिल</span></div>
+  </div>
+
+  <!-- ── Continuous Header Paragraph ── -->
+  <div class="cb-header-paragraph" style="line-height: 2.2; margin-bottom: 15px;">
+    <span>Expenditure on account of</span>
+    <input type="text" class="cb-uline dynamic-input" style="min-width:150px;" id="expAccount" name="exp_account" placeholder="...">
+    <span class="lbl-hi">/ के संबंध में</span>
+    
+    <span style="margin-left:8px;">incurred by</span>
+    <input type="text" class="cb-uline dynamic-input" style="min-width:40px;" id="incurredBy" name="incurred_by" value="ITSDC">
+    <span class="lbl-hi">/ के द्वारा</span>
+    
+    <span style="margin-left:8px;">during</span>
+    <input type="text" class="cb-uline dynamic-input" style="min-width:60px;" id="during" name="during" placeholder="MM/YYYY">
+    <span class="lbl-hi">/ के दौरान खर्च किया गया।</span>
+    
+    <span style="margin-left:8px;">प्राधिकार / Authority</span>
+    <input type="text" class="cb-uline dynamic-input" style="min-width:150px;" id="authority" name="authority" value="ITSDC/Contingent Bill/">
+    <span style="margin-left:8px;">Dated</span>
+    <input type="text" placeholder="dd/mm/yyyy" class="cb-uline" style="width:130px;" id="authorityDate" name="authority_date">
+    
+    <br>
+    <span>जिस महीने के खाते में इस खाते का अंतिम प्रभार तैयार किया गया /</span>
+    <span>Month's Account in which last charge on this account was prepared:</span>
+    <input type="text" class="cb-uline dynamic-input" style="min-width:140px;" id="monthAccount" name="month_account" placeholder="">
+  </div>
+
+  <!-- ── Expenditure Table ── -->
+  <table class="cb-exp-table" id="expTable">
+    <thead>
+      <tr>
+        <th class="cb-col-sno">क्रम सं.<br><span class="hi">S.No.</span></th>
+        <th class="cb-col-date">दिनांक<br><span class="hi">Date</span></th>
+        <th class="cb-col-det">खर्च का विवरण<br><span class="hi">Details of Expenditure</span></th>
+        <th class="cb-col-amt">राशि<br><span class="hi">Amount (₹)</span></th>
+        <th class="no-print" style="width:36px;"></th>
+      </tr>
+    </thead>
+    <tbody id="cbExpBody">
+      <!-- rows added by JS in claims_new.js -->
+    </tbody>
+    <tfoot>
+      <tr class="cb-total-row">
+        <td colspan="3" style="text-align:right;font-weight:700;">कुल योग / Total</td>
+        <td style="text-align:right;"><input type="text" id="totalAmt" name="total_amount" readonly class="cb-uline"
+            style="text-align:right; border:none !important; font-weight:bold; width:120px;"></td>
+        <td class="no-print"></td>
+      </tr>
+    </tfoot>
+  </table>
+  <!-- ── Add button and Total in words (Same Line) ── -->
+  <div style="display:flex; align-items:baseline; gap:10px; margin-top:10px;">
+    <button type="button" class="cb-btn-add-row no-print" id="cbAddRowBtn">+</button>
+    <div class="cb-total-words" style="display:flex; align-items:baseline; gap:4px; flex:1;">
+      <span class="cb-plus-sign">+</span> <span>(रुपये / Rupees</span>
+      <input type="text" class="cb-uline dynamic-input" style="flex:1;min-width:50px;" id="amtWords" name="amount_words"
+        placeholder="...">
+      <span>मात्र / only)</span>
+    </div>
+  </div>
+
+  <!-- ── Station / Date / Countersigned / Signature ── -->
+  <!-- ── Station / Date / Countersigned / Signature ── -->
+  <div style="display:grid; grid-template-columns: 1fr auto 1fr; align-items:flex-end; margin-top:30px; margin-bottom:15px; gap:20px; width: 100%;">
+    <!-- Left: Station & Date -->
+    <div class="cb-bottom-left" style="width: 220px;">
+      <div class="cb-bl-row" style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">
+        <span>स्टेशन / Station:</span>
+        <input type="text" class="cb-uline" style="width:160px;" id="station" name="station" value="Secunderabad">
+      </div>
+      <div class="cb-bl-row" style="display:flex; align-items:baseline; gap:6px;">
+        <span>दिनांक / Date:</span>
+        <input type="text" placeholder="dd/mm/yyyy" class="cb-uline" style="width:140px;" id="billDate" name="bill_date">
+      </div>
+    </div>
+
+    <!-- Middle: Countersigned by ACDA/DCDA... -->
+    <div class="cb-bottom-center" style="width: 240px; text-align:center;">
+      <div class="cb-audit-cell" style="border: 1px solid #555; width: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; margin: 0 auto; min-height:100px; padding: 4px 0;">
+        <div style="font-size:11px; font-weight:bold;">Countersigned by</div>
+        <div style="font-size:11px; font-weight:bold;">ACDA/DCDA/JCDA/Addn CDA</div>
+      </div>
+    </div>
+
+    <!-- Right: Signature & Name -->
+    <div class="cb-bottom-right" style="text-align:right; font-size:12px;">
+      <div class="cb-bl-row" style="display:flex; justify-content:flex-end; align-items:baseline; gap:6px; margin-bottom:6px;">
+        <span style="font-weight:bold;">हस्ताक्षर / Signature:</span>
+        <input type="text" class="cb-uline" style="width:160px;" id="sig" name="signature">
+      </div>
+      <div class="cb-bl-row" style="display:flex; justify-content:flex-end; align-items:baseline; gap:6px;">
+        <span>नाम व पदनाम / Name & Designation:</span>
+        <input type="text" class="cb-uline" style="width:160px;" id="nameDesig" name="name_designation">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Passed for ── -->
+  <div class="cb-passed-block">
+    <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;">
+      <span>Passed for ₹ / रु.</span>
+      <input type="text" class="cb-uline" style="width:120px;" id="passedAmt" name="passed_amount">
+      <span>(रुपये / Rupees</span>
+      <input type="text" class="cb-uline dynamic-input" style="flex:1;min-width:50px;" id="passedWords"
+        name="passed_words" placeholder="...">
+      <span>मात्र / only)</span>
+    </div>
+    <div style="margin-top:4px;font-size:11.5px;">के लिए निम्नानुसार भुगतान हेतु पास किया / for payment as under :</div>
+  </div>
+
+  <!-- ── Payment table ── -->
+  <table class="cb-pay-table">
+    <thead>
+      <tr>
+        <th>ए.जी. कूट / AGs Code</th>
+        <th>कोष / Treasury</th>
+        <th>आदाता का नाम / Name of Payee</th>
+        <th style="width:90px;">राशि / Amount (₹)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" id="agCode" name="payee_ag_code"></td>
+        <td><input type="text" id="treasury" name="payee_treasury"></td>
+        <td><input type="text" id="payeeName" name="payee_name"></td>
+        <td><input type="text" id="payeeAmt" name="payee_amount" style="text-align:right;"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── Audit signature row ── -->
+  <div class="cb-audit-row">
+    <div class="cb-audit-cell cb-sig-large">ले.प. / Auditor</div>
+    <div class="cb-audit-cell cb-sig-large">स.ले.अ. / AAO</div>
+    <div class="cb-audit-cell cb-sig-large">AO / व.ले.अ. / SAO</div>
+    <div class="cb-audit-cell cb-sig-large">सहा.नि. / ACDA</div>
+    <div class="cb-audit-cell cb-sig-large">उप-नि. / DCDA</div>
+  </div>
+
+
+  <!-- ── CDA / Section / Voucher row ── -->
+  <div class="cb-cda-row">
+    <div class="cb-cda-cell">
+      <span>माह / Month</span>
+      <input type="text" id="cdaMonth" name="cda_month">
+    </div>
+    <div class="cb-cda-cell">
+      <span>र.ले.नि. / CDA</span>
+      <input type="text" id="cdaCode" name="cda_code" value="25">
+    </div>
+    <div class="cb-cda-cell">
+      <span>सेक्शन / Section</span>
+      <input type="text" id="cdaSection" name="cda_section" value="100">
+    </div>
+    <div class="cb-cda-cell">
+      <span>वाउचर वर्ग / Vr.Class</span>
+      <input type="text" id="vrClass" name="vr_class" value="1">
+    </div>
+    <div class="cb-cda-cell">
+      <span>वाउचर सं. / Vr.No.</span>
+      <input type="text" id="vrNo" name="vr_no">
+    </div>
+  </div>
+
+  <!-- ── Classification Code rows ── -->
+  <div class="cb-class-outer">
+    <div class="cb-class-row">
+      <!-- +R / -R Block -->
+      <div class="cb-class-half">
+        <div class="cb-class-inner">
+          <div style="font-weight:700;">वर्गीकरण कूट<br>Classification Code</div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;">+R</div>
+            <input type="text" id="classCodeR_plus" name="class_code_r_plus">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;">-R</div>
+            <input type="text" id="classCodeR_minus" name="class_code_r_minus">
+          </div>
+        </div>
+      </div>
+      <!-- +C / -C Block -->
+      <div class="cb-class-half">
+        <div class="cb-class-inner">
+          <div style="font-weight:700;">वर्गीकरण कूट<br>Classification Code</div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;">+C</div>
+            <input type="text" id="classCodeC_plus" name="class_code_c_plus">
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;">-C</div>
+            <input type="text" id="classCodeC_minus" name="class_code_c_minus">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Countersigned block ── -->
+  <div class="cb-counter-block">
+    <div class="cb-counter-left">
+      <div style="font-size:11px;margin-bottom:4px; font-weight:bold;">प्रतिहस्ताक्षरित / Countersigned</div>
+      <div class="cb-audit-sig-row" style="display:flex; margin-top:5px; border:1px solid #999;">
+        <div class="cb-audit-cell cb-sig-large" style="flex:1; border-right:1px solid #999;">ले.प. / Auditor</div>
+        <div class="cb-audit-cell cb-sig-large" style="flex:1; border-right:1px solid #999;">स.ले.अ. / AAO</div>
+        <div class="cb-audit-cell cb-sig-large" style="flex:1;">AO / SAO</div>
+      </div>
+    </div>
+    <div class="cb-counter-right" style="padding:0; border-left: 1px solid #555; display: flex; flex-direction: column;">
+      <div class="cb-audit-cell cb-sig-large"
+        style="border:none; border-bottom:1px solid #555; width:100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 4px; min-height:80px; position:relative;">
+        सहा.नि.(प्रशा) / ACDA(AN)
+        <!-- Revenue stamp -->
+        <div class="cb-revenue-stamp" style="position:absolute; right:5px; top:5px; margin:0; scale:0.8;">
+          राजस्व टिकट<br>Revenue
+        </div>
+      </div>
+      <div class="cb-audit-cell cb-sig-large"
+        style="border:none; width:100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 4px; min-height:80px;">
+        उप-नि. / DCDA
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .cb-page -->
