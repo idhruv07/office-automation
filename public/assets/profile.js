@@ -299,19 +299,57 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (editPanel) editPanel.style.display = 'none';
                         if (editToggleBtn) editToggleBtn.textContent = '✎ \u00a0Edit Details';
                         
-                        // Briefly show a success message on the toggle button
-                        if (editToggleBtn) {
-                            editToggleBtn.textContent = '✓ \u00a0Saved successfully!';
-                            editToggleBtn.style.background = 'rgba(167,243,208,0.3)';
-                            editToggleBtn.style.color = '#10b981';
-                            editToggleBtn.style.borderColor = 'rgba(16,185,129,0.5)';
-                            setTimeout(() => {
-                                editToggleBtn.textContent = '✎ \u00a0Edit Details';
-                                editToggleBtn.style.background = '';
-                                editToggleBtn.style.color = '';
-                                editToggleBtn.style.borderColor = '';
-                            }, 2500);
+                        // Show custom success modal with user's attached meme image
+                        let modal = document.getElementById('custom-success-modal');
+                        if (!modal) {
+                            modal = document.createElement('div');
+                            modal.id = 'custom-success-modal';
+                            modal.className = 'save-modal-overlay';
+                            modal.style.cssText = `
+                                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                                background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);
+                                display: flex; align-items: center; justify-content: center;
+                                z-index: 9999; opacity: 0; transition: opacity 0.3s ease;
+                            `;
+                            modal.innerHTML = `
+                                <div class="save-modal-content" style="
+                                    background: white; padding: 32px; border-radius: 24px;
+                                    text-align: center; max-width: 400px; width: 90%;
+                                    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                                    transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                                ">
+                                    <div style="width: 72px; height: 72px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </div>
+                                    <h2 id="custom-modal-title" style="margin: 0 0 12px; color: #1e293b; font-size: 24px; font-weight: 800;">Profile Updated</h2>
+                                    <p id="custom-modal-desc" style="color: #64748b; margin: 0 0 24px; font-size: 15px; line-height: 1.5;">Your personal details were saved successfully.</p>
+                                    
+                                    <div style="background: #f8fafc; border-radius: 16px; padding: 12px; margin-bottom: 24px; border: 2px dashed #cbd5e1;">
+                                        <img id="custom-modal-img" src="/assets/profile_dp_joke.png" alt="Profile Joke" style="max-width: 100%; border-radius: 12px;">
+                                    </div>
+
+                                    <button id="custom-modal-close" style="
+                                        background: #4f46e5; color: white; border: none;
+                                        padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 16px;
+                                        cursor: pointer; width: 100%; transition: background 0.2s;
+                                    ">Got it, thanks!</button>
+                                </div>
+                            `;
+                            document.body.appendChild(modal);
+
+                            document.getElementById('custom-modal-close').onclick = () => {
+                                modal.style.opacity = '0';
+                                modal.querySelector('.save-modal-content').style.transform = 'scale(0.9)';
+                                setTimeout(() => modal.style.setProperty('display', 'none', 'important'), 300);
+                            };
                         }
+                        
+                        modal.style.setProperty('display', 'flex', 'important');
+                        // Small delay to trigger animation
+                        setTimeout(() => {
+                            modal.style.opacity = '1';
+                            modal.querySelector('.save-modal-content').style.transform = 'scale(1)';
+                        }, 10);
                         
                         loadProfile();
                     } else {
