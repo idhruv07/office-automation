@@ -316,6 +316,12 @@ async function suiteContingentSecurity() {
         saved?.status === 'Draft',
         `actual status: ${saved?.status}`);
 
+    // Verify GET /api/claims?type_id=7 returns the saved contingent bill for individual
+    const rClaimsType = await api('GET', `/api/claims?type_id=${contingentTypeId}`, null, individualToken);
+    ok('Individual can fetch own contingent bills via query type_id=7', rClaimsType.status === 200);
+    const foundType = rClaimsType.json?.find(c => c.id === contId);
+    ok('Found own contingent bill inside type_id=7 query response', !!foundType);
+
     // 5.3 SEC: Admin contingent list must NOT show individual's contingent bill
     const r3 = await api('GET', `/api/admin/claims?type_id=${contingentTypeId}&months=60`, null, adminToken);
     ok('Admin claims list returns 200', r3.status === 200);

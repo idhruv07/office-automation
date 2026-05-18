@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Contingent Bills - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <h1 class="mb-6">Saved Contingent Bills</h1>
+
+    <!-- Folder Navigation -->
+    <div class="mb-4">
+        <div id="folder-list" class="flex gap-2">
+            <!-- Folders will be populated here dynamically -->
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="adm-table-section">
+        <div class="adm-table-header">
+            <h3 id="current-folder-title">Root Folder</h3>
+            <span id="result-count" class="font-bold">0 Results</span>
+        </div>
+        <div id="contingent-list-content">
+            <p class="text-center font-bold">Loading contingent bills...</p>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/contingent_list.js"></script>
+</body>
+</html>

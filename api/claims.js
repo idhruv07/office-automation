@@ -204,15 +204,20 @@ router.post('/', authenticateToken, async (req, res) => {
 // Fetch user's claims
 router.get('/', authenticateToken, async (req, res) => {
     try {
-        const { status, months, year } = req.query;
+        const { status, months, year, type_id } = req.query;
         let query = `
-            SELECT c.*, t.name as type_name 
+            SELECT c.*, t.name as type_name, t.folder_name 
             FROM claims c 
             JOIN claim_types t ON c.type_id = t.id 
             WHERE c.user_id = $1 
         `;
         let params = [req.user.id];
         let pCount = 1;
+
+        if (type_id) {
+            query += ` AND c.type_id = $${++pCount}`;
+            params.push(type_id);
+        }
 
         if (year) {
             query += ` AND EXTRACT(YEAR FROM c.updated_at) = $${++pCount}`;
