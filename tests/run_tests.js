@@ -147,7 +147,8 @@ async function suiteProfile() {
         address:     '12 Test Street, New Delhi',
         cghs_ben_id: 'CGHS-9999',
         pay_level:   'Level 9',
-        basic_pay:   '65000'
+        basic_pay:   '65000',
+        gpf_ac_no:   '12345/AG'
     }, individualToken);
     ok('Profile update returns 200', r1.status === 200);
 
@@ -159,10 +160,11 @@ async function suiteProfile() {
     ok('CGHS ID saved correctly',     r2.json?.cghs_ben_id === 'CGHS-9999');
     ok('Pay Level saved correctly',   r2.json?.pay_level   === 'Level 9');
     ok('Basic Pay saved correctly',   r2.json?.basic_pay   === '65000');
+    ok('GPF A/C No saved correctly',  r2.json?.gpf_ac_no   === '12345/AG');
 
     // 2.3 Empty strings should be stored as NULL (not break unique constraint)
     const r3 = await api('POST', '/api/auth/profile', {
-        email: '', mobile_no: '', address: '', cghs_ben_id: '', pay_level: '', basic_pay: ''
+        email: '', mobile_no: '', address: '', cghs_ben_id: '', pay_level: '', basic_pay: '', gpf_ac_no: ''
     }, individualToken);
     ok('Blank fields update does not error', r3.status === 200);
 }

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('prof_cghs_ben_id').value = user.cghs_ben_id || '';
                     document.getElementById('prof_pay_level').value = user.pay_level || '';
                     document.getElementById('prof_basic_pay').value = user.basic_pay || '';
+                    document.getElementById('prof_gpf_ac_no').value = user.gpf_ac_no || '';
 
                     const tbody = document.getElementById('dependents-table');
                     tbody.innerHTML = '';
@@ -56,7 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         address: document.getElementById('prof_address').value,
                         cghs_ben_id: document.getElementById('prof_cghs_ben_id').value,
                         pay_level: document.getElementById('prof_pay_level').value,
-                        basic_pay: document.getElementById('prof_basic_pay').value
+                        basic_pay: document.getElementById('prof_basic_pay').value,
+                        gpf_ac_no: document.getElementById('prof_gpf_ac_no').value
                     };
                     const res = await fetch('/api/auth/profile', {
                         method: 'POST',

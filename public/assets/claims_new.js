@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setVal('gpf_designation', currentUser.designation);
                 setVal('gpf_sig_name', currentUser.name);
                 setVal('gpf_sig_desig', (currentUser.designation || '') + (currentUser.personal_no ? ' / ' + currentUser.personal_no : ''));
-                setVal('gpf_account_no', currentUser.personal_no || '');
+                setVal('gpf_account_no', currentUser.gpf_ac_no || currentUser.personal_no || '');
 
                 // Format pay as "Basic Pay + Pay Level"
                 const gpfBasicPay = currentUser.basic_pay || '';
@@ -281,13 +281,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // ── GPF Final Withdrawal Template ─────────────────────────────────
             if (folderName === 'gpf-final-withdrawl') {
-                setVal('gpfno', currentUser.personal_no || '');
+                setVal('gpfno', currentUser.gpf_ac_no || currentUser.personal_no || '');
                 setVal('name', currentUser.name);
-                setVal('acno', currentUser.personal_no || '');
+                setVal('acno', currentUser.gpf_ac_no || currentUser.personal_no || '');
                 setVal('desig', currentUser.designation);
                 setVal('pay', currentUser.basic_pay || '');
                 setVal('signame', (currentUser.name || '') + (currentUser.designation ? ' / ' + currentUser.designation : ''));
-                setVal('siggpf', currentUser.personal_no || '');
+                setVal('siggpf', currentUser.gpf_ac_no || currentUser.personal_no || '');
 
                 // Set today's date in dd/mm/yy format
                 const d = new Date();

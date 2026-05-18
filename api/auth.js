@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', require('./middleware').authenticateToken, async (req, res) => {
     try {
-        const result = await db.query('SELECT id, username, name, designation, email, personal_no, role_id, cghs_ben_id, address, mobile_no, basic_pay, pay_level, orders_for_move, TO_CHAR(move_date, \'YYYY-MM-DD\') as move_date, authority FROM users WHERE id = $1', [req.user.id]);
+        const result = await db.query('SELECT id, username, name, designation, email, personal_no, role_id, cghs_ben_id, address, mobile_no, basic_pay, pay_level, orders_for_move, TO_CHAR(move_date, \'YYYY-MM-DD\') as move_date, authority, gpf_ac_no FROM users WHERE id = $1', [req.user.id]);
         if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
 
         const user = result.rows[0];
@@ -68,7 +68,7 @@ router.get('/me', require('./middleware').authenticateToken, async (req, res) =>
 });
 
 router.post('/profile', require('./middleware').authenticateToken, async (req, res) => {
-    const { cghs_ben_id, address, mobile_no, email, basic_pay, pay_level } = req.body;
+    const { cghs_ben_id, address, mobile_no, email, basic_pay, pay_level, gpf_ac_no } = req.body;
     try {
         const cleanCghsBenId = cghs_ben_id && cghs_ben_id.trim() !== '' ? cghs_ben_id.trim() : null;
         const cleanAddress = address && address.trim() !== '' ? address.trim() : null;
@@ -76,10 +76,11 @@ router.post('/profile', require('./middleware').authenticateToken, async (req, r
         const cleanEmail = email && email.trim() !== '' ? email.trim() : null;
         const cleanBasicPay = basic_pay && basic_pay.trim() !== '' ? basic_pay.trim() : null;
         const cleanPayLevel = pay_level && pay_level.trim() !== '' ? pay_level.trim() : null;
+        const cleanGpfAcNo = gpf_ac_no && gpf_ac_no.trim() !== '' ? gpf_ac_no.trim() : null;
 
         await db.query(
-            'UPDATE users SET cghs_ben_id = $1, address = $2, mobile_no = $3, email = $4, basic_pay = $6, pay_level = $7 WHERE id = $5',
-            [cleanCghsBenId, cleanAddress, cleanMobileNo, cleanEmail, req.user.id, cleanBasicPay, cleanPayLevel]
+            'UPDATE users SET cghs_ben_id = $1, address = $2, mobile_no = $3, email = $4, basic_pay = $6, pay_level = $7, gpf_ac_no = $8 WHERE id = $5',
+            [cleanCghsBenId, cleanAddress, cleanMobileNo, cleanEmail, req.user.id, cleanBasicPay, cleanPayLevel, cleanGpfAcNo]
         );
         res.json({ message: 'Profile updated' });
     } catch (err) {
