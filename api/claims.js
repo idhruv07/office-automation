@@ -131,15 +131,14 @@ router.post('/', authenticateToken, async (req, res) => {
             await fs.writeFile(fwdNotePath, noteContent);
         }
 
-        // Save Basic Pay, Orders for Move, Move Date, Authority to employee table if provided
-        const { basic_pay, orders_for_move, move_date, authority } = formData;
-        if (basic_pay || orders_for_move || move_date || authority) {
+        // Save Orders for Move, Move Date, Authority to employee table if provided
+        const { orders_for_move, move_date, authority } = formData;
+        if (orders_for_move || move_date || authority) {
             let updateQuery = 'UPDATE users SET ';
             const updateFields = [];
             const updateValues = [];
             let varIndex = 1;
 
-            if (basic_pay) { updateFields.push(`basic_pay = $${varIndex++}`); updateValues.push(basic_pay); }
             if (orders_for_move) { updateFields.push(`orders_for_move = $${varIndex++}`); updateValues.push(orders_for_move); }
             if (move_date) { updateFields.push(`move_date = $${varIndex++}`); updateValues.push(move_date); }
             if (authority) { updateFields.push(`authority = $${varIndex++}`); updateValues.push(authority); }
