@@ -123,10 +123,21 @@ h6 {
     margin-top: 0;
 }
 
-/* Layout */
 #app-container {
     display: flex;
     min-height: 100vh;
+    animation: pageReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageReveal {
+    from {
+        clip-path: circle(0% at 50% 50%);
+        opacity: 0;
+    }
+    to {
+        clip-path: circle(150% at 50% 50%);
+        opacity: 1;
+    }
 }
 
 /* Sidebar Styling */
