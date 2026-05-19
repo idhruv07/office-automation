@@ -1941,3 +1941,174 @@ tr:hover td {
     z-index: 20;
 }
 
+/* ══════════════════════════════════════════
+   LOGIN PAGE SPECIFIC STYLES
+══════════════════════════════════════════ */
+.login-page-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: url('/assets/login.png') no-repeat center top fixed; /* Shipped image up to align flag on top */
+    background-size: cover;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: transparent !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    transform: none; /* Centered card naturally */
+}
+
+/* Hide the decorative blobs */
+.login-container .profile-blob {
+    display: none !important;
+}
+
+/* Make the top login hero transparent and float in top-right with an animation */
+.login-container .profile-id-card {
+    position: fixed;
+    top: 40px;
+    right: 40px;
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+    border-radius: 16px;
+    padding: 16px 24px !important;
+    max-width: 280px;
+    z-index: 100;
+    
+    /* Elegant entrance animation */
+    animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-container .profile-id-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.login-hero-adjust {
+    justify-content: flex-start;
+    text-align: left;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 0;
+}
+
+.login-title {
+    font-size: 1.4rem;
+    margin-top: 4px;
+    color: #0f172a !important;
+    font-weight: 800;
+    text-shadow: none;
+    line-height: 1.2;
+}
+
+.login-subtitle {
+    font-size: 11px;
+    color: #64748b !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.login-container .profile-badge {
+    background: rgba(37, 99, 235, 0.1) !important;
+    color: var(--primary-color, #2563eb) !important;
+    border: 1px solid rgba(37, 99, 235, 0.2) !important;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 99px;
+    display: inline-block;
+    width: fit-content;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.login-edit-panel {
+    display: block;
+    position: relative;
+    z-index: 10;
+    margin-top: 15px;
+    /* Translucent background moved here, restricted to the inputs area */
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 30px !important;
+}
+
+/* Make text inside the form readable on white background */
+.login-edit-panel label {
+    color: #334155 !important;
+    text-shadow: none;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.login-edit-panel input {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    height: 42px;
+}
+
+.login-edit-panel input:focus {
+    border-color: var(--primary-color, #2563eb) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    outline: none !important;
+    background: #ffffff !important;
+}
+
+.login-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.login-btn {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px;
+    border-radius: 8px;
+    letter-spacing: 0.02em;
+    font-weight: 700;
+}
+
+.login-org-title {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    padding-bottom: 12px;
+}

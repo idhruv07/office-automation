@@ -3,3 +3,4 @@ node_modules/
 server/storage/*
 !server/storage/.gitkeep
 .DS_Store
+server.log
