@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800&family=Hind:wght@300;400;500;600;700&display=swap');
 
 :root {
     /* Color Palette - Royal Indigo & Teal (Premium Fintech) */
@@ -30,8 +30,8 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-    --font-headline: 'Plus Jakarta Sans', sans-serif;
-    --font-body: 'Manrope', sans-serif;
+    --font-headline: 'Plus Jakarta Sans', 'Noto Sans Devanagari', 'Hind', sans-serif;
+    --font-body: 'Manrope', 'Noto Sans Devanagari', 'Hind', sans-serif;
 
     --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2879,4 +2879,25 @@ body:not(.profile-id-card-active) .claim-action-btn:hover,
 
 .profile-id-card .tree-toggle:hover {
     color: white;
+}
+
+/* Hindi/Devanagari Font Support and fallbacks for Firefox & Linux */
+.gpf-page, 
+.gpf-final-page, 
+.gpf-final-label-hi,
+.gpf-title-hindi,
+.gpf-final-title-hindi,
+.hi,
+[class*="hindi"],
+[class*="label-hi"],
+[class*="title-hi"] {
+    font-family: 'Times New Roman', Times, 'Noto Sans Devanagari', 'Hind', serif !important;
+}
+
+/* For sans-serif templates/containers that contain Hindi labels */
+.ltc-compact *,
+.ltc-intimation-compact *,
+.mrc-compact *,
+.newspaper-container * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Manrope', 'Noto Sans Devanagari', 'Hind', sans-serif !important;
 }
