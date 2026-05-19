@@ -81,8 +81,17 @@ class MenuRenderer {
                 if(logoutBtn) {
                     logoutBtn.addEventListener('click', (e) => {
                         e.preventDefault();
-                        localStorage.clear();
-                        window.location.href = '/';
+                        const app = document.getElementById('app-container');
+                        if (app) {
+                            app.classList.add('tv-off');
+                            setTimeout(() => {
+                                localStorage.clear();
+                                window.location.href = '/';
+                            }, 1350); // Matches the 1.4s tvTurnOff animation duration
+                        } else {
+                            localStorage.clear();
+                            window.location.href = '/';
+                        }
                     });
                 }
             }

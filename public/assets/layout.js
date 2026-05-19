@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         document.head.appendChild(tw);
 
-        document.body.classList.add('bg-surface', 'font-body', 'text-on-surface');
+        document.body.classList.add('bg-surface', 'font-body', 'text-on-surface', 'logged-in');
     }
 
     // Skip layout for login and change password pages
