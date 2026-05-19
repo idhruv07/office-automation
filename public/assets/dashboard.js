@@ -68,123 +68,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('val-returned').textContent = countReturned;
         document.getElementById('val-categories').textContent = categories.size;
 
-        // ── Gamification System ──
-        // Calculate XP
-        const xpForSubmitted = countSubmitted * 100;
-        const xpForDrafts = countDrafts * 25;
-        const xpForReturned = countReturned * 50;
-        const totalXp = xpForSubmitted + xpForDrafts + xpForReturned;
+        // ── Calculate 6-Month Claims Completion Progress ──
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        // Level thresholds
-        let level = 1;
-        let levelName = 'Claim Cadet';
-        let xpNeededForNext = 100;
+        let totalClaimsIn6Months = 0;
+        let totalScore = 0;
 
-        if (totalXp >= 1000) {
-            level = 5;
-            levelName = 'Office Legend';
-            xpNeededForNext = 2000;
-        } else if (totalXp >= 500) {
-            level = 4;
-            levelName = 'Claim Master';
-            xpNeededForNext = 1000;
-        } else if (totalXp >= 250) {
-            level = 3;
-            levelName = 'Senior Analyst';
-            xpNeededForNext = 500;
-        } else if (totalXp >= 100) {
-            level = 2;
-            levelName = 'Claim Specialist';
-            xpNeededForNext = 250;
-        }
+        claims.forEach(c => {
+            const claimDate = c.claim_date ? new Date(c.claim_date) : null;
+            if (claimDate && claimDate >= sixMonthsAgo) {
+                totalClaimsIn6Months++;
+                if (c.status === 'Approved') {
+                    totalScore += 1.0;
+                } else if (c.status === 'Submitted' || c.status === 'Pending') {
+                    totalScore += 0.75;
+                } else if (c.status === 'Returned') {
+                    totalScore += 0.50;
+                } else if (c.status === 'Draft') {
+                    totalScore += 0.25;
+                }
+                // Rejected counts as 0.0 towards progress
+            }
+        });
 
-        // Calculate progress percentage
-        let minXpForLevel = 0;
-        if (level === 2) minXpForLevel = 100;
-        else if (level === 3) minXpForLevel = 250;
-        else if (level === 4) minXpForLevel = 500;
-        else if (level === 5) minXpForLevel = 1000;
+        const progressPct = totalClaimsIn6Months > 0 
+            ? Math.round((totalScore / totalClaimsIn6Months) * 100) 
+            : 0;
 
-        const range = xpNeededForNext - minXpForLevel;
-        const earnedInLevel = totalXp - minXpForLevel;
-        const progressPct = Math.min(100, Math.max(0, Math.floor((earnedInLevel / range) * 100)));
-
-        // Update rank, level name and bar in DOM
-        document.getElementById('dash-rank').textContent = levelName;
-        document.getElementById('xp-level-name').textContent = `Level ${level} (${levelName})`;
-        document.getElementById('xp-numbers').textContent = `${totalXp} / ${xpNeededForNext} XP`;
+        // Update progress bar and text in DOM
+        document.getElementById('xp-level-name').textContent = "Claims Completion Progress (Last 6 Months)";
+        document.getElementById('xp-numbers').textContent = `${progressPct}%`;
         
         setTimeout(() => {
             const bar = document.getElementById('xp-bar-progress');
             if (bar) bar.style.width = `${progressPct}%`;
         }, 150);
 
-        // Populate dynamic badges as fruits (matching profile styles)
-        const badgeContainer = document.getElementById('badge-container');
-        if (badgeContainer) {
-            badgeContainer.innerHTML = '';
-            
-            const badgesList = [
-                {
-                    emoji: '🍇',
-                    title: 'First Step',
-                    desc: 'Created your first record in the system.',
-                    fruitClass: 'root-node',
-                    unlocked: (countSubmitted + countDrafts + countReturned) > 0
-                },
-                {
-                    emoji: '🍑',
-                    title: 'Draft Pioneer',
-                    desc: 'Saved a claim as draft for later review.',
-                    fruitClass: 'spouse-fruit',
-                    unlocked: countDrafts > 0
-                },
-                {
-                    emoji: '🥭',
-                    title: 'Active Submitter',
-                    desc: 'Successfully submitted 3 or more claims.',
-                    fruitClass: 'daughter-fruit',
-                    unlocked: countSubmitted >= 3
-                },
-                {
-                    emoji: '🍏',
-                    title: 'Multi-Tasker',
-                    desc: 'Submitted claims in 2+ categories.',
-                    fruitClass: 'parent-fruit',
-                    unlocked: categories.size >= 2
-                },
-                {
-                    emoji: '🫐',
-                    title: 'Returned Survivor',
-                    desc: 'Had at least one claim returned for action.',
-                    fruitClass: 'son-fruit',
-                    unlocked: countReturned > 0
-                }
-            ];
 
-            badgesList.forEach(b => {
-                const badgeEl = document.createElement('div');
-                badgeEl.className = `family-tree-node ${b.fruitClass}`;
-                badgeEl.style.cssText = `
-                    min-width: 140px; 
-                    padding: 16px 10px 12px; 
-                    text-align: center;
-                    opacity: ${b.unlocked ? '1' : '0.25'};
-                    filter: ${b.unlocked ? 'none' : 'grayscale(100%) brightness(0.7)'};
-                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                `;
-                
-                badgeEl.innerHTML = `
-                    <div style="font-size: 26px; margin-bottom: 5px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">${b.emoji}</div>
-                    <div style="font-weight: 800; color: #fff; font-size: 11px; text-shadow: 0 1px 3px rgba(0,0,0,0.3); line-height: 1.1;">${b.title}</div>
-                    <div style="font-size: 8px; color: rgba(255,255,255,0.85); margin-top: 3px; font-weight: 600; line-height: 1.2; padding: 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 20px;">${b.desc}</div>
-                    <div style="font-size: 8px; font-weight: 800; color: ${b.unlocked ? '#ffe4e6' : '#cbd5e1'}; text-transform: uppercase; margin-top: 8px; letter-spacing: 0.05em;">
-                        ${b.unlocked ? '★ Unlocked' : 'Locked'}
-                    </div>
-                `;
-                badgeContainer.appendChild(badgeEl);
-            });
-        }
 
         // 2. Fetch computed CSS theme colors dynamically for native integration
         const getThemeColor = (varName, fallback) => {
