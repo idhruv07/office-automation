@@ -77,9 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const savedTheme = localStorage.getItem('themePref') || '';
+    const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
+    if (justLoggedIn) {
+        sessionStorage.removeItem('justLoggedIn');
+    }
 
     const appHtml = `
-        <div id="app-container">
+        <div id="app-container" class="${justLoggedIn ? 'tv-on' : ''}">
             <aside id="sidebar">
                 <header>
                     <a href="/dashboard.html" class="sidebar-logo-link" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; width: 100%; cursor: pointer;">

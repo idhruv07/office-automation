@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('role', data.role);
                     localStorage.setItem('username', data.username);
                     localStorage.setItem('must_reset', data.must_reset_password);
+                    sessionStorage.setItem('justLoggedIn', 'true');
                     if (data.theme_pref) {
                         localStorage.setItem('themePref', data.theme_pref);
                     } else {

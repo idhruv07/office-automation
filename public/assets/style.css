@@ -127,8 +127,11 @@ h6 {
     display: flex;
     min-height: 100vh;
     background-color: var(--bg-main, #f8fafc);
-    animation: tvTurnOn 1.6s cubic-bezier(0.19, 1, 0.22, 1) both;
     transform-origin: center;
+}
+
+#app-container.tv-on {
+    animation: tvTurnOn 1.6s cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
 #app-container.tv-off {
