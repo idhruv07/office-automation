@@ -205,10 +205,39 @@
 </head>
 <body>
     
-    <!-- Hero Banner -->
-    <div class="dash-hero">
-        <h1 class="dash-hero-title" id="welcome-message">Welcome back, Employee! 👋</h1>
-        <p class="dash-hero-sub" id="current-date-str">Loading workspace data...</p>
+    <!-- Premium Gamified Hero Banner -->
+    <div class="profile-id-card-wrapper" style="max-width: none; padding: 0; margin-bottom: 30px;">
+        <div class="profile-id-card">
+            <!-- Animated decorative blobs -->
+            <div class="profile-blob profile-blob-1"></div>
+            <div class="profile-blob profile-blob-2"></div>
+            <div class="profile-blob profile-blob-3"></div>
+
+            <!-- Avatar + name hero -->
+            <div class="profile-hero">
+                <div class="profile-avatar-wrap">
+                    <img id="dashboard-avatar"
+                        src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e0e7ff'/><circle cx='12' cy='8' r='4' fill='%236366f1'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%236366f1'/></svg>"
+                        alt="Profile Photo" class="profile-avatar-img">
+                </div>
+                <div class="profile-hero-text">
+                    <div class="profile-badge" id="dash-rank">Claim Cadet</div>
+                    <h2 class="profile-hero-name" id="welcome-message">Welcome back, Employee! 👋</h2>
+                    <div class="profile-hero-sub" id="current-date-str">Workspace Overview</div>
+                </div>
+            </div>
+
+            <!-- XP Progress Tracker -->
+            <div class="xp-tracker" style="margin-top: 24px; padding: 0 5px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 6px; letter-spacing: 0.02em;">
+                    <span id="xp-level-name">Level 1 (Claim Cadet)</span>
+                    <span id="xp-numbers">0 / 100 XP</span>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.2); height: 10px; border-radius: 99px; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px);">
+                    <div id="xp-bar-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 99px; transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Metrics Cards Grid -->
@@ -262,6 +291,16 @@
             <div class="chart-wrapper">
                 <canvas id="statusChart"></canvas>
             </div>
+        </div>
+    </div>
+
+    <!-- Gamified Achievements Section -->
+    <div class="quick-actions-card" style="margin-bottom: 30px;">
+        <div class="chart-header" style="border: none; padding-bottom: 0;">
+            <h3 class="chart-title">🏆 Unlocked Achievements</h3>
+        </div>
+        <div class="badge-row" id="badge-container" style="display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; padding: 10px 0; justify-content: flex-start; align-items: flex-start;">
+            <!-- Badges dynamically populated here -->
         </div>
     </div>
 
