@@ -128,6 +128,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </aside>
             <main id="main-content">
+                <div class="main-top-bar">
+                    <div class="top-bar-left">
+                        <span class="top-bar-tag">Workspace</span>
+                        <span class="top-bar-arrow">/</span>
+                        <span id="top-bar-title" class="top-bar-title-text">Dashboard</span>
+                    </div>
+                    <div class="top-bar-right">
+                        <div class="theme-badge-glow">
+                            <span class="glow-dot"></span>
+                            <span id="current-theme-badge-text">Royal Indigo & Teal</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="theme-separator-line"></div>
+
                 <section id="content">
                     <!-- Page specific content will be moved here -->
                 </section>
@@ -166,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.body.classList.add(swatch.dataset.theme);
                 }
                 localStorage.setItem('themePref', swatch.dataset.theme);
+                updateThemeBadge(swatch.dataset.theme);
 
                 // Save to database
                 const token = localStorage.getItem('token');
@@ -222,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data && data.theme_pref !== undefined && data.theme_pref !== localStorage.getItem('themePref')) {
                     const dbTheme = data.theme_pref;
                     localStorage.setItem('themePref', dbTheme);
+                    updateThemeBadge(dbTheme);
                     const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
                     document.body.classList.remove(...themes);
                     if (dbTheme) {
@@ -262,6 +279,30 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(() => { });
     }
+
+    // Function to update the theme badge text
+    function updateThemeBadge(themeClass) {
+        const badgeText = document.getElementById('current-theme-badge-text');
+        if (!badgeText) return;
+        
+        let label = 'Royal Indigo & Teal';
+        if (themeClass === 'theme-emerald') label = 'Emerald Wealth & Sage';
+        else if (themeClass === 'theme-slate') label = 'Slate Gray & Electric Violet';
+        else if (themeClass === 'theme-ocean') label = 'Ocean Navy & Azure';
+        else if (themeClass === 'theme-amber') label = 'Midnight Charcoal & Amber';
+        
+        badgeText.textContent = label;
+    }
+
+    // Set dynamic page title
+    const topBarTitle = document.getElementById('top-bar-title');
+    if (topBarTitle) {
+        const titleText = document.title ? document.title.replace(' - Office Auto', '') : 'Workspace';
+        topBarTitle.textContent = titleText;
+    }
+
+    // Call initially
+    updateThemeBadge(savedTheme);
 
     if (window.MenuRenderer) {
         const menuRenderer = new window.MenuRenderer('nav-menu');
