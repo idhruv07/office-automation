@@ -107,16 +107,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-        // 2. Fetch computed CSS theme colors dynamically for native integration
-        const getThemeColor = (varName, fallback) => {
-            return getComputedStyle(document.body).getPropertyValue(varName).trim() || fallback;
-        };
-
-        const primaryColor = getThemeColor('--primary-color', '#4f46e5');
-        const accentColor = getThemeColor('--accent-color', '#0d9488');
-        const dangerColor = getThemeColor('--danger-color', '#ef4444');
-        const warningColor = getThemeColor('--warning-color', '#f59e0b');
-        const textMain = getThemeColor('--text-main', '#1e293b');
+        // 2. Fetch colors designed for dark gradient charts integration
+        const colorSubmitted = '#38bdf8'; // Sky blue glow
+        const colorDrafts = '#34d399'; // Emerald glow
+        const colorReturned = '#fb7185'; // Rose/Coral glow
+        const textWhite = 'rgba(255, 255, 255, 0.95)';
 
         // 3. Render Status Doughnut Chart
         const statusCtx = document.getElementById('statusChart').getContext('2d');
@@ -127,13 +122,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{
                     data: [countSubmitted, countDrafts, countReturned],
                     backgroundColor: [
-                        primaryColor,
-                        accentColor,
-                        dangerColor
+                        colorSubmitted,
+                        colorDrafts,
+                        colorReturned
                     ],
                     borderWidth: 2,
-                    borderColor: '#ffffff',
-                    hoverOffset: 4
+                    borderColor: 'rgba(255, 255, 255, 0.15)',
+                    hoverOffset: 6
                 }]
             },
             options: {
@@ -143,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: textMain,
+                            color: textWhite,
                             font: {
                                 family: 'Inter, sans-serif',
                                 weight: '600',
@@ -166,10 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{
                     label: 'Claims Submitted',
                     data: monthlySubmissions,
-                    backgroundColor: primaryColor,
+                    backgroundColor: colorSubmitted,
                     borderRadius: 6,
                     borderWidth: 0,
-                    barThickness: 24
+                    barThickness: 20
                 }]
             },
             options: {
@@ -186,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             display: false
                         },
                         ticks: {
-                            color: textMain,
+                            color: 'rgba(255, 255, 255, 0.8)',
                             font: {
                                 family: 'Inter, sans-serif',
                                 weight: '600'
@@ -195,10 +190,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     },
                     y: {
                         grid: {
-                            color: 'rgba(226, 232, 240, 0.6)'
+                            color: 'rgba(255, 255, 255, 0.15)'
                         },
                         ticks: {
-                            color: textMain,
+                            color: 'rgba(255, 255, 255, 0.8)',
                             precision: 0,
                             font: {
                                 family: 'Inter, sans-serif'

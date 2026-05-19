@@ -241,79 +241,103 @@
     </div>
 
     <!-- Metrics Cards Grid -->
-    <div class="dash-metrics-grid">
-        <div class="metric-card">
-            <div class="metric-info">
-                <span class="metric-label">Submitted Claims</span>
-                <span class="metric-value" id="val-submitted">0</span>
+    <div class="profile-id-card-wrapper" style="max-width: none; padding: 0; margin-bottom: 30px;">
+        <div class="profile-id-card" style="padding: 24px;">
+            <!-- Animated decorative blobs -->
+            <div class="profile-blob profile-blob-1" style="width: 180px; height: 180px; top: -40px; right: -40px;"></div>
+            <div class="profile-blob profile-blob-2" style="width: 180px; height: 180px; bottom: -40px; left: -40px;"></div>
+            
+            <div class="dash-metrics-grid" style="margin-bottom: 0; border: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="profile-chip" style="padding: 16px 20px; gap: 14px; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                    <span class="profile-chip-icon" style="font-size: 28px;">📑</span>
+                    <div>
+                        <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5);">Submitted Claims</div>
+                        <div id="val-submitted" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #ffffff;">0</div>
+                    </div>
+                </div>
+                <div class="profile-chip" style="padding: 16px 20px; gap: 14px; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                    <span class="profile-chip-icon" style="font-size: 28px;">✏️</span>
+                    <div>
+                        <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5);">Draft Claims</div>
+                        <div id="val-drafts" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #ffffff;">0</div>
+                    </div>
+                </div>
+                <div class="profile-chip returned-highlight" style="padding: 16px 20px; gap: 14px; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.35);">
+                    <span class="profile-chip-icon" style="font-size: 28px;">⚠️</span>
+                    <div>
+                        <div class="profile-chip-label" style="font-size: 11px; color: rgba(254,226,226,0.6);">Returned for Action</div>
+                        <div id="val-returned" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #fecaca;">0</div>
+                    </div>
+                </div>
+                <div class="profile-chip" style="padding: 16px 20px; gap: 14px; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                    <span class="profile-chip-icon" style="font-size: 28px;">🗂️</span>
+                    <div>
+                        <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5);">Claim Categories</div>
+                        <div id="val-categories" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #ffffff;">0</div>
+                    </div>
+                </div>
             </div>
-            <div class="metric-icon">📑</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-info">
-                <span class="metric-label">Draft Claims</span>
-                <span class="metric-value" id="val-drafts">0</span>
-            </div>
-            <div class="metric-icon">✏️</div>
-        </div>
-        <div class="metric-card returned-highlight">
-            <div class="metric-info">
-                <span class="metric-label">Returned for Action</span>
-                <span class="metric-value" id="val-returned">0</span>
-            </div>
-            <div class="metric-icon">⚠️</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-info">
-                <span class="metric-label">Claim Categories</span>
-                <span class="metric-value" id="val-categories">0</span>
-            </div>
-            <div class="metric-icon">🗂️</div>
         </div>
     </div>
 
     <!-- Charts Section -->
-    <div class="dash-charts-grid">
+    <div class="dash-charts-grid" style="gap: 30px; margin-bottom: 30px;">
         <!-- Activity History Bar Chart -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">📊 Submission History</h3>
-            </div>
-            <div class="chart-wrapper">
-                <canvas id="historyChart"></canvas>
+        <div class="profile-id-card-wrapper" style="max-width: none; padding: 0; margin-bottom: 0;">
+            <div class="profile-id-card" style="padding: 24px; min-height: 400px; display: flex; flex-direction: column;">
+                <div class="profile-blob profile-blob-1" style="width: 160px; height: 160px; top: -30px; right: -30px;"></div>
+                <div class="chart-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 12px; margin-bottom: 20px;">
+                    <h3 class="chart-title" style="color: #ffffff; font-weight: 800; font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;">📊 Submission History</h3>
+                </div>
+                <div class="chart-wrapper" style="flex: 1; min-height: 280px; position: relative;">
+                    <canvas id="historyChart"></canvas>
+                </div>
             </div>
         </div>
         <!-- Status Doughnut Chart -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">🎯 Status Distribution</h3>
-            </div>
-            <div class="chart-wrapper">
-                <canvas id="statusChart"></canvas>
+        <div class="profile-id-card-wrapper" style="max-width: none; padding: 0; margin-bottom: 0;">
+            <div class="profile-id-card" style="padding: 24px; min-height: 400px; display: flex; flex-direction: column;">
+                <div class="profile-blob profile-blob-2" style="width: 160px; height: 160px; bottom: -30px; left: -30px;"></div>
+                <div class="chart-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 12px; margin-bottom: 20px;">
+                    <h3 class="chart-title" style="color: #ffffff; font-weight: 800; font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;">🎯 Status Distribution</h3>
+                </div>
+                <div class="chart-wrapper" style="flex: 1; min-height: 280px; position: relative;">
+                    <canvas id="statusChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
+
     <!-- Quick Actions Ledger -->
-    <div class="quick-actions-card">
-        <div class="chart-header" style="border: none; padding-bottom: 0;">
-            <h3 class="chart-title">🚀 Quick Actions Navigation</h3>
-        </div>
-        <div class="quick-actions-grid">
-            <a href="/claims/new.html" class="action-button-card">
-                <div class="action-button-icon">➕</div>
-                <h4 class="action-button-title">Create New Claim</h4>
-                <p class="action-button-desc">Submit a new request</p>
-            </a>
-            <a href="/claims/my.html" class="action-button-card">
-                <div class="action-button-icon">📂</div>
-                <h4 class="action-button-title">My Claims</h4>
-                <p class="action-button-desc">View existing submissions</p>
-            </a>
-            <a href="/profile.html" class="action-button-card">
-                <div class="action-button-icon">👤</div>
-                <h4 class="action-button-title">My Profile</h4>
-                <p class="action-button-desc">Update personal information</p>
-            </a>
+    <div class="profile-id-card-wrapper" style="max-width: none; padding: 0; margin-bottom: 30px;">
+        <div class="profile-id-card" style="padding: 24px;">
+            <div class="profile-blob profile-blob-3" style="width: 200px; height: 200px; top: -50px; right: -50px;"></div>
+            <div class="chart-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 12px; margin-bottom: 20px;">
+                <h3 class="chart-title" style="color: #ffffff; font-weight: 800; font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;">🚀 Quick Actions Navigation</h3>
+            </div>
+            <div class="quick-actions-grid" style="margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <a href="/claims/new.html" class="profile-chip" style="padding: 20px; flex-direction: column; text-align: center; gap: 10px; justify-content: center; text-decoration: none; cursor: pointer; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                    <span class="profile-chip-icon" style="font-size: 28px;">➕</span>
+                    <div>
+                        <div class="profile-chip-val" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.15);">Create New Claim</div>
+                        <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: none; letter-spacing: normal;">Submit a new request</div>
+                    </div>
+                </a>
+                <a href="/claims/my.html" class="profile-chip" style="padding: 20px; flex-direction: column; text-align: center; gap: 10px; justify-content: center; text-decoration: none; cursor: pointer; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                    <span class="profile-chip-icon" style="font-size: 28px;">📂</span>
+                    <div>
+                        <div class="profile-chip-val" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.15);">My Claims</div>
+                        <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: none; letter-spacing: normal;">View existing submissions</div>
+                    </div>
+                </a>
+                <a href="/profile.html" class="profile-chip" style="padding: 20px; flex-direction: column; text-align: center; gap: 10px; justify-content: center; text-decoration: none; cursor: pointer; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                    <span class="profile-chip-icon" style="font-size: 28px;">👤</span>
+                    <div>
+                        <div class="profile-chip-val" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.15);">My Profile</div>
+                        <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: none; letter-spacing: normal;">Update personal information</div>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 
