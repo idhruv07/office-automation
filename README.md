@@ -8,6 +8,7 @@ A web application for government office claim management. This system allows ind
 - **Contingent Bill Security**: Special server-side security checks ensuring Individual-submitted Contingent Bills cannot be directly processed without Admin approval.
 - **Dynamic Ward Entitlements**: Automatically sets Ward Entitlement for Medical Reimbursement claims based on PostgreSQL database-defined pay thresholds, fully editable by Admins.
 - **Profile & Dependent Management**: Users can manage their personal profiles, designations, pay details, and dependents.
+- **Explorer-style Folder Navigation**: Collapsible, recursive directory tree layout for saved claims and bills (e.g., Contingent Bills), supporting deep nested subfolders.
 - **Export to DOCX**: Claims can be exported to Word format for easy physical printing.
 
 ## Prerequisites

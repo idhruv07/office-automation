@@ -65,6 +65,18 @@ router.post('/', authenticateToken, async (req, res) => {
     const finalStatus = (isContingent && !isAdmin) ? 'Draft' : (status === 'Pending' ? 'Pending' : 'Draft');
     const submittedAt = finalStatus === 'Pending' ? new Date() : null;
 
+    let finalFolderName = folder_name || null;
+    if (isContingent) {
+        const trimmed = (folder_name || '').trim();
+        if (trimmed === '') {
+            finalFolderName = 'contingent';
+        } else if (trimmed === 'contingent' || trimmed.startsWith('contingent/')) {
+            finalFolderName = trimmed;
+        } else {
+            finalFolderName = `contingent/${trimmed}`;
+        }
+    }
+
     const client = await db.pool.connect();
     try {
         await client.query('BEGIN');
@@ -86,7 +98,7 @@ router.post('/', authenticateToken, async (req, res) => {
                 `UPDATE claims 
                  SET status = $1, data = $2, claim_name = $3, claim_date = $4, remarks = $5, submitted_at = $6, version = $7, folder_name = $8, updated_at = CURRENT_TIMESTAMP
                  WHERE id = $9 RETURNING id`,
-                [finalStatus, formData, claim_name, claim_date, remarks, submittedAt, currentVersion + 1, folder_name || null, parent_claim_id]
+                [finalStatus, formData, claim_name, claim_date, remarks, submittedAt, currentVersion + 1, finalFolderName, parent_claim_id]
             );
             claimId = result.rows[0].id;
 
@@ -101,7 +113,7 @@ router.post('/', authenticateToken, async (req, res) => {
             const result = await client.query(
                 `INSERT INTO claims (user_id, type_id, status, data, claim_name, claim_date, remarks, submitted_at, parent_claim_id, folder_name) 
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-                [req.user.id, type_id, finalStatus, formData, claim_name, claim_date, remarks, submittedAt, parent_claim_id || null, folder_name || null]
+                [req.user.id, type_id, finalStatus, formData, claim_name, claim_date, remarks, submittedAt, parent_claim_id || null, finalFolderName]
             );
             claimId = result.rows[0].id;
 
@@ -122,7 +134,7 @@ router.post('/', authenticateToken, async (req, res) => {
             console.error('Failed to read style.css for embedding:', e);
         }
 
-        const htmlContent = `
+        const html = `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -140,19 +152,26 @@ router.post('/', authenticateToken, async (req, res) => {
             </html>
         `;
 
+        // Retrieve the owner's username to ensure it is saved in their folder
+        const ownerRes = await client.query(
+            'SELECT username FROM users WHERE id = (SELECT user_id FROM claims WHERE id = $1) OR id = $2',
+            [claimId, req.user.id]
+        );
+        const ownerUsername = ownerRes.rows.length > 0 ? ownerRes.rows[0].username : req.user.username;
+
         // Save HTML File to storage
-        const userStoragePath = path.join(__dirname, '..', 'server', 'storage', req.user.username, 'claims');
+        const userStoragePath = path.join(__dirname, '..', 'server', 'storage', ownerUsername, 'claims');
         let saveDir = userStoragePath;
-        if (folder_name && folder_name.trim() !== '') {
-            saveDir = path.join(userStoragePath, folder_name.trim());
+        if (finalFolderName && finalFolderName.trim() !== '') {
+            saveDir = path.join(userStoragePath, finalFolderName.trim());
             await fs.ensureDir(saveDir);
         }
         
         const filePath = path.join(saveDir, `${claimId}.html`);
-        await fs.writeFile(filePath, htmlContent);
+        await fs.writeFile(filePath, html);
 
         // Record or Update the generated file in bill_files table
-        const relativePath = path.join('storage', req.user.username, 'claims', folder_name ? folder_name.trim() : '', `${claimId}.html`);
+        const relativePath = path.join('storage', ownerUsername, 'claims', finalFolderName ? finalFolderName.trim() : '', `${claimId}.html`);
         
         const existingFile = await client.query('SELECT id FROM bill_files WHERE claim_id = $1 AND file_path LIKE $2', [claimId, '%.html']);
         if (existingFile.rows.length > 0) {
@@ -167,7 +186,7 @@ router.post('/', authenticateToken, async (req, res) => {
         // If Pending, generate forwarding note
         if (finalStatus === 'Pending') {
             const fwdNotePath = path.join(userStoragePath, `${claimId}_forwarding_note.txt`);
-            const noteContent = `Forwarding Note for Claim #${claimId}\nName: ${req.user.username}\nDate: ${new Date().toISOString()}`;
+            const noteContent = `Forwarding Note for Claim #${claimId}\nName: ${ownerUsername}\nDate: ${new Date().toISOString()}`;
             await fs.writeFile(fwdNotePath, noteContent);
         }
 

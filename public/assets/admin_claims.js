@@ -90,10 +90,16 @@ document.addEventListener('DOMContentLoaded', () => {
                                     </td>
                                     <td style="padding: 12px 20px;">
                                         ${c.status === 'Pending' ? `
-                                            <div style="display: flex; gap: 6px; justify-content: center;">
-                                                <button class="btn-sm" style="background: #059669; color:white; border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight: 700;" onclick="openModal(${c.id}, 'Approved')">Approve</button>
-                                                <button class="btn-sm" style="background: #d97706; color:white; border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight: 700;" onclick="openModal(${c.id}, 'Returned')">Return</button>
-                                                <button class="btn-sm" style="background: #dc2626; color:white; border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight: 700;" onclick="openModal(${c.id}, 'Rejected')">Reject</button>
+                                            <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-direction: row;">
+                                                <button class="claim-action-btn btn-approve" onclick="openModal(${c.id}, 'Approved')" data-tooltip="Approve Claim">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </button>
+                                                <button class="claim-action-btn btn-return" onclick="openModal(${c.id}, 'Returned')" data-tooltip="Return to User">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"></path></svg>
+                                                </button>
+                                                <button class="claim-action-btn btn-reject" onclick="openModal(${c.id}, 'Rejected')" data-tooltip="Reject Claim">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                                </button>
                                             </div>
                                         ` : `
                                             <div style="text-align:center; font-size:11px; color:#94a3b8; font-style: italic;">No actions pending</div>

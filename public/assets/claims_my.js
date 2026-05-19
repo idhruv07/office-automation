@@ -87,31 +87,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
             contentDiv.innerHTML = Object.keys(grouped).map(typeName => `
                         <div class="claim-type-section" style="margin-bottom: 30px;">
-                            <h3 style="background: #f1f5f9; padding: 8px; border-left: 5px solid var(--primary-color);">${typeName}</h3>
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed;">
+                            <h3 style="background: rgba(255,255,255,0.08); padding: 8px 16px; border-left: 4px solid var(--secondary-color); border-radius: 4px; color: white; font-size: 0.95rem; font-weight: 700; margin-top: 0; margin-bottom: 12px; display: inline-block;">${typeName}</h3>
+                            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                 <thead>
-                                    <tr style="background: #f8fafc;">
-                                        <th style="border: 1px solid #e2e8f0; padding: 8px; width: 50px;">ID</th>
-                                        <th style="border: 1px solid #e2e8f0; padding: 8px; width: 30%;">Claim Name</th>
-                                        <th style="border: 1px solid #e2e8f0; padding: 8px; width: 100px;">Date</th>
-                                        <th style="border: 1px solid #e2e8f0; padding: 8px; width: 100px;">Status</th>
-                                        <th style="border: 1px solid #e2e8f0; padding: 8px;">Remarks</th>
-                                        <th style="border: 1px solid #e2e8f0; padding: 8px; width: 180px;">Actions</th>
+                                    <tr>
+                                        <th style="width: 50px;">ID</th>
+                                        <th style="width: 30%;">Claim Name</th>
+                                        <th style="width: 100px;">Date</th>
+                                        <th style="width: 110px;">Status</th>
+                                        <th>Remarks</th>
+                                        <th style="width: 140px;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     ${grouped[typeName].map(c => `
                                         <tr>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">${c.id}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.claim_name}">${c.claim_name}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">${new Date(c.claim_date).toLocaleDateString()}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;"><strong style="color: ${c.status === 'Returned' ? '#dc3545' : 'inherit'}">${c.status}</strong></td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; font-size: 11px;">${c.remarks || '-'}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px;">
-                                                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                                                    <button class="btn-sm" style="background: var(--primary-color); cursor: pointer;" onclick="viewClaimPrint(${c.id})" title="View / Print">👁️</button>
-                                                    <button class="btn-sm" style="background: #6c757d; cursor: pointer;" onclick="window.location.href='/claims/new.html?edit_id=${c.id}'" title="Edit Claim">✏️</button>
-                                                    ${['Draft', 'Returned', 'Rejected'].includes(c.status) ? `<button class="btn-sm" style="background: #dc3545; cursor: pointer;" onclick="deleteDraft(${c.id})" title="Delete">🗑️</button>` : ''}
+                                            <td style="text-align: center;">${c.id}</td>
+                                            <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.claim_name}">${c.claim_name}</td>
+                                            <td style="text-align: center;">${new Date(c.claim_date).toLocaleDateString()}</td>
+                                            <td style="text-align: center;">
+                                                <span class="status-badge" style="background: ${getStatusColor(c.status)}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block;">
+                                                    ${c.status.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td style="font-size: 11px; opacity: 0.95;">${c.remarks || '-'}</td>
+                                            <td>
+                                                <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-direction: row;">
+                                                    <button class="claim-action-btn btn-view" onclick="viewClaimPrint(${c.id})" data-tooltip="View / Print">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                    </button>
+                                                    <button class="claim-action-btn btn-edit" onclick="window.location.href='/claims/new.html?edit_id=${c.id}'" data-tooltip="Edit Claim">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                                    </button>
+                                                    ${['Draft', 'Returned', 'Rejected'].includes(c.status) ? `
+                                                    <button class="claim-action-btn btn-delete" onclick="deleteDraft(${c.id})" data-tooltip="Delete">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                                    </button>` : ''}
                                                 </div>
                                             </td>
                                         </tr>
@@ -213,6 +224,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const win = window.open(url, '_blank');
         if (!win) alert('Please allow popups to view the claim.');
     };
+
+    function getStatusColor(status) {
+        switch(status) {
+            case 'Pending': return 'var(--primary-color)';
+            case 'Approved': return 'var(--success-color)';
+            case 'Rejected': return 'var(--danger-color)';
+            case 'Returned': return 'var(--warning-color)';
+            default: return 'var(--text-muted)';
+        }
+    }
 
     loadClaims('');
 });

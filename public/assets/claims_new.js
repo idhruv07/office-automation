@@ -1401,7 +1401,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('save-modal').classList.remove('active');
     });
 
-    document.getElementById('btn-save-draft').addEventListener('click', () => handleSaveClick('Draft'));
+    document.getElementById('btn-save-draft').addEventListener('click', () => {
+        const typeSelect = document.getElementById('claim_type');
+        const isContingent = typeSelect && typeSelect.value === '7';
+        handleSaveClick(isContingent ? 'Pending' : 'Draft');
+    });
     document.getElementById('btn-submit').addEventListener('click', () => handleSaveClick('Pending'));
     document.getElementById('new-claim-form').addEventListener('submit', (e) => e.preventDefault());
 });

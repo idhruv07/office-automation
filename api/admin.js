@@ -66,7 +66,7 @@ router.get('/claims', authenticateToken, authorizeRole('Admin'), async (req, res
         `;
         if (type_id === '7') {
             // Contingent bills: only Admin-role users; never show individual submissions
-            query += " WHERE c.type_id = 7 AND c.status != 'Draft' AND r.name = 'Admin'";
+            query += " WHERE c.type_id = 7 AND r.name = 'Admin'";
         } else {
             query += " WHERE c.status != 'Draft' AND c.type_id != 7";
         }
@@ -80,11 +80,11 @@ router.get('/claims', authenticateToken, authorizeRole('Admin'), async (req, res
         }
 
         if (year && year !== '') {
-            query += ` AND EXTRACT(YEAR FROM c.submitted_at) = $${++pCount}`;
+            query += ` AND (c.submitted_at IS NULL OR EXTRACT(YEAR FROM c.submitted_at) = $${++pCount})`;
             params.push(parseInt(year));
         } else {
             const m = parseInt(months) || 6;
-            query += ` AND c.submitted_at >= CURRENT_DATE - INTERVAL '1 month' * $${++pCount}`;
+            query += ` AND (c.submitted_at IS NULL OR c.submitted_at >= CURRENT_DATE - INTERVAL '1 month' * $${++pCount})`;
             params.push(m);
         }
 

@@ -9,21 +9,30 @@
 <body>
     <h1 style="margin-bottom: 2rem; font-weight: 800; color: #0f172a;">Saved Contingent Bills</h1>
 
-    <!-- Folder Navigation -->
-    <div style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-        <div id="folder-list" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <!-- Folders will be populated here -->
+    <!-- Two Column Layout: Left Tree Panel, Right Table Panel -->
+    <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; margin-top: 1.5rem;">
+        
+        <!-- Left Side: Folder Directory Tree -->
+        <div style="flex: 0 0 280px; width: 280px; display: flex; flex-direction: column;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 10px;">Folder Directory</label>
+            <div id="folder-list" style="display: flex; flex-direction: column; gap: 4px; width: 100%; background: rgba(15, 23, 42, 0.02); padding: 12px; border-radius: 12px; border: 1px solid rgba(15, 23, 42, 0.06);">
+                <!-- Folders will be populated here -->
+            </div>
         </div>
-    </div>
 
-    <div class="adm-table-section">
-        <div class="adm-table-header">
-            <h3 id="current-folder-title">Root Folder</h3>
-            <span id="result-count" style="font-size: 0.8rem; color: #64748b; font-weight: 600;">0 Results</span>
+        <!-- Right Side: Ledger Table -->
+        <div style="flex: 1; min-width: 500px; display: flex; flex-direction: column;">
+            <div class="adm-table-section" style="margin-top: 0;">
+                <div class="adm-table-header">
+                    <h3 id="current-folder-title">Root Folder</h3>
+                    <span id="result-count" style="font-size: 0.8rem; color: #64748b; font-weight: 600;">0 Results</span>
+                </div>
+                <div id="contingent-list-content" style="padding: 1rem;">
+                    <p style="padding: 1rem; color: #64748b;">Loading contingent bills...</p>
+                </div>
+            </div>
         </div>
-        <div id="contingent-list-content" style="padding: 1rem;">
-            <p style="padding: 1rem; color: #64748b;">Loading contingent bills...</p>
-        </div>
+
     </div>
 
     <script src="/assets/menu.js"></script>

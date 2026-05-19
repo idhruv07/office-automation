@@ -5,120 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Claims - Office Auto</title>
     <link rel="stylesheet" href="/assets/style.css">
-    <style>
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
-        th { background-color: var(--border-light); color: var(--text-main); font-weight: 700; }
-        
-        .btn-sm {
-            padding: 6px 10px;
-            font-size: 12px;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
-        .btn-sm:hover {
-            opacity: 0.95;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-        }
-
-        /* Premium Theme Buttons */
-        #btn-show-all, #btn-show-submitted, #btn-show-drafts, #btn-show-returned {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            border: 1px solid var(--border-color);
-            background: white;
-            color: var(--text-main);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #btn-show-all:hover, #btn-show-submitted:hover, #btn-show-drafts:hover, #btn-show-returned:hover {
-            background: var(--border-light);
-            border-color: var(--primary-color);
-        }
-        #btn-show-all.active, #btn-show-submitted.active, #btn-show-drafts.active, #btn-show-returned.active {
-            background: var(--primary-color) !important;
-            color: white !important;
-            border-color: var(--primary-color) !important;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
-        }
-
-        /* View Period Box */
-        .view-period-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--border-light) !important;
-            padding: 6px 16px;
-            border-radius: 30px;
-            border: 1.5px solid var(--border-color) !important;
-            transition: all 0.2s ease;
-        }
-        .view-period-box:hover {
-            border-color: var(--primary-color) !important;
-        }
-        .view-period-box label {
-            font-weight: 700;
-            font-size: 13px;
-            color: var(--text-main);
-            margin: 0;
-            cursor: pointer;
-        }
-        .view-period-box select {
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: white;
-            color: var(--text-main);
-            font-size: 13px;
-            font-weight: 500;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .view-period-box select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-    </style>
 </head>
 <body>
-    <h1>My Claims</h1>
-    
-    <div style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-        <div style="display: flex; gap: 10px;">
-            <button id="btn-show-all" type="button" class="active">All Claims</button>
-            <button id="btn-show-submitted" type="button">Submitted Claims</button>
-            <button id="btn-show-drafts" type="button">My Drafts</button>
-            <button id="btn-show-returned" type="button" style="position: relative;">
-                Returned Claims
-                <span id="returned-count" style="display: none; position: absolute; top: -10px; right: -10px; background: white; color: var(--danger-color); border: 2px solid var(--danger-color); border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; align-items: center; justify-content: center;">0</span>
-            </button>
-        </div>
-        
-        <div class="view-period-box">
-            <label for="filter-year">View Period:</label>
-            <select id="filter-year">
-                <option value="">Recent (6 Months)</option>
-                <!-- Years will be populated by JS -->
-            </select>
-        </div>
-    </div>
+    <!-- ══════════════════════════════════════════════════
+         MY CLAIMS — Premium Card Dashboard
+    ══════════════════════════════════════════════════ -->
+    <div class="profile-id-card-wrapper" style="margin-top: 1.5rem; max-width: 1100px;">
+        <div class="profile-id-card">
+            <!-- Decorative blobs -->
+            <div class="profile-blob profile-blob-1"></div>
+            <div class="profile-blob profile-blob-2"></div>
+            <div class="profile-blob profile-blob-3"></div>
 
-    <div id="claims-wrapper" style="background: white; padding: 20px; border-radius: 8px;">
-        <h2 id="view-title">All Claims</h2>
-        <div id="claims-dynamic-content">
-            <!-- Dynamic tables grouped by type will appear here -->
-            <p>Loading claims...</p>
+            <!-- Avatar + Title Hero -->
+            <div class="profile-hero" style="margin-bottom: 24px; align-items: center;">
+                <div class="profile-avatar-wrap">
+                    <span class="profile-avatar-img" style="display: flex; align-items: center; justify-content: center; font-size: 2.25rem; background: rgba(255, 255, 255, 0.2); border-radius: 50%; width: 70px; height: 70px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">📑</span>
+                </div>
+                <div class="profile-hero-text">
+                    <div class="profile-badge">Workspace</div>
+                    <h2 class="profile-hero-name" style="font-size: 1.8rem; margin: 0; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.15);">My Claims</h2>
+                    <div class="profile-hero-sub" style="font-size: 0.9rem; opacity: 0.85; margin-top: 4px;">Track status and manage all your submitted claim documents</div>
+                </div>
+            </div>
+
+            <!-- Filters & Period Row -->
+            <div style="margin-bottom: 24px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; position: relative; z-index: 5;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="btn-show-all" type="button" class="adm-filter-btn active">All Claims</button>
+                    <button id="btn-show-submitted" type="button" class="adm-filter-btn">Submitted Claims</button>
+                    <button id="btn-show-drafts" type="button" class="adm-filter-btn">My Drafts</button>
+                    <button id="btn-show-returned" type="button" class="adm-filter-btn" style="position: relative;">
+                        Returned Claims
+                        <span id="returned-count" style="display: none; position: absolute; top: -10px; right: -10px; background: white; color: var(--danger-color); border: 2px solid var(--danger-color); border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: bold; align-items: center; justify-content: center;">0</span>
+                    </button>
+                </div>
+                
+                <div class="view-period-box">
+                    <label for="filter-year">View Period:</label>
+                    <select id="filter-year">
+                        <option value="">Recent (6 Months)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Nested Claims Ledger inside the Card -->
+            <div style="position: relative; z-index: 5; margin-top: 12px;">
+                <h4 id="view-title" style="font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    All Claims
+                </h4>
+                <div class="table-container">
+                    <div id="claims-dynamic-content">
+                        <p class="text-center font-bold" style="color: rgba(255,255,255,0.75);">Loading claims...</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
