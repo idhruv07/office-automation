@@ -204,7 +204,86 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
+        // Initialize Drag and Drop capability for all dashboard widget containers
+        initDragAndDrop();
+
     } catch (err) {
         console.error('Failed to load dashboard workspace metrics', err);
     }
 });
+
+function initDragAndDrop() {
+    const container = document.getElementById('dashboard-widgets-container');
+    const widgets = document.querySelectorAll('.draggable-widget');
+    if (!container || widgets.length === 0) return;
+
+    widgets.forEach(widget => {
+        widget.addEventListener('dragstart', (e) => {
+            const targetTag = e.target.tagName.toLowerCase();
+            // Prevent drag if starting on canvas, buttons, links, or inputs
+            if (targetTag === 'a' || targetTag === 'button' || targetTag === 'canvas' || 
+                e.target.closest('a') || e.target.closest('button') || e.target.closest('canvas')) {
+                e.preventDefault();
+                return;
+            }
+            widget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        widget.addEventListener('dragend', () => {
+            widget.classList.remove('dragging');
+            saveWidgetOrder();
+        });
+    });
+
+    container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const draggingItem = document.querySelector('.dragging');
+        if (!draggingItem) return;
+
+        const siblings = [...container.querySelectorAll('.draggable-widget:not(.dragging)')];
+
+        const nextSibling = siblings.find(sibling => {
+            const box = sibling.getBoundingClientRect();
+            // Check vertical mid-point offset to allow insertion before or after
+            const offset = e.clientY - box.top - box.height / 2;
+            return offset < 0;
+        });
+
+        if (nextSibling) {
+            container.insertBefore(draggingItem, nextSibling);
+        } else {
+            container.appendChild(draggingItem);
+        }
+    });
+
+    restoreWidgetOrder();
+}
+
+function saveWidgetOrder() {
+    const container = document.getElementById('dashboard-widgets-container');
+    if (!container) return;
+    const order = [...container.querySelectorAll('.draggable-widget')].map(el => el.getAttribute('data-widget-id'));
+    localStorage.setItem('dashboard-widget-order', JSON.stringify(order));
+}
+
+function restoreWidgetOrder() {
+    const orderStr = localStorage.getItem('dashboard-widget-order');
+    if (!orderStr) return;
+    try {
+        const order = JSON.parse(orderStr);
+        const container = document.getElementById('dashboard-widgets-container');
+        if (!container) return;
+        const widgetsMap = {};
+        container.querySelectorAll('.draggable-widget').forEach(el => {
+            widgetsMap[el.getAttribute('data-widget-id')] = el;
+        });
+        order.forEach(id => {
+            if (widgetsMap[id]) {
+                container.appendChild(widgetsMap[id]);
+            }
+        });
+    } catch (e) {
+        console.error('Failed to restore widget order', e);
+    }
+}
