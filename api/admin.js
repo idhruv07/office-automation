@@ -52,7 +52,7 @@ router.post('/users', authenticateToken, authorizeRole('Admin'), async (req, res
 router.get('/users', authenticateToken, authorizeRole('Admin'), async (req, res) => {
     try {
         const result = await db.query(`
-            SELECT u.id, u.username, u.name, u.designation, u.email, u.personal_no, u.cghs_ben_id, u.gender, r.name as role_name, u.created_at, u.last_login_at, u.last_active_at
+            SELECT u.id, u.username, u.name, u.designation, u.email, u.personal_no, u.cghs_ben_id, u.gender, r.name as role_name, u.created_at, u.last_login_at, u.last_active_at, u.is_active
             FROM users u
             LEFT JOIN roles r ON u.role_id = r.id
             ORDER BY u.created_at DESC
@@ -63,6 +63,54 @@ router.get('/users', authenticateToken, authorizeRole('Admin'), async (req, res)
         res.status(500).json({ message: 'Error fetching users' });
     }
 });
+
+// Update user active status (Toggle)
+router.put('/users/:id/status', authenticateToken, authorizeRole('Admin'), async (req, res) => {
+    const userId = req.params.id;
+    const { is_active } = req.body;
+    
+    try {
+        await db.query('UPDATE users SET is_active = $1 WHERE id = $2', [is_active, userId]);
+        res.json({ message: 'User status updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error updating user status' });
+    }
+});
+
+// Update user details
+router.put('/users/:id', authenticateToken, authorizeRole('Admin'), async (req, res) => {
+    const userId = req.params.id;
+    const { name, designation, email, personal_no, gender, role_name } = req.body;
+    
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        
+        // Get role id
+        const roleRes = await client.query('SELECT id FROM roles WHERE name = $1', [role_name || 'Individual']);
+        if (roleRes.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+        const roleId = roleRes.rows[0].id;
+        
+        await client.query(
+            'UPDATE users SET name = $1, designation = $2, email = $3, personal_no = $4, gender = $5, role_id = $6 WHERE id = $7',
+            [name, designation, email, personal_no, gender || 'Male', roleId, userId]
+        );
+        
+        await client.query('COMMIT');
+        res.json({ message: 'User updated successfully' });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ message: 'Error updating user details' });
+    } finally {
+        client.release();
+    }
+});
+
 
 // Get all claims (grouped by type, sorted by submitted_at DESC)
 router.get('/claims', authenticateToken, authorizeRole('Admin'), async (req, res) => {
@@ -237,6 +285,45 @@ router.put('/claim-types/:id/toggle', authenticateToken, authorizeRole('Admin'),
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Error toggling status' });
+    }
+});
+
+// Get a specific user's full profile (Admin only)
+router.get('/users/:id', authenticateToken, authorizeRole('Admin'), async (req, res) => {
+    try {
+        const userRes = await db.query(
+            'SELECT id, username, name, designation, email, personal_no, role_id, cghs_ben_id, address, mobile_no, basic_pay, pay_level, orders_for_move, TO_CHAR(move_date, \'YYYY-MM-DD\') as move_date, authority, gpf_ac_no, theme_pref, gender FROM users WHERE id = $1',
+            [req.params.id]
+        );
+        if (userRes.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+        const user = userRes.rows[0];
+
+        const depResult = await db.query('SELECT * FROM dependents WHERE user_id = $1', [req.params.id]);
+        user.dependents = depResult.rows;
+
+        res.json(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error fetching user profile' });
+    }
+});
+
+// Get a specific user's avatar (Admin only)
+router.get('/users/:id/avatar', authenticateToken, authorizeRole('Admin'), async (req, res) => {
+    try {
+        const result = await db.query('SELECT username FROM users WHERE id = $1', [req.params.id]);
+        if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+        
+        const username = result.rows[0].username;
+        const avatarPath = path.join(__dirname, '..', 'server', 'storage', username, 'avatar.jpg');
+        if (fs.existsSync(avatarPath)) {
+            res.sendFile(avatarPath);
+        } else {
+            res.status(404).send('No avatar found');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error fetching avatar' });
     }
 });
 

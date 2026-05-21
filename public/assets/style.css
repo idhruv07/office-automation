@@ -2917,3 +2917,45 @@ body:not(.profile-id-card-active) .claim-action-btn:hover,
 .newspaper-container * {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Manrope', 'Noto Sans Devanagari', 'Hind', sans-serif !important;
 }
+
+/* Custom Modal Overlay & Box Rules */
+#create-user-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#create-user-modal.hidden {
+    display: none !important;
+}
+
+#create-user-modal.opacity-0 {
+    opacity: 0;
+}
+
+#create-user-modal:not(.opacity-0) {
+    opacity: 1;
+}
+
+#create-user-modal .transform {
+    background-color: #ffffff;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 90%;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#create-user-modal:not(.opacity-0) .transform {
+    transform: scale(1);
+}
