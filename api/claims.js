@@ -82,23 +82,47 @@ router.post('/', authenticateToken, async (req, res) => {
         await client.query('BEGIN');
 
         let claimId;
+        let shouldOverwrite = false;
+        let overwriteClaimId = null;
+        let currentVersion = 1;
 
-        if (save_mode === 'overwrite' && parent_claim_id) {
-            // Verify ownership
-            const check = await client.query('SELECT version FROM claims WHERE id = $1 AND user_id = $2', [parent_claim_id, req.user.id]);
-            if (check.rows.length === 0) {
-                await client.query('ROLLBACK');
-                client.release();
-                return res.status(403).json({ message: 'Cannot overwrite this claim' });
+        if (finalStatus === 'Draft') {
+            // Check if there is an existing draft with the same name for this user
+            const existingDraft = await client.query(
+                "SELECT id, version FROM claims WHERE user_id = $1 AND claim_name = $2 AND status = 'Draft'",
+                [req.user.id, claim_name]
+            );
+            if (existingDraft.rows.length > 0) {
+                shouldOverwrite = true;
+                overwriteClaimId = existingDraft.rows[0].id;
+                currentVersion = existingDraft.rows[0].version || 1;
+            } else if (parent_claim_id) {
+                // If there's a parent_claim_id, check if the parent claim has the same name and is owned by the user
+                const check = await client.query('SELECT version, claim_name FROM claims WHERE id = $1 AND user_id = $2', [parent_claim_id, req.user.id]);
+                if (check.rows.length > 0 && check.rows[0].claim_name === claim_name) {
+                    shouldOverwrite = true;
+                    overwriteClaimId = parent_claim_id;
+                    currentVersion = check.rows[0].version || 1;
+                }
             }
+        } else {
+            // For pending claims, follow the save_mode / parent_claim_id, but only if the name is the same
+            if (save_mode === 'overwrite' && parent_claim_id) {
+                const check = await client.query('SELECT version, claim_name FROM claims WHERE id = $1 AND user_id = $2', [parent_claim_id, req.user.id]);
+                if (check.rows.length > 0 && check.rows[0].claim_name === claim_name) {
+                    shouldOverwrite = true;
+                    overwriteClaimId = parent_claim_id;
+                    currentVersion = check.rows[0].version || 1;
+                }
+            }
+        }
 
-            const currentVersion = check.rows[0].version || 1;
-
+        if (shouldOverwrite) {
             const result = await client.query(
                 `UPDATE claims 
                  SET status = $1, data = $2, claim_name = $3, claim_date = $4, remarks = $5, submitted_at = $6, version = $7, folder_name = $8, updated_at = CURRENT_TIMESTAMP
                  WHERE id = $9 RETURNING id`,
-                [finalStatus, formData, claim_name, claim_date, remarks, submittedAt, currentVersion + 1, finalFolderName, parent_claim_id]
+                [finalStatus, formData, claim_name, claim_date, remarks, submittedAt, currentVersion + 1, finalFolderName, overwriteClaimId]
             );
             claimId = result.rows[0].id;
 

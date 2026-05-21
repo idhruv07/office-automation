@@ -11,17 +11,25 @@ const { authenticateToken, authorizeRole } = require('./middleware');
 router.post('/users', authenticateToken, authorizeRole('Admin'), async (req, res) => {
     const { username, password, name, designation, email, personal_no, role_name, gender } = req.body;
 
+    const client = await db.pool.connect();
     try {
+        await client.query('BEGIN');
+
         const passwordHash = await bcrypt.hash(password, 12);
         
         // Get role id
-        const roleRes = await db.query('SELECT id FROM roles WHERE name = $1', [role_name || 'Individual']);
-        if (roleRes.rows.length === 0) return res.status(400).json({ message: 'Invalid role' });
+        const roleRes = await client.query('SELECT id FROM roles WHERE name = $1', [role_name || 'Individual']);
+        if (roleRes.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ message: 'Invalid role' });
+        }
         const roleId = roleRes.rows[0].id;
 
-        const result = await db.query(
-            'INSERT INTO users (username, password_hash, name, designation, email, personal_no, role_id, gender, must_reset_password) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING id',
-            [username, passwordHash, name, designation, email, personal_no, roleId, gender || 'Male']
+        const storagePath = `/storage/${username}/`;
+
+        const result = await client.query(
+            'INSERT INTO users (username, password_hash, name, designation, email, personal_no, role_id, gender, storage_path, must_reset_password) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true) RETURNING id',
+            [username, passwordHash, name, designation, email, personal_no, roleId, gender || 'Male', storagePath]
         );
 
         // Create storage directories
@@ -29,10 +37,14 @@ router.post('/users', authenticateToken, authorizeRole('Admin'), async (req, res
         await fs.ensureDir(path.join(userStoragePath, 'bills'));
         await fs.ensureDir(path.join(userStoragePath, 'claims'));
 
+        await client.query('COMMIT');
         res.status(201).json({ message: 'User created successfully', userId: result.rows[0].id });
     } catch (err) {
+        await client.query('ROLLBACK');
         console.error(err);
         res.status(500).json({ message: 'Error creating user' });
+    } finally {
+        client.release();
     }
 });
 

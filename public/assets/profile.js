@@ -12,11 +12,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return '';
             }
 
+            // Helper to format date to dd/mm/yyyy in local timezone
+            function formatDateDMY(dobString) {
+                if (!dobString) return '—';
+                const date = new Date(dobString);
+                if (isNaN(date.getTime())) return '—';
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            // Helper to format date to yyyy-mm-dd in local timezone for date inputs
+            function getLocalDateString(dobString) {
+                if (!dobString) return '';
+                const date = new Date(dobString);
+                if (isNaN(date.getTime())) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
             // ── Build a single fruit <li> ───────────────────────────────────
             function buildFruitLi(dep) {
                 const fc = fruitClass(dep.relationship);
-                const dobDisplay = dep.dob ? new Date(dep.dob).toLocaleDateString('en-IN') : '—';
-                const dobValue   = dep.dob ? dep.dob.substring(0, 10) : '';
+                const dobDisplay = dep.dob ? formatDateDMY(dep.dob) : '—';
+                const dobValue   = dep.dob ? getLocalDateString(dep.dob) : '';
 
                 const li = document.createElement('li');
                 li.dataset.depId = dep.id;
@@ -58,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 appearance:none;-webkit-appearance:none;
                             ">
                                 ${['Spouse','Husband','Wife','Son','Daughter','Father','Mother','Brother','Sister','Father-in-law','Mother-in-law']
-                                    .map(r => `<option value="${r}" ${r === dep.relationship ? 'selected' : ''} style="color:#1e293b;">${r}</option>`).join('')}
+                                    .map(r => `<option value="${r}" ${r.toLowerCase() === (dep.relationship || '').trim().toLowerCase() ? 'selected' : ''} style="color:#1e293b;">${r}</option>`).join('')}
                             </select>
                             <input type="text" class="fruit-edit-cghs" value="${dep.cghs_ben_id || ''}" placeholder="CGHS ID (optional)" style="
                                 width:100%;border:none;border-bottom:1.5px solid #cbd5e1;
@@ -218,7 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <td>${dep.name}</td>
                                 <td>${dep.relationship}</td>
                                 <td>${dep.cghs_ben_id || '-'}</td>
-                                <td>${dep.dob ? new Date(dep.dob).toLocaleDateString() : '-'}</td>
+                                <td>${dep.dob ? formatDateDMY(dep.dob) : '-'}</td>
                                 <td>
                                     <button type="button" class="btn-small" onclick='editDependent(${JSON.stringify(dep)})'>Edit</button>
                                     <button type="button" class="btn-small btn-danger" onclick="deleteDependent(${dep.id})">Delete</button>
@@ -408,9 +430,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.editDependent = function(dep) {
                 document.getElementById('dep_id').value = dep.id;
                 document.getElementById('dep_name').value = dep.name;
-                document.getElementById('dep_relationship').value = dep.relationship;
+                const relSelect = document.getElementById('dep_relationship');
+                if (relSelect) {
+                    const targetRel = (dep.relationship || '').trim().toLowerCase();
+                    for (let i = 0; i < relSelect.options.length; i++) {
+                        if (relSelect.options[i].value.toLowerCase() === targetRel) {
+                            relSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
                 document.getElementById('dep_cghs_id').value = dep.cghs_ben_id || '';
-                document.getElementById('dep_dob').value = dep.dob ? dep.dob.substring(0, 10) : '';
+                document.getElementById('dep_dob').value = dep.dob ? getLocalDateString(dep.dob) : '';
                 document.getElementById('btn-cancel-dep').style.display = 'inline-block';
             };
 

@@ -86,7 +86,21 @@
     @media print {
         .no-print { display: none !important; }
         body { margin: 0; padding: 0; }
-        .mrc-compact { width: 100%; padding: 0 !important; }
+        .mrc-compact { width: 100%; padding: 0 !important; font-size: 10.5px !important; }
+        .mrc-compact h2 { font-size: 13px !important; margin-bottom: 4px !important; }
+        .mrc-compact h3 { font-size: 11px !important; margin: 4px 0 2px 0 !important; }
+        .mrc-compact table { margin-bottom: 4px !important; }
+        .mrc-compact table th, 
+        .mrc-compact table td { padding: 1px 3px !important; font-size: 10.5px !important; }
+        .mrc-doc-section { margin-top: 4px !important; border-radius: 4px !important; }
+        .mrc-doc-column-header { padding: 3px 6px !important; font-size: 10px !important; }
+        .mrc-doc-column { padding: 4px 6px !important; }
+        .mrc-checkbox-group { margin-bottom: 1px !important; padding: 1px 2px !important; gap: 4px !important; }
+        .mrc-checkbox-group input[type="checkbox"] { width: 11px !important; height: 11px !important; margin-top: 1px !important; }
+        .mrc-checkbox-group label { font-size: 10px !important; }
+        .warning-box { margin-top: 4px !important; padding: 3px 6px !important; font-size: 9px !important; }
+        .mrc-signature-row { margin-top: 8px !important; margin-bottom: 4px !important; }
+        .mrc-signature-row input { height: 16px !important; }
     }
 </style>
 
@@ -240,7 +254,7 @@
             <td style="width: 30%;"><input type="text" name="bank_ifsc" class="no-border-input" placeholder="IFSC Code"></td>
         </tr>
     </table>
-    <div style="font-size: 10px; color: #ef4444; padding-left: 5px; margin-top: -4px; margin-bottom: 8px; font-weight: 500;">
+    <div class="no-print" style="font-size: 10px; color: #ef4444; padding-left: 5px; margin-top: -4px; margin-bottom: 8px; font-weight: 500;">
         * Remarks: Bank A/c details not saved.
     </div>
 
@@ -275,16 +289,16 @@
     </div>
 
         <!-- ── Station / Date / Countersigned / Signature ── -->
-        <div style="display:grid; grid-template-columns: 1fr auto 1fr; align-items:flex-end; margin-top:30px; margin-bottom:15px; gap:20px; width: 100%; font-size: 12px;">
+        <div class="mrc-signature-row" style="display:grid; grid-template-columns: 1fr auto 1fr; align-items:flex-end; margin-top:30px; margin-bottom:15px; gap:20px; width: 100%; font-size: 12px;">
             <!-- Left: Station & Date -->
             <div style="width: 220px; text-align: left;">
                 <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">
                     <span>स्टेशन / Station:</span>
-                    <input type="text" style="border:none; border-bottom:1px solid #9ca3af; width:140px; background:transparent;" name="declaration_place" value="Secunderabad">
+                    <input type="text" style="border:none; border-bottom:1px solid #9ca3af !important; width:140px; height:22px !important; padding:2px 4px !important; background:transparent;" name="declaration_place" value="Secunderabad">
                 </div>
                 <div style="display:flex; align-items:baseline; gap:6px;">
                     <span>दिनांक / Date:</span>
-                    <input type="text" placeholder="dd/mm/yyyy" style="border:none; border-bottom:1px solid #9ca3af; width:150px; background:transparent;" name="declaration_date" id="declaration_date">
+                    <input type="text" placeholder="dd/mm/yyyy" style="border:none; border-bottom:1px solid #9ca3af !important; width:150px; height:22px !important; padding:2px 4px !important; background:transparent;" name="declaration_date" id="declaration_date">
                 </div>
             </div>
 
@@ -311,6 +325,28 @@
     </div>
 
     <div class="mt-8 border-t pt-4" style="page-break-before: always;">
+        <h3 class="mt-0 text-center" style="border-left: none; background: transparent; font-size: 16px !important; text-decoration: underline;">Declaration</h3>
+        <textarea id="declarationText" name="generated_declaration" rows="4" class="w-full mt-2 p-2 border bg-gray-50 text-xs">I {Name Of Individual}, resident of [Adress] hereby declare that the statements made in the application are true to the best of my knowledge and belief and the person for whom medical expenses were incurred is wholly dependent on me. I am a CGHS beneficiary and the CGHS card was valid at the time of treatment. I agree for the reimbursement as is admissible under the rules.</textarea>
+        
+        <table class="w-full border-0 mt-4" style="border-collapse: collapse;">
+            <tr>
+                <td style="vertical-align: top; width: 75%; padding-top: 10px;">
+                    <div class="flex items-center gap-2 mb-1">
+                        <strong>Date:</strong> <input type="text" placeholder="dd/mm/yyyy" name="declaration_page_date" id="declaration_page_date" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 100px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <strong>Place:</strong> <input type="text" name="declaration_page_place" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 120px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;" value="Secunderabad">
+                    </div>
+                </td>
+                <td style="vertical-align: top; text-align: right; padding-top: 10px; padding-right: 0;">
+                    <p style="margin-bottom: 30px;">Signature of CGHS Card Holder</p>
+                    <p>____________________</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="mt-8 border-t pt-4" style="page-break-before: always;">
         <h3 class="mt-0 text-center" style="border-left: none; background: transparent; font-size: 16px !important; text-decoration: underline;">Annexure I – Affidavit for Duplicate Claim Papers</h3>
         <textarea id="affidavitText" name="generated_affidavit" rows="4" class="w-full mt-2 p-2 border bg-gray-50 text-xs">I, [Your Name], resident of [Address], have lost/misplaced the original claim papers/bills. I hereby undertake that I have not received any payment against these original bills from any source. If the original papers are traced, I shall not stake claim against them in future.</textarea>
         
@@ -318,10 +354,10 @@
             <tr>
                 <td style="vertical-align: top; width: 75%; padding-top: 10px;">
                     <div class="flex items-center gap-2 mb-1">
-                        <strong>Date:</strong> <input type="text" placeholder="dd/mm/yyyy" name="affidavit_date" id="affidavit_date" class="border-0 p-0 m-0" style="width: 160px;">
+                        <strong>Date:</strong> <input type="text" placeholder="dd/mm/yyyy" name="affidavit_date" id="affidavit_date" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 100px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;">
                     </div>
                     <div class="flex items-center gap-2">
-                        <strong>Place:</strong> <input type="text" name="affidavit_place" class="border-0 p-0 m-0" style="width: 150px;" value="Secunderabad">
+                        <strong>Place:</strong> <input type="text" name="affidavit_place" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 120px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;" value="Secunderabad">
                     </div>
                 </td>
                 <td style="vertical-align: top; text-align: right; padding-top: 10px; padding-right: 0;">

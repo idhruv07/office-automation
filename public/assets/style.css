@@ -776,7 +776,7 @@ tr:hover td {
 /* Print Styles - Restored and optimized */
 @media print {
     @page {
-        margin: 1.5cm;
+        margin: 5mm;
         size: auto;
     }
 
@@ -789,12 +789,16 @@ tr:hover td {
     .save-modal-overlay,
     #metadata-fields,
     .info-tooltip-icon,
-    h1 {
+    h1,
+    .main-top-bar,
+    .theme-separator-line {
         display: none !important;
     }
 
-    body {
+    body,
+    body.logged-in {
         background: white !important;
+        background-color: white !important;
         color: black !important;
         font-size: 10pt;
         margin: 0 !important;
@@ -833,6 +837,13 @@ tr:hover td {
         padding: 2px !important;
         background: transparent !important;
     }
+
+    textarea {
+        overflow: hidden !important;
+        resize: none !important;
+        height: auto !important;
+    }
+
 
     table {
         width: 100% !important;
@@ -1649,21 +1660,24 @@ tr:hover td {
 /* Print Optimization */
 @page {
     size: auto;
-    margin: 0mm;
+    margin: 5mm;
 }
 
 @media print {
 
     html,
-    body {
+    body,
+    body.logged-in {
         height: auto !important;
         overflow: visible !important;
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
+        background-color: white !important;
     }
 
-    body {
+    body,
+    body.logged-in {
         padding: 10mm !important;
     }
 
@@ -1673,7 +1687,9 @@ tr:hover td {
     .claim-action-bar,
     .btn-draft,
     .btn-preview,
-    #btn-submit {
+    #btn-submit,
+    .main-top-bar,
+    .theme-separator-line {
         display: none !important;
     }
 

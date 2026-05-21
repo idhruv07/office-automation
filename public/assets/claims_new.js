@@ -921,33 +921,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             // ── Ward entitlement auto-set (dynamic DB rules) ──────────────────
             const wardSelect = document.querySelector('select[name="ward_entitlement"]');
             if (wardSelect) {
-                const basicPay = parseInt(currentUser.basic_pay || 0, 10);
+                const cleanPay = String(currentUser.basic_pay || '').replace(/,/g, '');
+                const payMatch = cleanPay.match(/\d+/);
+                const basicPay = payMatch ? parseInt(payMatch[0], 10) : 0;
                 
-                // Fetch dynamic entitlement rules from database
-                fetch('/api/claims/ward-entitlements', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                .then(res => res.json())
-                .then(rules => {
-                    if (Array.isArray(rules) && rules.length > 0) {
-                        const matchingRule = rules.find(rule => basicPay >= rule.min_pay && basicPay <= rule.max_pay);
-                        if (matchingRule) {
-                            wardSelect.value = matchingRule.ward_type;
+                try {
+                    // Fetch dynamic entitlement rules from database
+                    const res = await fetch('/api/claims/ward-entitlements', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const rules = await res.json();
+                        if (Array.isArray(rules) && rules.length > 0) {
+                            const matchingRule = rules.find(rule => basicPay >= rule.min_pay && basicPay <= rule.max_pay);
+                            if (matchingRule) {
+                                wardSelect.value = matchingRule.ward_type;
+                            }
+                        } else {
+                            // Fallback static rules if DB table is empty
+                            wardSelect.value = basicPay <= 36500 ? 'General'
+                                : basicPay <= 50500 ? 'Semi-Private'
+                                : 'Private';
                         }
                     } else {
-                        // Fallback static rules if DB table is empty
-                        wardSelect.value = basicPay <= 36500 ? 'General'
-                            : basicPay <= 50500 ? 'Semi-Private'
-                            : 'Private';
+                        throw new Error(`HTTP ${res.status}`);
                     }
-                })
-                .catch(err => {
+                } catch (err) {
                     console.error('Error fetching ward entitlements:', err);
                     // Fallback to static rule on network/API failure
                     wardSelect.value = basicPay <= 36500 ? 'General'
                         : basicPay <= 50500 ? 'Semi-Private'
                         : 'Private';
-                });
+                }
             }
 
             // ── MRC auto-calculation ──────────────────────────────────────────
