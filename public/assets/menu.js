@@ -6,95 +6,133 @@ class MenuRenderer {
     async render() {
         this.navContainer = document.getElementById(this.navContainerId);
         if (!this.navContainer) return;
-        
+
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
 
+            // Fetch nested menu tree from API
             const res = await fetch('/api/auth/menu', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
-            if (res.ok) {
-                let menuItems = await res.json();
-                
-                const role = localStorage.getItem('role');
-                
-                // Group all "New [Type]" into a single consolidated menu
-                try {
-                    const typesRes = await fetch('/api/claims/types', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (typesRes.ok) {
-                        const types = await typesRes.json();
-                        if (types.length > 0) {
-                            menuItems.push({ 
-                                label: 'New Claim', 
-                                link: '#',
-                                display_order: 5,
-                                children: types.map(type => ({
-                                    label: type.name,
-                                    link: `/claims/new.html?type_id=${type.id}`
-                                }))
-                            });
+            if (!res.ok) return;
+
+            let menuTree = await res.json();
+
+            // Inject "New Claim" children dynamically into the Claims group
+            try {
+                const typesRes = await fetch('/api/claims/types', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (typesRes.ok) {
+                    const types = await typesRes.json();
+                    if (types.length > 0) {
+                        const claimsGroup = menuTree.find(i => i.label === 'Claims');
+                        const newClaimChildren = types.map(type => ({
+                            label: type.name,
+                            link: `/claims/new.html?type_id=${type.id}`
+                        }));
+                        const newClaimItem = {
+                            label: 'New Claim',
+                            link: '#',
+                            display_order: 0,
+                            children: newClaimChildren
+                        };
+                        if (claimsGroup) {
+                            // Prepend "New Claim" to the Claims group
+                            claimsGroup.children.unshift(newClaimItem);
+                        } else {
+                            // Fallback: add as top-level group
+                            menuTree.splice(1, 0, newClaimItem);
                         }
                     }
-                } catch (e) {}
+                }
+            } catch (e) {}
 
-                if (menuItems.length === 0) {
-                    menuItems.push({ label: 'Dashboard', link: '/dashboard.html', display_order: 1 });
+            if (menuTree.length === 0) {
+                menuTree.push({ label: 'Dashboard', link: '/dashboard.html', display_order: 1, children: [] });
+            }
+
+            // Append Logout at end
+            menuTree.push({ label: 'Logout', link: '#', id: 'logout-btn', children: [] });
+
+            const currentPath = window.location.pathname;
+
+            this.navContainer.innerHTML = menuTree.map(item => {
+                const children = item.children || [];
+
+                if (children.length > 0) {
+                    // Check if any child (or grandchild for New Claim) is active
+                    const hasActiveChild = children.some(child => {
+                        if (child.children && child.children.length > 0) {
+                            return child.children.some(gc => currentPath === gc.link || currentPath.startsWith(gc.link.split('?')[0]));
+                        }
+                        return currentPath === child.link || currentPath.startsWith(child.link.split('?')[0]);
+                    });
+
+                    return `
+                        <li class="has-submenu ${hasActiveChild ? 'active' : ''}">
+                            <a href="#">${item.label}</a>
+                            <ul class="submenu">
+                                ${children.map(child => {
+                                    const grandchildren = child.children || [];
+                                    if (grandchildren.length > 0) {
+                                        const hasActiveGc = grandchildren.some(gc => currentPath === gc.link || currentPath.startsWith(gc.link.split('?')[0]));
+                                        return `
+                                            <li class="has-submenu submenu-nested ${hasActiveGc ? 'active' : ''}">
+                                                <a href="#">${child.label}</a>
+                                                <ul class="submenu submenu-level2">
+                                                    ${grandchildren.map(gc => {
+                                                        const isActive = currentPath === gc.link || currentPath.startsWith(gc.link.split('?')[0]);
+                                                        return `<li><a href="${gc.link}" class="${isActive ? 'active' : ''}">${gc.label}</a></li>`;
+                                                    }).join('')}
+                                                </ul>
+                                            </li>`;
+                                    }
+                                    const isActive = currentPath === child.link || currentPath.startsWith(child.link.split('?')[0]);
+                                    return `<li><a href="${child.link}" class="${isActive ? 'active' : ''}">${child.label}</a></li>`;
+                                }).join('')}
+                            </ul>
+                        </li>`;
                 }
 
-                menuItems.sort((a, b) => a.display_order - b.display_order);
-                menuItems.push({ label: 'Logout', link: '#', id: 'logout-btn' });
+                const isActive = currentPath === item.link;
+                return `<li class="${isActive ? 'active' : ''}"><a href="${item.link}" ${item.id ? `id="${item.id}"` : ''}>${item.label}</a></li>`;
+            }).join('');
 
-                this.navContainer.innerHTML = menuItems.map(item => {
-                    const currentPath = window.location.pathname;
-                    const isActive = currentPath === item.link;
-                    
-                    if (item.children) {
-                        const hasActiveChild = item.children.some(child => currentPath === child.link);
-                        return `
-                            <li class="has-submenu ${hasActiveChild ? 'active' : ''}">
-                                <a href="#">${item.label}</a>
-                                <ul class="submenu">
-                                    ${item.children.map(child => {
-                                        const isChildActive = currentPath === child.link;
-                                        return `<li><a href="${child.link}" class="${isChildActive ? 'active' : ''}">${child.label}</a></li>`;
-                                    }).join('')}
-                                </ul>
-                            </li>
-                        `;
+            // Submenu click handler (prevent jump for # links, hover handles expansion)
+            this.navContainer.querySelectorAll('.has-submenu > a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (link.getAttribute('href') === '#') {
+                        e.preventDefault();
                     }
-                    return `<li class="${isActive ? 'active' : ''}"><a href="${item.link}" ${item.id ? `id="${item.id}"` : ''}>${item.label}</a></li>`;
-                }).join('');
-
-                // Add Submenu Toggle Logic
-                this.navContainer.querySelectorAll('.has-submenu > a').forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        link.parentElement.classList.toggle('active');
-                    });
                 });
+            });
 
-                const logoutBtn = document.getElementById('logout-btn');
-                if(logoutBtn) {
-                    logoutBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const app = document.getElementById('app-container');
-                        if (app) {
-                            app.classList.add('tv-off');
-                            setTimeout(() => {
-                                localStorage.clear();
-                                window.location.href = '/';
-                            }, 1350); // Matches the 1.4s tvTurnOff animation duration
-                        } else {
+            // Auto-open active groups on page load
+            this.navContainer.querySelectorAll('.has-submenu.active').forEach(li => {
+                li.classList.add('open');
+            });
+
+            // Logout handler
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const app = document.getElementById('app-container');
+                    if (app) {
+                        app.classList.add('tv-off');
+                        setTimeout(() => {
                             localStorage.clear();
                             window.location.href = '/';
-                        }
-                    });
-                }
+                        }, 1350);
+                    } else {
+                        localStorage.clear();
+                        window.location.href = '/';
+                    }
+                });
             }
+
         } catch (err) {
             console.error('Menu rendering failed:', err);
         }

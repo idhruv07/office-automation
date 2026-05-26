@@ -1,0 +1,455 @@
+<div class="iafa194-wrap">
+  <div class="doc">
+    <!-- Top Header Row -->
+    <div style="position: relative; text-align: center; margin-bottom: 16px;">
+      <div class="doc-header" style="display: inline-block; margin: 0; padding: 0;">
+        <div class="hindi-title" style="margin: 0; font-size: 16px; font-weight: bold;">पेंशन/यात्रा भत्ता आदि के
+          मांग-पत्र</div>
+        <div class="eng-title" style="margin: 0; font-size: 14px; font-weight: bold;">Requisition for Advances of Pay /
+          TA Etc.</div>
+      </div>
+      <div class="form-ref"
+        style="position: absolute; right: 0; top: 0; text-align: right; font-size: 11px; font-weight: bold; line-height: 1.3;">
+        पा॰ रे॰ फा॰ ए॰–194<br>
+        I. A. F. A.–194
+      </div>
+    </div>
+
+    <!-- Receipt block -->
+    <div class="receipt-section">
+      <div class="receipt-row">
+        <span class="receipt-label">रक्षा लेखा नियंत्रक / Received from the Controller of Defence Accounts</span>
+        <input class="receipt-field w-max-260" id="advance_cda_name" name="cda_name" placeholder="CDA office name">
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-label">की राशि / the sum of Rs.</span>
+        <input class="receipt-field w-max-120" id="advance_amount_num" name="amount_num" placeholder="0.00">
+        <span class="receipt-label">(Rupees in words)</span>
+        <input class="receipt-field" id="advance_amount_words" name="amount_words" placeholder="Amount in words">
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-label">on account of advance of</span>
+        <input class="receipt-field" id="advance_purpose" name="advance_purpose" placeholder="Purpose of advance">
+      </div>
+    </div>
+
+    <!-- Signature, Countersigned + Stamp -->
+    <div class="sig-stamp-row" style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0; gap: 20px;">
+      
+      <!-- 1. Left: Countersigned -->
+      <div class="countersigned-block" style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+        <div style="font-weight: bold;">
+          <span class="hi-small">प्रतिहस्ताक्षरित /</span> Countersigned
+        </div>
+        <input class="field-input" style="width: 220px; border-bottom: 1px dotted #94a3b8; outline: none; background: transparent; padding: 2px 6px;" id="advance_countersigned_by" name="countersigned_by" placeholder="Authority name & designation">
+      </div>
+
+      <!-- 2. Center: Signature Stack vertically aligned -->
+      <div class="sig-block" style="flex: 1; display: grid; grid-template-columns: 130px 1fr; gap: 8px 12px; align-items: center; max-width: 380px; margin: 0 auto;">
+        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Signature <span class="hi">हस्ताक्षर</span></label>
+        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_signature_note" name="signature_note" placeholder="(Original signed)">
+
+        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Name <span class="hi">नाम</span></label>
+        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_name" name="name" placeholder="Full name" required>
+
+        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Rank <span class="hi">रैंक</span></label>
+        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_rank" name="rank" placeholder="Rank / Designation">
+
+        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Corps/Dept <span class="hi">कोर</span></label>
+        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_corps_dept" name="corps_dept" placeholder="Corps or Dept">
+      </div>
+
+      <!-- 3. Right: Stamp Box (Reduced 50%) -->
+      <div class="stamp-box-wrapper" style="flex: 0 0 auto;">
+        <div class="stamp-box" style="border: 1px dashed #cbd5e1; padding: 8px; width: 100px; text-align: center; border-radius: 4px; color: #64748b; font-size: 8px;">
+          <div class="stamp-icon" style="font-size: 16px; margin-bottom: 2px;">🔖</div>
+          <div>आवश्यकतानुसार टिकट लगाएं</div>
+          <div style="margin-top: 2px;">To be stamped where necessary</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Particulars -->
+    <style>
+      .iafa194-wrap {
+        font-size: 12px !important;
+      }
+
+      .iafa194-wrap input,
+      .iafa194-wrap select,
+      .iafa194-wrap textarea {
+        font-size: 12px !important;
+        padding: 2px 6px !important;
+        min-height: 24px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        outline: none;
+      }
+
+      .compact-item {
+        margin-top: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed #e2e8f0;
+      }
+
+      .compact-label {
+        font-weight: bold;
+        margin-bottom: 6px;
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+      }
+
+      .compact-label .hi {
+        font-weight: normal;
+        color: #64748b;
+      }
+
+      .compact-grid-2x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .compact-field-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .compact-field-row label {
+        white-space: nowrap;
+        font-weight: 500;
+        color: #475569;
+      }
+
+      .compact-input {
+        flex: 1;
+      }
+    </style>
+
+    <!-- Particulars -->
+    <div class="particulars">
+      <!-- (i) Rate of Pay -->
+      <div class="compact-item" style="display: flex; align-items: center; gap: 16px;">
+        <div class="compact-label" style="margin: 0; white-space: nowrap;">
+          <span>(i) Rate of Pay</span> <span class="hi">वेतन दर</span>
+        </div>
+        <div class="compact-field-row" style="flex: 0 0 auto;">
+          <label>Basic Pay (Rs.)</label>
+          <input class="compact-input" id="advance_basic_pay" name="basic_pay" placeholder="0.00" style="width: 100px;">
+        </div>
+        <div class="compact-field-row" style="flex: 1;">
+          <label>Grade Pay / Level</label>
+          <input class="compact-input" id="advance_grade_pay" name="grade_pay" placeholder="Level / GP" style="width: 100%;">
+        </div>
+      </div>
+
+      <!-- (ii) Authority for move -->
+      <div class="compact-item">
+        <div class="compact-label">
+          <span>(ii) Authority for the move</span><span class="hi">संचलन का प्राधिकार पत्र (प्राधिकार पत्र की प्रति संलग्न करें)</span>
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <div class="compact-field-row" style="flex: 1;">
+            <label>Auth No.</label>
+            <input class="compact-input" id="advance_authority_no" name="authority_no" placeholder="Order / Ref. No.">
+          </div>
+          <div class="compact-field-row" style="flex: 0 0 auto;">
+            <label>Auth Date</label>
+            <input class="compact-input" id="advance_authority_date" name="authority_date" type="date">
+          </div>
+          <div class="compact-field-row" style="flex: 1.5;">
+            <label>Issuing Authority</label>
+            <input class="compact-input" id="advance_issuing_authority" name="issuing_authority" placeholder="Name of issuing authority">
+          </div>
+        </div>
+      </div>
+
+      <!-- (iii) Family details -->
+      <div class="compact-item">
+        <div class="compact-label">
+          <span>(iii) Details of family for permanent duty move / LTC</span><span class="hi">ड्यूटी के लिए स्थायी रूप से
+            स्थानांतरण और छुट्टी यात्रा रियायत के लिए परिवार का विवरण</span>
+        </div>
+        <div class="compact-grid-2x2" style="grid-template-columns: 1fr;">
+          <input class="compact-input" id="advance_family_details" name="family_details"
+            placeholder="Name / Relation / Age — e.g. Smt. X (Wife, 32), Master Y (Son, 8), Km. Z (Daughter, 5)…">
+        </div>
+      </div>
+
+      <!-- (iv) Weight of personal effects -->
+      <div class="compact-item" style="display: flex; align-items: center; gap: 16px;">
+        <div class="compact-label" style="margin: 0; white-space: nowrap;">
+          <span>(iv) Weight of personal effects</span> <span class="hi">निजी सामान का वजन</span>
+        </div>
+        <div class="compact-field-row" style="flex: 0 0 auto;">
+          <label>Weight (Kgs)</label>
+          <input class="compact-input" id="advance_weight_kg" name="weight_kg" placeholder="0 kg" style="width: 80px;">
+        </div>
+        <div class="compact-field-row" style="flex: 1;">
+          <label>Mode of Transport</label>
+          <input class="compact-input" id="advance_transport_mode" name="transport_mode" placeholder="Rail / Road / Air" style="width: 100%;">
+        </div>
+      </div>
+
+      <!-- (v) Authority for conveyance of car etc. -->
+      <div class="compact-item">
+        <div class="compact-label">
+          <span>(v) Authority for conveyance of car etc. and baggage by air</span><span class="hi">कार आदि और वायुयान
+            द्वारा सामान ले जाने के लिए प्राधिकार पत्र</span>
+        </div>
+        <div class="compact-grid-2x2">
+          <div class="compact-field-row">
+            <label>Vehicle Type</label>
+            <input class="compact-input" id="advance_vehicle_type" name="vehicle_type"
+              placeholder="Car / Motorcycle / etc.">
+          </div>
+          <div class="compact-field-row">
+            <label>Authority Ref.</label>
+            <input class="compact-input" id="advance_vehicle_authority_ref" name="vehicle_authority_ref"
+              placeholder="Authority ref. no.">
+          </div>
+        </div>
+      </div>
+
+      <!-- (vi) Details of advance claimed -->
+      <div class="compact-item" style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="compact-label" style="margin: 0; white-space: nowrap;">
+            <span>(vi) Details of advance claimed</span> <span class="hi">दावा की गई पेशगी के ब्यौरे</span>
+          </div>
+          <div class="compact-field-row" style="flex: 1;">
+            <label>Type</label>
+            <select class="compact-input cursor-pointer" id="advance_advance_type" name="advance_type" style="width: 100%;">
+              <option value="">— Select —</option>
+              <option>TA Advance</option>
+              <option>LTC Advance</option>
+              <option>DA Advance</option>
+              <option>Temporary Duty</option>
+              <option>Pay Advance</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="compact-field-row" style="flex: 1;">
+            <label>Amount (Rs.)</label>
+            <input class="compact-input" id="advance_advance_amount" name="advance_amount" placeholder="0.00" style="width: 100%;">
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="compact-field-row" style="flex: 1;">
+            <label>Period (From–To)</label>
+            <input class="compact-input" id="advance_advance_period" name="advance_period" placeholder="dd/mm/yy – dd/mm/yy" style="width: 100%;">
+          </div>
+          <div class="compact-field-row" style="flex: 1;">
+            <label>Journey (From→To)</label>
+            <input class="compact-input" id="advance_journey_details" name="journey_details" placeholder="Departure → Destination" style="width: 100%;">
+          </div>
+        </div>
+      </div>
+
+      <!-- (vii) Cheque mode -->
+      <div class="compact-item" style="display: flex; align-items: center; gap: 16px;">
+        <div class="compact-label" style="margin: 0; white-space: nowrap;">
+          <span>(vii) Cheque to be issued in favour of</span> <span class="hi">व्यक्ति / बैंकर आदि के पक्ष में चेक जारी किए जाएं</span>
+        </div>
+        <div class="compact-field-row" style="flex: 0 0 auto; gap: 12px;">
+          <label><input type="radio" id="advance_cheque_favour_self" name="cheque_favour" value="self"> Self</label>
+          <label><input type="radio" id="advance_cheque_favour_banker" name="cheque_favour" value="banker"> Banker</label>
+          <label><input type="radio" id="advance_cheque_favour_other" name="cheque_favour" value="other"> Other</label>
+        </div>
+        <div class="compact-field-row" style="flex: 1;">
+          <label>Details</label>
+          <input class="compact-input" id="advance_cheque_name" name="cheque_name" placeholder="Name / Banker details" style="width: 100%;">
+        </div>
+      </div>
+
+      <!-- (viii) LTC block year -->
+      <div class="compact-item" style="border-bottom: none; margin-bottom: 20px; display: flex; align-items: center; gap: 16px;">
+        <div class="compact-label" style="margin: 0; white-space: nowrap;">
+          <span>(viii) LTC for block years / home town / choice</span> <span class="hi">ब्लाक वर्ष / स्थायी पता / पसंद का स्थान</span>
+        </div>
+        <div class="compact-field-row" style="flex: 0 0 auto;">
+          <label>LTC Block Year</label>
+          <input class="compact-input" id="advance_ltc_block_year" name="ltc_block_year" placeholder="e.g. 2022–2025" style="width: 100px;">
+        </div>
+        <div class="compact-field-row" style="flex: 1;">
+          <label>Destination</label>
+          <input class="compact-input" id="advance_ltc_destination" name="ltc_destination" placeholder="City / State" style="width: 100%;">
+        </div>
+      </div>
+    </div><!-- /particulars -->
+
+    <!-- Travel Expenses Details -->
+    <div style="margin-top: 10px; margin-bottom: 10px;">
+      <label style="font-weight: bold; color: #475569; display: block; margin-bottom: 4px;">Details and breakup of travel expenses / यात्रा व्यय का विवरण:</label>
+      <textarea id="advance_travel_expenses" name="travel_expenses" rows="6" placeholder="Provide details and breakup of travel expenses here..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; outline: none; resize: vertical; font-family: inherit; font-size: 12px; line-height: 1.4;"></textarea>
+    </div>
+  </div>
+
+  <div class="doc page-2 mt-32">
+    <!-- ── Defence Accounts Department section ── -->
+    <div class="da-section">
+      <div class="da-heading">रक्षा लेखा विभाग में इस्तेमाल के लिए</div>
+      <div class="da-subheading">For Use in the Defence Accounts Department</div>
+
+      <div class="passed-row">
+        <span>Passed for Rs.</span>
+        <input class="field-input w-max-130" id="advance_da_passed_rs" name="da_passed_rs" placeholder="0.00">
+        <span>P.</span>
+        <input class="field-input w-max-60" id="advance_da_passed_p" name="da_passed_p" placeholder="00">
+        <span>(Rupees in words</span>
+        <input class="field-input" id="advance_da_passed_words" name="da_passed_words" placeholder="Amount in words">
+        <span>)</span>
+      </div>
+      <div class="da-payment-instruction">नीचे लिखे अनुसार अदायगी के लिए / For Payment as under:</div>
+
+      <table class="da-table">
+        <thead>
+          <tr>
+            <th class="da-table-w-80">खजाना<br><span class="th-hindi">Treasury</span></th>
+            <th>पाने वाले का नाम<br><span class="th-hindi">Name of payee</span></th>
+            <th class="da-table-w-120">चेक की राशि<br><span class="th-hindi">Amount of cheque</span></th>
+            <th class="da-table-w-110">चेक की तारीख<br><span class="th-hindi">Date of cheque</span></th>
+            <th class="da-table-w-90">SO(A)/AAO<br><span class="th-hindi">अनु॰ अधि॰ (ले॰) / स॰ अधि॰</span></th>
+            <th class="da-table-w-90">लेखा अधिकारी<br><span class="th-hindi">A.O.</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input id="advance_da_treasury_1" name="da_treasury_1" placeholder=""></td>
+            <td><input id="advance_da_payee_1" name="da_payee_1" placeholder=""></td>
+            <td><input id="advance_da_cheque_amt_1" name="da_cheque_amt_1" placeholder="0.00"></td>
+            <td><input id="advance_da_cheque_date_1" name="da_cheque_date_1" type="date"></td>
+            <td><input id="advance_da_so_1" name="da_so_1" placeholder=""></td>
+            <td><input id="advance_da_ao_1" name="da_ao_1" placeholder=""></td>
+          </tr>
+          <tr>
+            <td><input id="advance_da_treasury_2" name="da_treasury_2" placeholder=""></td>
+            <td><input id="advance_da_payee_2" name="da_payee_2" placeholder=""></td>
+            <td><input id="advance_da_cheque_amt_2" name="da_cheque_amt_2" placeholder="0.00"></td>
+            <td><input id="advance_da_cheque_date_2" name="da_cheque_date_2" type="date"></td>
+            <td><input id="advance_da_so_2" name="da_so_2" placeholder=""></td>
+            <td><input id="advance_da_ao_2" name="da_ao_2" placeholder=""></td>
+          </tr>
+          <tr>
+            <td><input id="advance_da_treasury_3" name="da_treasury_3" placeholder=""></td>
+            <td><input id="advance_da_payee_3" name="da_payee_3" placeholder=""></td>
+            <td><input id="advance_da_cheque_amt_3" name="da_cheque_amt_3" placeholder="0.00"></td>
+            <td><input id="advance_da_cheque_date_3" name="da_cheque_date_3" type="date"></td>
+            <td><input id="advance_da_so_3" name="da_so_3" placeholder=""></td>
+            <td><input id="advance_da_ao_3" name="da_ao_3" placeholder=""></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="da-noted-row">
+        <span>मांग रजिस्टर की पृ॰ सं॰ / Noted in D.R. Page</span>
+        <input class="field-input" id="advance_dr_page" name="dr_page" placeholder="Page no." style="max-width:80px;">
+        <span>मद सं॰ / item</span>
+        <input class="field-input" id="advance_dr_item" name="dr_item" placeholder="Item no." style="max-width:80px;">
+        <span>पर नोट किया।</span>
+      </div>
+
+      <div class="sig-row-da">
+        <div class="sig-block-da">
+          <div class="line"></div>
+          <div>लेखा परीक्षक<br>Auditor</div>
+        </div>
+        <div class="sig-block-da">
+          <div class="line"></div>
+          <div>अनुभाग अधिकारी लेखा / सहायक लेखा अधिकारी<br>S.O.(A) / A.A.O.</div>
+        </div>
+        <div class="sig-block-da">
+          <div class="line"></div>
+          <div>लेखा अधिकारी / वरिष्ठ लेखा अधिकारी / सहायक रक्षा लेखा नियंत्रक<br>A.O. / S.A.O. / A.C.D.A.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Punching Medium -->
+    <div class="punching-section">
+      <div class="punch-heading">पंचिंग माध्यम / Punching Medium</div>
+      <div class="compact-grid-2x2"
+        style="margin-bottom: 12px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+        <div class="compact-field-row">
+          <label>Month <span class="hi">माह</span></label>
+          <input class="compact-input" id="advance_pm_month" name="pm_month" placeholder="Month">
+        </div>
+        <div class="compact-field-row">
+          <label>CDA <span class="hi">रक्षा लेखा नियंत्रक</span></label>
+          <input class="compact-input" id="advance_pm_cda" name="pm_cda" placeholder="CDA">
+        </div>
+        <div class="compact-field-row">
+          <label>Section <span class="hi">अनुभाग</span></label>
+          <input class="compact-input" id="advance_pm_section" name="pm_section" placeholder="Section">
+        </div>
+        <div class="compact-field-row">
+          <label>Class of Vr. <span class="hi">बाउचर श्रेणी</span></label>
+          <input class="compact-input" id="advance_pm_vr_class" name="pm_vr_class" placeholder="Class">
+        </div>
+        <div class="compact-field-row" style="grid-column: span 2; justify-content: center; margin-top: 6px;">
+          <label>Voucher No. <span class="hi">बाउचर संख्या</span></label>
+          <input class="compact-input" id="advance_pm_vr_no" name="pm_vr_no" placeholder="Voucher Number"
+            style="max-width: 260px;">
+        </div>
+      </div>
+
+      <table class="punch-table">
+        <thead>
+          <tr>
+            <th colspan="3">प्राप्तियां / Receipts</th>
+            <th colspan="5">प्रभार / Charges</th>
+          </tr>
+          <tr>
+            <th>वर्गीकरण कोड<br>Classification Code</th>
+            <th>आर(1)/R(1)</th>
+            <th>एम आर(2)/MR(2)</th>
+            <th>वर्गीकरण कोड<br>Classification Code</th>
+            <th>रा॰सी(3)/C(3)<br>Rs.</th>
+            <th>प/P.</th>
+            <th>एम सी(4)/MC(4)<br>Rs.</th>
+            <th>प/P.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input id="advance_pm_class_r1" name="pm_class_r1" placeholder=""></td>
+            <td><input id="advance_pm_r1" name="pm_r1" placeholder="0.00"></td>
+            <td><input id="advance_pm_mr2" name="pm_mr2" placeholder="0.00"></td>
+            <td><input id="advance_pm_class_c3" name="pm_class_c3" placeholder=""></td>
+            <td><input id="advance_pm_c3_rs" name="pm_c3_rs" placeholder="0.00"></td>
+            <td><input id="advance_pm_c3_p" name="pm_c3_p" placeholder=""></td>
+            <td><input id="advance_pm_mc4_rs" name="pm_mc4_rs" placeholder="0.00"></td>
+            <td><input id="advance_pm_mc4_p" name="pm_mc4_p" placeholder=""></td>
+          </tr>
+          <tr>
+            <td><input id="advance_pm_class_r1b" name="pm_class_r1b" placeholder=""></td>
+            <td><input id="advance_pm_r1b" name="pm_r1b" placeholder="0.00"></td>
+            <td><input id="advance_pm_mr2b" name="pm_mr2b" placeholder="0.00"></td>
+            <td><input id="advance_pm_class_c3b" name="pm_class_c3b" placeholder=""></td>
+            <td><input id="advance_pm_c3b_rs" name="pm_c3b_rs" placeholder="0.00"></td>
+            <td><input id="advance_pm_c3b_p" name="pm_c3b_p" placeholder=""></td>
+            <td><input id="advance_pm_mc4b_rs" name="pm_mc4b_rs" placeholder="0.00"></td>
+            <td><input id="advance_pm_mc4b_p" name="pm_mc4b_p" placeholder=""></td>
+          </tr>
+          <tr>
+            <td><input id="advance_pm_class_r1c" name="pm_class_r1c" placeholder=""></td>
+            <td><input id="advance_pm_r1c" name="pm_r1c" placeholder="0.00"></td>
+            <td><input id="advance_pm_mr2c" name="pm_mr2c" placeholder="0.00"></td>
+            <td><input id="advance_pm_class_c3c" name="pm_class_c3c" placeholder=""></td>
+            <td><input id="advance_pm_c3c_rs" name="pm_c3c_rs" placeholder="0.00"></td>
+            <td><input id="advance_pm_c3c_p" name="pm_c3c_p" placeholder=""></td>
+            <td><input id="advance_pm_mc4c_rs" name="pm_mc4c_rs" placeholder="0.00"></td>
+            <td><input id="advance_pm_mc4c_p" name="pm_mc4c_p" placeholder=""></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="mt-12 text-mono-subtext text-right" style="font-size: 10px; color: var(--ink-light);">
+        MGIPTCal–16 Army/98-99—GIPTC–(M–16)–5-1-2000–12,00,000.
+      </div>
+    </div>
+  </div>
+</div>

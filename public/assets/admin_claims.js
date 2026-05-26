@@ -2,29 +2,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const viewTitle = document.getElementById('view-title');
     const contentDiv = document.getElementById('admin-claims-dynamic-content');
-    const yearSelect = document.getElementById('filter-year');
+    const periodSelect = document.getElementById('filter-period');
+    const customDateInput = document.getElementById('filter-custom-date');
 
-    let currentClaimId = null;
-    let currentAction = null;
     let currentStatusFilter = '';
 
-    // Populate years
-    const currentYear = new Date().getFullYear();
-    for (let i = 0; i < 5; i++) {
-        const opt = document.createElement('option');
-        opt.value = currentYear - i;
-        opt.textContent = currentYear - i;
-        yearSelect.appendChild(opt);
+    function getPeriodParam() {
+        const val = periodSelect.value;
+        if (val === 'custom') {
+            const d = customDateInput.value;
+            return d ? `&from_date=${d}&to_date=${d}` : '';
+        }
+        return `&period=${val}`;
     }
+
+    periodSelect.addEventListener('change', () => {
+        if (periodSelect.value === 'custom') {
+            customDateInput.style.display = 'inline-block';
+            customDateInput.valueAsDate = new Date();
+        } else {
+            customDateInput.style.display = 'none';
+        }
+        loadClaims(currentStatusFilter);
+    });
+
+    customDateInput.addEventListener('change', () => loadClaims(currentStatusFilter));
 
     async function loadClaims(statusFilter = '') {
         currentStatusFilter = statusFilter;
-        const selectedYear = yearSelect.value;
         contentDiv.innerHTML = '<p style="padding: 1rem; color: #64748b;">Loading claim data...</p>';
 
         try {
-            let url = `/api/admin/claims?status=${statusFilter}`;
-            if (selectedYear) url += `&year=${selectedYear}`;
+            let url = `/api/admin/claims?status=${statusFilter}${getPeriodParam()}`;
 
             const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -50,13 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             contentDiv.innerHTML = Object.keys(grouped).map(typeName => `
                 <div class="claim-type-section" style="margin-bottom: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-                    <h3 style="background: #f8fafc; padding: 12px 20px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 700; color: #334155;">
-                        ${typeName} <span style="font-weight: 400; color: #94a3b8; font-size: 0.8rem; margin-left: 10px;">${grouped[typeName].length} items</span>
+                    <h3 style="background: #f8fafc; padding: 12px 20px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 700; color: #334155; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            ${typeName} <span style="font-weight: 400; color: #94a3b8; font-size: 0.8rem; margin-left: 10px;">${grouped[typeName].length} items</span>
+                        </div>
+                        <button onclick="generateMultiFwdNote('${typeName.replace(/'/g, "\\'")}')" style="background: #4f46e5; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">Generate Multi-Forward Note</button>
                     </h3>
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <thead>
                             <tr style="background: white;">
-                                <th style="border-bottom: 2px solid #f1f5f9; padding: 12px 20px; width: 200px; font-size: 0.75rem; text-transform: uppercase; color: #64748b;">User Details</th>
+                                <th style="border-bottom: 2px solid #f1f5f9; padding: 12px 10px 12px 20px; width: 40px;"><input type="checkbox" onclick="toggleGroup(this, '${typeName.replace(/'/g, "\\'")}')"></th>
+                                <th style="border-bottom: 2px solid #f1f5f9; padding: 12px 20px; width: 180px; font-size: 0.75rem; text-transform: uppercase; color: #64748b;">User Details</th>
                                 <th style="border-bottom: 2px solid #f1f5f9; padding: 12px 20px; font-size: 0.75rem; text-transform: uppercase; color: #64748b;">Claim Details</th>
                                 <th style="border-bottom: 2px solid #f1f5f9; padding: 12px 20px; width: 140px; font-size: 0.75rem; text-transform: uppercase; color: #64748b;">Submitted</th>
                                 <th style="border-bottom: 2px solid #f1f5f9; padding: 12px 20px; width: 100px; font-size: 0.75rem; text-transform: uppercase; color: #64748b;">Status</th>
@@ -67,6 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tbody>
                             ${grouped[typeName].map(c => `
                                 <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 12px 10px 12px 20px;">
+                                        <input type="checkbox" class="claim-cb claim-cb-${typeName.replace(/[^a-zA-Z0-9]/g, '')}" value="${c.id}" data-type="${typeName.replace(/'/g, "\\'")}" data-name="${c.user_name || ''}" data-desig="${c.designation || ''}" data-pno="${c.personal_no || ''}" data-gender="${c.gender || ''}">
+                                    </td>
                                     <td style="padding: 12px 20px; font-size: 11px;">
                                         <div style="font-weight: 700; color: #1e293b;">${c.user_name}</div>
                                         <div style="color: #64748b;">${c.designation}</div>
@@ -179,13 +195,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event Listeners for Filters
-    yearSelect.addEventListener('change', () => loadClaims(currentStatusFilter));
+    // Event Listeners for Status Filters
     document.getElementById('btn-show-all').addEventListener('click', () => { setActiveTab('btn-show-all'); viewTitle.textContent = 'All Submitted Claims'; loadClaims(''); });
     document.getElementById('btn-show-pending').addEventListener('click', () => { setActiveTab('btn-show-pending'); viewTitle.textContent = 'Pending Claims'; loadClaims('Pending'); });
     document.getElementById('btn-show-approved').addEventListener('click', () => { setActiveTab('btn-show-approved'); viewTitle.textContent = 'Approved Claims'; loadClaims('Approved'); });
     document.getElementById('btn-show-returned').addEventListener('click', () => { setActiveTab('btn-show-returned'); viewTitle.textContent = 'Returned Claims'; loadClaims('Returned'); });
     document.getElementById('btn-show-rejected').addEventListener('click', () => { setActiveTab('btn-show-rejected'); viewTitle.textContent = 'Rejected Claims'; loadClaims('Rejected'); });
+
+    window.toggleGroup = function(masterCb, typeName) {
+        const safeName = typeName.replace(/[^a-zA-Z0-9]/g, '');
+        document.querySelectorAll(`.claim-cb-${safeName}`).forEach(cb => cb.checked = masterCb.checked);
+    };
+
+    window.generateMultiFwdNote = function(typeName) {
+        const safeName = typeName.replace(/[^a-zA-Z0-9]/g, '');
+        const selectedCbs = document.querySelectorAll(`.claim-cb-${safeName}:checked`);
+        if (selectedCbs.length === 0) {
+            alert('Please select at least one claim to generate a Forwarding Note.');
+            return;
+        }
+
+        // Pack selected individuals into sessionStorage and navigate to multi_fwd_note page
+        const individuals = Array.from(selectedCbs).map(cb => ({
+            id:     cb.value,
+            name:   cb.getAttribute('data-name'),
+            desig:  cb.getAttribute('data-desig'),
+            pno:    cb.getAttribute('data-pno'),
+            gender: cb.getAttribute('data-gender')
+        }));
+
+        sessionStorage.setItem('multiFwdNote', JSON.stringify({
+            typeName,
+            individuals,
+            claimIds: individuals.map(i => i.id)
+        }));
+
+        window.open('/admin/multi_fwd_note.html', '_blank');
+    };
 
     loadClaims('');
 });

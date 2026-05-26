@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const res = await fetch(`/claims/${folderName}/template.html`);
+            const res = await fetch(`/claims/${folderName}/template.html?v=${new Date().getTime()}`);
 
             if (!res.ok) {
                 // ─── FIX 3: Log HTTP status for easier debugging
@@ -136,6 +136,87 @@ document.addEventListener('DOMContentLoaded', async () => {
             setVal('mrc_mobile_number', currentUser.mobile_no);
             setVal('mrc_email', currentUser.email);
             setVal('declaration_name_desig', (currentUser.name || '') + (currentUser.designation ? ', ' + currentUser.designation : ''));
+
+            // Autofill for Advance of Pay/TA (IAF A-194)
+            setVal('advance_name', currentUser.name);
+            setVal('advance_rank', currentUser.designation);
+            setVal('advance_basic_pay', currentUser.basic_pay);
+            setVal('advance_grade_pay', currentUser.pay_level);
+            setVal('advance_authority_no', currentUser.authority || currentUser.orders_for_move);
+            if (currentUser.move_date) {
+                try {
+                    const d = new Date(currentUser.move_date);
+                    if (!isNaN(d.getTime())) {
+                        setVal('advance_authority_date', d.toISOString().split('T')[0]);
+                    }
+                } catch (e) {
+                    console.error('[claims_new] move_date formatting error:', e);
+                }
+            }
+            if (currentUser.dependents && Array.isArray(currentUser.dependents)) {
+                const familyStr = currentUser.dependents.map(dep => {
+                    let ageStr = '';
+                    if (dep.dob) {
+                        const dob = new Date(dep.dob);
+                        if (!isNaN(dob.getTime())) {
+                            const age = Math.abs(new Date(Date.now() - dob.getTime()).getUTCFullYear() - 1970);
+                            ageStr = `, ${age} yrs`;
+                        }
+                    }
+                    return `${dep.name} (${dep.relationship || 'Dependent'}${ageStr})`;
+                }).join(', ');
+                setVal('advance_family_details', familyStr);
+            }
+
+            // Real-time amount to words conversion for IAF A-194 Requisition
+            const amtNumEl = document.getElementById('advance_amount_num');
+            const amtWordsEl = document.getElementById('advance_amount_words');
+
+            function convertNumberToWords(num) {
+                const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ',
+                    'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ',
+                    'Seventeen ', 'Eighteen ', 'Nineteen '];
+                const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+                function convert(n) {
+                    if (n < 20) return a[n];
+                    if (n < 100) return b[Math.floor(n / 10)] + (n % 10 > 0 ? '-' + a[n % 10] : '') + ' ';
+                    if (n < 1000) return a[Math.floor(n / 100)] + 'Hundred ' + (n % 100 > 0 ? 'and ' + convert(n % 100) : '');
+                    return '';
+                }
+
+                let n = Math.floor(num);
+                if (n === 0) return 'Zero';
+                let str = '';
+                const groups = [
+                    { unit: 'Crore ', val: 10000000 },
+                    { unit: 'Lakh ', val: 100000 },
+                    { unit: 'Thousand ', val: 1000 },
+                    { unit: 'Hundred ', val: 100 }
+                ];
+                for (const g of groups) {
+                    const gVal = Math.floor(n / g.val);
+                    if (gVal > 0) { str += convert(gVal) + g.unit; n %= g.val; }
+                }
+                if (n > 0) { if (str !== '') str += 'and '; str += convert(n); }
+                const p = Math.round((num - Math.floor(num)) * 100);
+                if (p > 0) str += 'and ' + convert(p) + 'Paisa ';
+                return str.trim();
+            }
+
+            if (amtNumEl && amtWordsEl) {
+                const handleAmtInput = () => {
+                    const val = parseFloat(amtNumEl.value);
+                    if (!isNaN(val) && val > 0) {
+                        amtWordsEl.value = convertNumberToWords(val);
+                    } else {
+                        amtWordsEl.value = '';
+                    }
+                };
+                amtNumEl.addEventListener('input', handleAmtInput);
+                // Trigger once in case edit mode loads an existing number
+                handleAmtInput();
+            }
 
             const affidavitEl = document.getElementById('affidavitText');
             if (affidavitEl) {

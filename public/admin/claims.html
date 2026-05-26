@@ -42,10 +42,14 @@
         </div>
         
         <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
-            <label for="filter-year" style="font-weight: 600; font-size: 0.85rem; color: #64748b;">Period:</label>
-            <select id="filter-year" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none; cursor: pointer;">
-                <option value="">Last 6 Months</option>
+            <label for="filter-period" style="font-weight: 600; font-size: 0.85rem; color: #64748b;">Period:</label>
+            <select id="filter-period" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none; cursor: pointer;">
+                <option value="5d" selected>Last 5 Days</option>
+                <option value="3w">Last 3 Weeks</option>
+                <option value="1m">Last 1 Month</option>
+                <option value="custom">Select Date</option>
             </select>
+            <input type="date" id="filter-custom-date" style="display:none; padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none; cursor: pointer;">
         </div>
     </div>
 

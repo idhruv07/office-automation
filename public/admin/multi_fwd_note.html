@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Medical Claim Forwarding – CDA IT&SDC</title>
+<title>Multi-Claim Forwarding Note</title>
 <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body id="fwd-body">
@@ -14,10 +14,10 @@
 
 <div class="fwd-page" id="formPage">
 
-  <!-- LETTERHEAD — all elements have IDs so fwd_note.js can inject office config -->
+  <!-- LETTERHEAD -->
   <div class="fwd-letterhead">
     <div class="fwd-lh-img">
-      <img id="logoLeft" src="images/emblem.png" alt="Defence Accounts Department Emblem">
+      <img id="logoLeft" src="images/emblem.png" alt="Emblem">
     </div>
     <div class="fwd-lh-center">
       <div class="fwd-lh-title" id="officeName">OFFICE OF THE CDA ( IT &amp; SDC)</div>
@@ -51,16 +51,10 @@
     Secunderabad-09
   </div>
 
-  <!-- Subject -->
+  <!-- Subject — editable claim type, multi-person -->
   <div class="fwd-sub-block">
     <div class="fwd-sub-line">
-      <span>Sub&nbsp;:&nbsp;<span class="fwd-ghost" id="subClaimType" contenteditable="true" spellcheck="false">Medical claim</span> in r/o&nbsp;</span>
-      <span class="fwd-ghost" id="subSalutation" contenteditable="true" spellcheck="false">Shri.</span>&nbsp;<span class="fwd-ghost" id="subName" contenteditable="true" data-ph="Name" spellcheck="false"></span><span
-        id="sepComma" style="display:none">,&nbsp;</span><span
-        class="fwd-ghost" id="subDesig" contenteditable="true" data-ph="Designation" spellcheck="false"></span><span
-        id="sepSlash" style="display:none">/</span><span
-        class="fwd-ghost" id="subPno"   contenteditable="true" data-ph="Personnel No." spellcheck="false"></span><span
-        >&nbsp;&ndash;&nbsp;Reg.</span>
+      <span>Sub&nbsp;:&nbsp;Submission of <span class="fwd-ghost" id="subClaimType" contenteditable="true" spellcheck="false">Medical claim</span> &ndash; Reg.</span>
     </div>
   </div>
 
@@ -68,13 +62,22 @@
 
   <!-- Body -->
   <div class="fwd-body-para">
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fwd-ghost" id="bodyClaimType" contenteditable="true" spellcheck="false">Medical reimbursement claim</span> in r/o <span id="bodySalutationText">Shri.</span>&nbsp;<span
-      class="fwd-ghost" id="bodyName"  contenteditable="true" data-ph="Name" spellcheck="false"></span><span
-      id="bSepComma" style="display:none">,&nbsp;</span><span
-      class="fwd-ghost" id="bodyDesig" contenteditable="true" data-ph="Designation" spellcheck="false"></span><span
-      id="bSepSlash" style="display:none">/</span><span
-      class="fwd-ghost" id="bodyPno"   contenteditable="true" data-ph="Personnel No." spellcheck="false"></span>&nbsp;is forwarded herewith for further necessary action at your end please.
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fwd-ghost" id="bodyClaimType" contenteditable="true" spellcheck="false">Medical reimbursement claim</span> in r/o of the individuals mentioned below is forwarded herewith for further necessary action at your end please:
   </div>
+
+  <!-- Individuals Table -->
+  <table id="individualsTable" style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:13px;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:8%;">Sr. No.</th>
+        <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:52%;">Name</th>
+        <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:40%;">Post/Personal Number</th>
+      </tr>
+    </thead>
+    <tbody id="individualsBody">
+      <!-- Rows injected by multi_fwd_note.js -->
+    </tbody>
+  </table>
 
   <div class="fwd-sig-block">
     <span id="signatoryName">Sr. Accounts Officer</span><br>
@@ -96,6 +99,6 @@
 
 <script src="/assets/menu.js"></script>
 <script src="/assets/layout.js"></script>
-<script src="/assets/fwd_note.js"></script>
+<script src="/assets/multi_fwd_note.js"></script>
 </body>
 </html>

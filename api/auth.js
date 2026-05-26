@@ -182,10 +182,7 @@ router.post('/theme', require('./middleware').authenticateToken, async (req, res
 router.get('/menu', require('./middleware').authenticateToken, async (req, res) => {
     try {
         const userResult = await db.query('SELECT r.permissions, r.name as role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = $1', [req.user.id]);
-        if (userResult.rows.length === 0) {
-            console.log('Menu API: User/Role not found for ID', req.user.id);
-            return res.json([]);
-        }
+        if (userResult.rows.length === 0) return res.json([]);
 
         let permissions = userResult.rows[0].permissions || {};
         const roleName = userResult.rows[0].role_name;
@@ -196,18 +193,34 @@ router.get('/menu', require('./middleware').authenticateToken, async (req, res) 
         }
 
         const menuResult = await db.query('SELECT * FROM menu_items ORDER BY display_order ASC');
-        const items = menuResult.rows;
-        console.log(`Menu API: Total menu items in DB: ${items.length}`);
+        const allItems = menuResult.rows;
 
-        const filteredMenu = items.filter(item => {
+        // Filter items the user has permission to see
+        const allowed = allItems.filter(item => {
             const reqPerm = item.permission_required;
-            if (!reqPerm || (typeof reqPerm === 'string' && reqPerm.trim() === '')) return true;
-            const hasPerm = permissions[reqPerm] === true;
-            return hasPerm;
+            if (!reqPerm || reqPerm.trim() === '') return true;
+            return permissions[reqPerm] === true;
         });
 
-        console.log(`Menu API: Returning ${filteredMenu.length} items`);
-        res.json(filteredMenu);
+        const allowedIds = new Set(allowed.map(i => i.id));
+
+        // Build nested tree: top-level items with children array
+        const topLevel = allowed
+            .filter(i => !i.parent_id)
+            .map(i => ({ ...i, children: [] }));
+
+        const topMap = new Map(topLevel.map(i => [i.id, i]));
+
+        // Attach children to parents
+        allowed
+            .filter(i => i.parent_id && topMap.has(i.parent_id))
+            .forEach(i => topMap.get(i.parent_id).children.push(i));
+
+        // Remove group-headers that have no visible children after filtering
+        const tree = topLevel.filter(i => i.link !== '#' || i.children.length > 0);
+
+        console.log(`Menu API: Returning ${tree.length} top-level items`);
+        res.json(tree);
     } catch (err) {
         console.error('Menu API error:', err);
         res.status(500).json({ message: 'Server error' });

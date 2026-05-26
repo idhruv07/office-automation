@@ -1,11 +1,34 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const claimId = urlParams.get('id');
     const token = localStorage.getItem('token');
 
-    // Default current date
+    // ── 1. FETCH & INJECT OFFICE CONFIG ────────────────────────────────────────
+    let officeConfig = {};
+    try {
+        const configRes = await fetch('/api/admin/office-config', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (configRes.ok) officeConfig = await configRes.json();
+    } catch (e) { console.warn('Could not load office config, using HTML defaults.'); }
+
+    // Inject into letterhead DOM elements (fall back to existing HTML text if config missing)
+    if (officeConfig.office_name)      document.getElementById('officeName').textContent      = officeConfig.office_name;
+    if (officeConfig.office_address)   document.getElementById('officeAddress').textContent   = officeConfig.office_address;
+    if (officeConfig.office_sub_address) document.getElementById('officeSubAddr').textContent = officeConfig.office_sub_address;
+    if (officeConfig.city_state_pin)   document.getElementById('officeCityPin').textContent   = officeConfig.city_state_pin;
+    if (officeConfig.phone)            document.getElementById('officePhone').textContent      = officeConfig.phone;
+    if (officeConfig.email)            document.getElementById('officeEmail').textContent      = officeConfig.email;
+    if (officeConfig.fwd_ref_no)       document.getElementById('fwdRefNo').textContent        = officeConfig.fwd_ref_no;
+    if (officeConfig.signatory_name)   document.getElementById('signatoryName').textContent   = officeConfig.signatory_name;
+    if (officeConfig.signatory_dept)   document.getElementById('signatoryDept').textContent   = officeConfig.signatory_dept;
+    if (officeConfig.logo_left_url)  { const img = document.getElementById('logoLeft');  if (img) img.src = officeConfig.logo_left_url; }
+    if (officeConfig.logo_right_url) { const img = document.getElementById('logoRight'); if (img) img.src = officeConfig.logo_right_url; }
+
+    // ── 2. DEFAULT DATE ─────────────────────────────────────────────────────────
     document.getElementById('letterDate').valueAsDate = new Date();
 
+    // ── 3. FETCH CLAIM DATA & AUTO-FILL ────────────────────────────────────────
     if (claimId) {
         fetch('/api/admin/claims', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -61,12 +84,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('subClaimType').textContent = subClaimString;
                 document.getElementById('bodyClaimType').textContent = bodyClaimString;
                 
+                // ── Fetch claim-type-specific ref no and override if set ──────
+                if (claim.type_id) {
+                    fetch(`/api/admin/claim-ref-nos/${claim.type_id}/current`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.ref_no) {
+                            const refEl = document.getElementById('fwdRefNo');
+                            if (refEl) refEl.textContent = data.ref_no;
+                        }
+                    })
+                    .catch(() => {});
+                }
+
                 updateSeps();
             }
         })
         .catch(err => console.error("Error fetching claim data:", err));
     }
 
+
+    // ── 4. TWO-WAY FIELD SYNC ───────────────────────────────────────────────────
     function wire(srcId, dstId) {
         var src = document.getElementById(srcId);
         var dst = document.getElementById(dstId);
@@ -95,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('input', updateSeps);
     });
 
+    // ── 5. BUILD HTML SNAPSHOT ──────────────────────────────────────────────────
     function formatDate(val) {
         if(!val) return '';
         var p = val.split('-');
@@ -106,32 +147,43 @@ document.addEventListener('DOMContentLoaded', () => {
     var base = window.location.href.replace(/\/[^\/]*$/, '/');
 
     function buildBody() {
-        var claimType = document.getElementById('subClaimType').textContent.trim();
-        var salutation = document.getElementById('subSalutation').textContent.trim();
-        var name  = document.getElementById('subName').textContent.trim();
-        var desig = document.getElementById('subDesig').textContent.trim();
-        var pno   = document.getElementById('subPno').textContent.trim();
-        var date  = formatDate(document.getElementById('letterDate').value);
-        var refStr = salutation + ' ' + name + (name&&desig?', ':'') + desig + ((name||desig)&&pno?'/':'') + pno;
-        var emblem = base + 'images/emblem.png';
-        var azadi  = base + 'images/azadi.png';
-        
-        var bodyClaimType = document.getElementById('bodyClaimType').textContent.trim();
+        var claimType    = document.getElementById('subClaimType').textContent.trim();
+        var salutation   = document.getElementById('subSalutation').textContent.trim();
+        var name         = document.getElementById('subName').textContent.trim();
+        var desig        = document.getElementById('subDesig').textContent.trim();
+        var pno          = document.getElementById('subPno').textContent.trim();
+        var date         = formatDate(document.getElementById('letterDate').value);
+        var refStr       = salutation + ' ' + name + (name&&desig?', ':'') + desig + ((name||desig)&&pno?'/':'') + pno;
+        var bodyClaimType= document.getElementById('bodyClaimType').textContent.trim();
+
+        // Use live DOM values (already set from officeConfig)
+        var oName    = document.getElementById('officeName').textContent.trim();
+        var oAddr    = document.getElementById('officeAddress').textContent.trim();
+        var oSub     = document.getElementById('officeSubAddr').textContent.trim();
+        var oCity    = document.getElementById('officeCityPin').textContent.trim();
+        var oPhone   = document.getElementById('officePhone').textContent.trim();
+        var oEmail   = document.getElementById('officeEmail').textContent.trim();
+        var oRef     = document.getElementById('fwdRefNo').textContent.trim();
+        var oSigName = document.getElementById('signatoryName').textContent.trim();
+        var oSigDept = document.getElementById('signatoryDept').textContent.trim();
+        var logoLeftSrc  = document.getElementById('logoLeft')  ? document.getElementById('logoLeft').src  : (base + 'images/emblem.png');
+        var logoRightSrc = document.getElementById('logoRight') ? document.getElementById('logoRight').src : (base + 'images/azadi.png');
 
         return `
         <div class="fwd-letterhead">
-          <div class="fwd-lh-img"><img src="${emblem}" alt="Emblem"></div>
+          <div class="fwd-lh-img"><img src="${logoLeftSrc}" alt="Emblem"></div>
           <div class="fwd-lh-center">
-            <div class="fwd-lh-title">OFFICE OF THE CDA ( IT &amp; SDC)</div>
-            <div class="fwd-lh-sub">Mornington Road, PAO(ORs)AOC Compound,</div>
-            <div class="fwd-lh-sub">Trimulgherry, Secunderabad &ndash; 500 015.</div>
-            <div class="fwd-lh-email">Email: itsdcsec-cda@nic.in</div>
-            <div class="fwd-lh-phone">Phone/ Fax No: 040-27742553/29805085</div>
+            <div class="fwd-lh-title">${oName}</div>
+            <div class="fwd-lh-sub">${oAddr}</div>
+            ${oSub  ? `<div class="fwd-lh-sub">${oSub}</div>`   : ''}
+            ${oCity ? `<div class="fwd-lh-sub">${oCity}</div>` : ''}
+            ${oEmail ? `<div class="fwd-lh-email">Email: ${oEmail}</div>` : ''}
+            ${oPhone ? `<div class="fwd-lh-phone">Phone/ Fax No: ${oPhone}</div>` : ''}
           </div>
-          <div class="fwd-lh-img"><img src="${azadi}" alt="Azadi Ka Amrit Mahotsav"></div>
+          <div class="fwd-lh-img"><img src="${logoRightSrc}" alt="Logo Right"></div>
         </div>
         <div class="fwd-meta-row">
-          <span>No. IT&amp;SDC/Estt/Vol-VI</span>
+          <span>No. ${oRef}</span>
           <span>Date: ${date}</span>
         </div>
         <div class="fwd-to-block">
@@ -145,10 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fwd-body-para">
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${bodyClaimType} in r/o ${refStr} is forwarded herewith for further necessary action at your end please.
         </div>
-        <div class="fwd-sig-block">Sr. Accounts Officer<br>(IT&amp;SDC)</div>
+        <div class="fwd-sig-block">${oSigName}<br>${oSigDept}</div>
         `;
     }
 
+    // ── 6. SAVE & PREVIEW ───────────────────────────────────────────────────────
     document.getElementById('btnPreview').addEventListener('click', () => {
         const content = buildBody();
         const htmlToSave = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Forwarding Note</title><link rel="stylesheet" href="/assets/style.css"><style>body { padding:28px 36px 40px !important; background: #fff; }</style></head><body>${content}</body></html>`;
@@ -175,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(err);
             });
         } else {
-            // If no claimId, just show preview
             document.getElementById('previewContent').innerHTML = content;
             document.getElementById('previewModal').classList.add('active');
             document.body.classList.add('modal-active');
