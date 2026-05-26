@@ -35,7 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
             renderUsers();
         });
     }
-});
+
+    // Wire Search Input
+    const searchInput = document.getElementById('filter-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            currentSearchFilter = e.target.value.toLowerCase().trim();
+            renderUsers();
+        });
+    }
+
 
 function openCreateModal() {
     const modal = document.getElementById('create-user-modal');
@@ -59,57 +68,64 @@ function closeCreateModal() {
     }, 300);
 }
 
-document.getElementById('create-user-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    const userData = {
-        username: document.getElementById('new-username').value.trim(),
-        password: document.getElementById('new-password').value,
-        name: document.getElementById('new-name').value.trim(),
-        designation: document.getElementById('new-designation').value,
-        email: document.getElementById('new-email').value.trim(),
-        personal_no: document.getElementById('new-personal_no').value.trim(),
-        gender: document.getElementById('new-gender').value,
-        role_name: document.getElementById('new-role').value
-    };
+    document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        const userData = {
+            username: document.getElementById('new-username').value.trim(),
+            password: document.getElementById('new-password').value,
+            name: document.getElementById('new-name').value.trim(),
+            designation: document.getElementById('new-designation').value,
+            email: document.getElementById('new-email').value.trim(),
+            personal_no: document.getElementById('new-personal_no').value.trim(),
+            gender: document.getElementById('new-gender').value,
+            role_name: document.getElementById('new-role').value
+        };
 
-    const errDiv = document.getElementById('create-user-error');
-    if (errDiv) errDiv.classList.add('hidden');
+        const errDiv = document.getElementById('create-user-error');
+        if (errDiv) errDiv.classList.add('hidden');
 
-    try {
-        const response = await fetch('/api/admin/users', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(userData)
-        });
+        try {
+            const response = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(userData)
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            alert('User created successfully and storage initialized!');
-            e.target.reset();
-            closeCreateModal();
-            await loadUsers(); // Auto-reload list on success
-        } else {
-            if (errDiv) {
-                errDiv.textContent = data.message || 'Error creating user';
-                errDiv.classList.remove('hidden');
+            const data = await response.json();
+            if (response.ok) {
+                alert('User created successfully and storage initialized!');
+                e.target.reset();
+                closeCreateModal();
+                await loadUsers(); // Auto-reload list on success
             } else {
-                alert(data.message || 'Error creating user');
+                const errorMsg = data.message || 'Error creating user';
+                if (errDiv) {
+                    errDiv.textContent = errorMsg;
+                    errDiv.style.color = '#ef4444';
+                    errDiv.style.fontSize = '12px';
+                    errDiv.style.fontWeight = '600';
+                    errDiv.style.marginTop = '8px';
+                    errDiv.classList.remove('hidden');
+                }
+                alert('Failed to create user: ' + errorMsg);
             }
+        } catch (err) {
+            console.error(err);
+            alert('Network error while creating user: ' + err.message);
         }
-    } catch (err) {
-        console.error(err);
-        alert('Network error');
-    }
+    });
+
 });
 
 let allUsers = [];
 let currentRoleFilter = 'all';
 let currentStatusFilter = 'all';
 let currentDesignationFilter = 'all';
+let currentSearchFilter = '';
 
 async function loadUsers() {
     const token = localStorage.getItem('token');
@@ -128,6 +144,14 @@ async function loadUsers() {
 
 function renderUsers() {
     const filtered = allUsers.filter(user => {
+        // Search filter
+        if (currentSearchFilter) {
+            const name = (user.name || '').toLowerCase();
+            const personalNo = (user.personal_no || '').toLowerCase();
+            if (!name.includes(currentSearchFilter) && !personalNo.includes(currentSearchFilter)) {
+                return false;
+            }
+        }
         // Role filter
         if (currentRoleFilter !== 'all') {
             if (user.role_name !== currentRoleFilter) return false;

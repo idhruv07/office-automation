@@ -227,19 +227,23 @@
         </table>
     </div>
 
-    <!-- Section 2: Family Details -->
     <h3>
         <span>2. family DETAILS / परिवार का ब्यौरा</span>
-        <button type="button" id="ltcFinalAddFamilyBtn" class="no-print" style="background: #3b82f6; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">+ Add Family Member</button>
+        <div class="no-print" style="display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 10px; font-weight: 400; color: #475569;">Add from profile:</span>
+            <select id="ltc_final_family" style="font-size: 10px; padding: 2px 6px; border: 1px solid #ccc; border-radius: 4px; background: white;">
+                <option value="">-- Select Member --</option>
+            </select>
+            <button type="button" id="ltcFinalAddFamilyBtn" style="background: #3b82f6; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">+ Add Manual</button>
+        </div>
     </h3>
     <table id="ltcFinalFamilyTable">
         <thead>
             <tr>
                 <th style="width: 8%; text-align: center;">Sl No</th>
-                <th style="width: 35%;">Name of Family Member / नाम</th>
-                <th style="width: 25%;">Relationship / संबंध</th>
-                <th style="width: 12%; text-align: center;">Age / आयु</th>
-                <th style="width: 15%; text-align: center;">Travel Date</th>
+                <th style="width: 45%;">Name of Family Member / नाम</th>
+                <th style="width: 15%; text-align: center;">Age / आयु</th>
+                <th style="width: 27%;">Relationship / संबंध</th>
                 <th style="width: 5%;" class="no-print">Actions</th>
             </tr>
         </thead>
