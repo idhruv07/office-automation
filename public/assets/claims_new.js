@@ -1153,11 +1153,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Restore all field values
                     Object.keys(claim.data).forEach(key => {
                         const input = templateContainer.querySelector(`[name="${key}"]`);
-                        if (!input) return;
-                        if (input.type === 'checkbox' || input.type === 'radio') {
-                            input.checked = (input.value === claim.data[key] || claim.data[key] === 'on' || claim.data[key] === true);
-                        } else {
-                            input.value = claim.data[key];
+                        if (input) {
+                            if (input.type === 'checkbox' || input.type === 'radio') {
+                                input.checked = (input.value === claim.data[key] || claim.data[key] === 'on' || claim.data[key] === true);
+                            } else {
+                                input.value = claim.data[key];
+                            }
+                        }
+                        
+                        // Also restore associated contenteditable divs (e.g. Journey Stations)
+                        const editableDiv = templateContainer.querySelector(`div[data-name="${key}"]`);
+                        if (editableDiv && editableDiv.hasAttribute('contenteditable')) {
+                            editableDiv.textContent = claim.data[key];
                         }
                     });
 
