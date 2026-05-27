@@ -2,10 +2,21 @@
   "name": "office-automation",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "electron-main.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "jest"
+    "start": "electron .",
+    "server": "node server.js",
+    "test": "jest",
+    "build:linux": "electron-builder --linux AppImage"
+  },
+  "build": {
+    "appId": "com.office.automation",
+    "productName": "Office Automation",
+    "linux": {
+      "target": "AppImage",
+      "category": "Office"
+    },
+    "asar": false
   },
   "keywords": [],
   "author": "",
@@ -23,6 +34,8 @@
     "pg": "^8.20.0"
   },
   "devDependencies": {
+    "electron": "^42.3.0",
+    "electron-builder": "^26.8.1",
     "jest": "^30.3.0",
     "supertest": "^7.2.2"
   }

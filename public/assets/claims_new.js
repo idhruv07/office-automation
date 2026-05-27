@@ -237,6 +237,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 updateAffidavit();
             }
 
+            const declarationEl = document.getElementById('declarationText');
+            if (declarationEl) {
+                declarationEl.dataset.templateText = declarationEl.value;
+                const updateDeclaration = () => {
+                    const name = currentUser.name || '';
+                    const address = document.getElementById('mrc_full_address')?.value || '';
+                    let text = declarationEl.dataset.templateText;
+                    text = text.replace('{Name Of Individual}', name);
+                    text = text.replace('[Adress]', address);
+                    declarationEl.value = text;
+                    declarationEl.style.height = 'auto';
+                    declarationEl.style.height = declarationEl.scrollHeight + 'px';
+                };
+                const addressInput = document.getElementById('mrc_full_address');
+                if (addressInput) {
+                    addressInput.addEventListener('input', updateDeclaration);
+                }
+                declarationEl.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+                // setTimeout ensures scrollHeight is calculated after layout
+                setTimeout(updateDeclaration, 0);
+            }
+
             // ── Date helpers ──────────────────────────────────────────────────
             function getTodayDDMMYYYY() {
                 const d = new Date();
@@ -245,6 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const todayFormatted = getTodayDDMMYYYY();
 
             setVal('declaration_date', todayFormatted);
+            setVal('declaration_page_date', todayFormatted);
             setVal('affidavit_date', todayFormatted);
             setVal('ltc_int_name', currentUser.name);
             setVal('ltc_int_designation', currentUser.designation);

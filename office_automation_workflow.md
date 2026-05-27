@@ -330,6 +330,7 @@ node db/migrate.js   # or: psql -U postgres -d office_automation -f db/migration
 | Contingent bills sent to admin | Frontend forced `Pending` for type_id=7; admin query showed all | Backend enforces Draft for Individual; admin query filters `r.name='Admin'` |
 | `uzpdateFields` typo | Typo in variable name caused `ReferenceError` | Fixed to `updateFields` |
 | HTML title mismatch in saved file | Frontend sent full HTML doc; backend wrapped it again (nested docs) | Frontend now sends raw `innerHTML` only |
+| Medical Claim Declaration bugs | `declarationText` missing auto-fill logic and dynamic resize; date not auto-filled | Added `updateDeclaration` with text replacement and auto-resize; mapped `declaration_page_date` to current date in `claims_new.js` |
 
 ---
 
