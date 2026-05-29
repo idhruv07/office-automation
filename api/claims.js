@@ -166,6 +166,9 @@ router.post('/', authenticateToken, async (req, res) => {
                 <title>${claim_name}</title>
                 <style>
                     ${embeddedStyle}
+                    .no-print { display: none !important; }
+                    input[type="time"]::-webkit-calendar-picker-indicator { display: none !important; }
+                    .editable-td { word-wrap: break-word !important; word-break: break-word !important; overflow-wrap: break-word !important; white-space: pre-wrap !important; }
                 </style>
             </head>
             <body style="background: #f1f5f9; padding: 40px; display: flex; justify-content: center;">

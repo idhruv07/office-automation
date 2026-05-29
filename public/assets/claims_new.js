@@ -683,7 +683,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.ltcFinalRecalcTotal = function () {
                     let journeySum = 0;
                     document.querySelectorAll('.ltc-journey-total-amt').forEach(inp => {
-                        const val = parseFloat(inp.value);
+                        let valText = inp.value;
+                        if (valText === undefined) valText = inp.innerText;
+                        const val = parseFloat(valText);
                         if (!isNaN(val)) journeySum += val;
                     });
 
@@ -750,15 +752,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const tr = document.createElement('tr');
                     tr.innerHTML =
                         `<td><div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_dep_station_${n}"></div><input type="hidden" name="journey_dep_station_${n}"></td>` +
-                        `<td><input type="text" name="journey_dep_date_${n}" class="no-border-input" placeholder="dd/mm/yy"><input type="time" name="journey_dep_time_${n}" class="no-border-input"></td>` +
+                        `<td><input type="text" name="journey_dep_date_${n}" class="no-border-input td-date-format" placeholder="dd/mm/yy"><input type="text" name="journey_dep_time_${n}" class="no-border-input td-time-format" placeholder="HH:MM"></td>` +
                         `<td><div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_arr_station_${n}"></div><input type="hidden" name="journey_arr_station_${n}"></td>` +
-                        `<td><input type="text" name="journey_arr_date_${n}" class="no-border-input" placeholder="dd/mm/yy"><input type="time" name="journey_arr_time_${n}" class="no-border-input"></td>` +
-                        `<td><input type="text" name="journey_dist_${n}" class="no-border-input"></td>` +
-                        `<td><input type="text" name="journey_mode_${n}" class="no-border-input"></td>` +
-                        `<td><input type="number" name="journey_fare_${n}" class="no-border-input ltc-calc-trigger"></td>` +
-                        `<td><input type="number" name="journey_persons_${n}" class="no-border-input ltc-calc-trigger"></td>` +
-                        `<td><input type="number" name="journey_total_amt_${n}" class="no-border-input ltc-journey-total-amt font-bold"></td>` +
-                        `<td><input type="text" name="journey_ticket_no_${n}" class="no-border-input"></td>` +
+                        `<td><input type="text" name="journey_arr_date_${n}" class="no-border-input td-date-format" placeholder="dd/mm/yy"><input type="text" name="journey_arr_time_${n}" class="no-border-input td-time-format" placeholder="HH:MM"></td>` +
+                        `<td><div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_dist_${n}"></div><input type="hidden" name="journey_dist_${n}"></td>` +
+                        `<td><div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_mode_${n}"></div><input type="hidden" name="journey_mode_${n}"></td>` +
+                        `<td><div contenteditable="true" class="editable-td ltc-journey-total-amt font-bold ltc-calc-trigger ltc-station-sync" data-name="journey_total_amt_${n}"></div><input type="hidden" name="journey_total_amt_${n}"></td>` +
+                        `<td><div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_ticket_no_${n}"></div><input type="hidden" name="journey_ticket_no_${n}"></td>` +
                         `<td class="no-print"><button type="button" class="ltc-final-del-row" style="border:none;background:transparent;color:#ef4444;cursor:pointer;padding:0;width:100%;font-size:14px;">✕</button></td>`;
                     tbody.appendChild(tr);
                 }
@@ -1183,7 +1183,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                             if (input.type === 'checkbox' || input.type === 'radio') {
                                 input.checked = (input.value === claim.data[key] || claim.data[key] === 'on' || claim.data[key] === true);
                             } else {
-                                input.value = claim.data[key];
+                                let val = claim.data[key];
+                                if (key.includes('_date_') && typeof val === 'string' && val.match(/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{4}$/)) {
+                                    const parts = val.split(/[\/\-\.]/);
+                                    val = `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2].slice(-2)}`;
+                                }
+                                input.value = val;
                             }
                         }
                         
@@ -1233,6 +1238,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── Print preview ─────────────────────────────────────────────────────────
     document.getElementById('btn-print-preview').addEventListener('click', () => window.print());
+    
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('td-date-format')) {
+            let val = e.target.value.trim();
+            if (val.match(/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{4}$/)) {
+                const parts = val.split(/[\/\-\.]/);
+                e.target.value = `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2].slice(-2)}`;
+            }
+        }
+    });
 
     let pendingStatus = null;
     let pendingSaveMode = null;
