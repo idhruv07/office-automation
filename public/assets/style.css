@@ -1581,10 +1581,12 @@ tr:hover td {
 }
 
 .fwd-sig-block {
-    float: right;
+    margin-left: auto;
     text-align: center;
     width: 200px;
     font-weight: bold;
+    margin-top: 80px;
+    margin-bottom: 20px;
 }
 
 .fwd-ghost {

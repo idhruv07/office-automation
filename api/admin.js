@@ -595,5 +595,16 @@ router.get('/claim-ref-nos/:claim_type_id/current', authenticateToken, async (re
     }
 });
 
+// GET codeheads for dropdowns
+router.get('/codeheads', authenticateToken, async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM codeheads ORDER BY code_head ASC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('GET codeheads error:', err);
+        res.status(500).json({ message: 'Error fetching codeheads' });
+    }
+});
+
 module.exports = router;
 

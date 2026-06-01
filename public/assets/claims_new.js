@@ -16,6 +16,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!userRes.ok) throw new Error('Failed to fetch user details');
         currentUser = await userRes.json();
 
+        // Check if mandatory profile details are missing (Skip for Admin, role_id 1)
+        if (currentUser.role_id !== 1) {
+            const missingFields = [];
+            if (!currentUser.name || currentUser.name.trim() === '') missingFields.push('Name');
+            if (!currentUser.designation || currentUser.designation.trim() === '') missingFields.push('Designation');
+            if (!currentUser.personal_no || currentUser.personal_no.trim() === '') missingFields.push('Personal No');
+            if (!currentUser.basic_pay || currentUser.basic_pay.trim() === '') missingFields.push('Basic Pay');
+            if (!currentUser.pay_level || String(currentUser.pay_level).trim() === '') missingFields.push('Pay Level');
+
+            if (missingFields.length > 0) {
+                alert('Action Required: Please update the following missing details in your Profile before creating a claim:\n\n- ' + missingFields.join('\n- '));
+                window.location.href = '/profile.html';
+                return;
+            }
+        }
+
         // Auto-fill claim date
         const today = new Date().toISOString().split('T')[0];
         const claimDateEl = document.getElementById('claim_date');
@@ -280,7 +296,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setVal('ltc_final_personal_name', currentUser.name);
                 setVal('ltc_final_designation', currentUser.designation);
                 setVal('ltc_final_personal_no', currentUser.personal_no);
-                setVal('ltc_final_basic_pay', currentUser.basic_pay);
+                
+                // Format: Basic Pay + Pay Level (e.g., 50500 + Level 8)
+                const basicPay = currentUser.basic_pay || '';
+                let payLevel = currentUser.pay_level || '';
+                if (payLevel && !String(payLevel).toLowerCase().includes('level')) {
+                    payLevel = 'Level ' + payLevel;
+                }
+                const payDisplay = payLevel ? `${basicPay} + ${payLevel}` : basicPay;
+                setVal('ltc_final_basic_pay', payDisplay);
+
 
                 document.querySelectorAll('.ltc_final_name_sync').forEach(el => el.value = currentUser.name || '');
                 document.querySelectorAll('.ltc_final_pno_sync').forEach(el => el.value = currentUser.personal_no || '');
