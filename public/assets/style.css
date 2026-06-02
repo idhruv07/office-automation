@@ -3660,10 +3660,32 @@ body:not(.profile-id-card-active) .claim-action-btn:hover,
         border-bottom-style: solid;
     }
 
+    .iafa194-wrap .sig-block,
+    .iafa194-wrap .sig-stamp-row {
+        overflow: visible !important;
+    }
+
+    .iafa194-wrap input {
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+
     .iafa194-wrap .page-2 {
         page-break-before: always;
         break-before: page;
         margin-top: 0 !important;
+    }
+
+    .iafa194-wrap .doc-header {
+        padding: 8px 16px 8px;
+    }
+
+    .iafa194-wrap .receipt-section {
+        padding: 8px 16px;
+    }
+
+    .iafa194-wrap .punching-section {
+        padding: 8px 16px 12px;
     }
 }
 

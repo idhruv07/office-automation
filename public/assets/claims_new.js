@@ -19,10 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Check if mandatory profile details are missing (Skip for Admin, role_id 1)
         if (currentUser.role_id !== 1) {
             const missingFields = [];
-            if (!currentUser.name || currentUser.name.trim() === '') missingFields.push('Name');
-            if (!currentUser.designation || currentUser.designation.trim() === '') missingFields.push('Designation');
-            if (!currentUser.personal_no || currentUser.personal_no.trim() === '') missingFields.push('Personal No');
-            if (!currentUser.basic_pay || currentUser.basic_pay.trim() === '') missingFields.push('Basic Pay');
+            if (!currentUser.name || String(currentUser.name).trim() === '') missingFields.push('Name');
+            if (!currentUser.designation || String(currentUser.designation).trim() === '') missingFields.push('Designation');
+            if (!currentUser.personal_no || String(currentUser.personal_no).trim() === '') missingFields.push('Personal No');
+            if (!currentUser.basic_pay || String(currentUser.basic_pay).trim() === '') missingFields.push('Basic Pay');
             if (!currentUser.pay_level || String(currentUser.pay_level).trim() === '') missingFields.push('Pay Level');
 
             if (missingFields.length > 0) {
@@ -1327,7 +1327,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (input.name === 'bank_account_no' || input.name === 'bank_ifsc') {
                     return;
                 }
-                formData[input.name] = input.value;
+                // For radio buttons, only store the checked one's value
+                if (input.type === 'radio') {
+                    if (input.checked) formData[input.name] = input.value;
+                } else if (input.type === 'checkbox') {
+                    formData[input.name] = input.checked ? input.value : '';
+                } else {
+                    formData[input.name] = input.value;
+                }
             }
 
             if (input.tagName === 'INPUT') {

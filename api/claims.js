@@ -188,6 +188,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
         // Save HTML File to storage
         const userStoragePath = path.join(__dirname, '..', 'server', 'storage', ownerUsername, 'claims');
+        await fs.ensureDir(userStoragePath);
         let saveDir = userStoragePath;
         if (finalFolderName && finalFolderName.trim() !== '') {
             saveDir = path.join(userStoragePath, finalFolderName.trim());
@@ -195,7 +196,7 @@ router.post('/', authenticateToken, async (req, res) => {
         }
         
         const filePath = path.join(saveDir, `${claimId}.html`);
-        await fs.writeFile(filePath, html);
+        await fs.outputFile(filePath, html);
 
         // Record or Update the generated file in bill_files table
         const relativePath = path.join('storage', ownerUsername, 'claims', finalFolderName ? finalFolderName.trim() : '', `${claimId}.html`);
@@ -214,7 +215,7 @@ router.post('/', authenticateToken, async (req, res) => {
         if (finalStatus === 'Pending') {
             const fwdNotePath = path.join(userStoragePath, `${claimId}_forwarding_note.txt`);
             const noteContent = `Forwarding Note for Claim #${claimId}\nName: ${ownerUsername}\nDate: ${new Date().toISOString()}`;
-            await fs.writeFile(fwdNotePath, noteContent);
+            await fs.outputFile(fwdNotePath, noteContent);
         }
 
         // Save Orders for Move, Move Date, Authority to employee table if provided

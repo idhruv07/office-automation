@@ -34,29 +34,29 @@
     </div>
 
     <!-- Signature, Countersigned + Stamp -->
-    <div class="sig-stamp-row" style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0; gap: 20px;">
+    <div class="sig-stamp-row" style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; gap: 10px;">
       
       <!-- 1. Left: Countersigned -->
       <div class="countersigned-block" style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-        <div style="font-weight: bold;">
+        <div style="font-weight: bold; font-size: 13px;">
           <span class="hi-small">प्रतिहस्ताक्षरित /</span> Countersigned
         </div>
-        <input class="field-input" style="width: 220px; border-bottom: 1px dotted #94a3b8; outline: none; background: transparent; padding: 2px 6px;" id="advance_countersigned_by" name="countersigned_by" placeholder="Authority name & designation">
+        <input class="field-input" style="width: 140px; border-bottom: 1px dotted #94a3b8; outline: none; background: transparent; padding: 2px 6px; font-size: 12px;" id="advance_countersigned_by" name="countersigned_by" placeholder="Authority name & designation">
       </div>
 
       <!-- 2. Center: Signature Stack vertically aligned -->
-      <div class="sig-block" style="flex: 1; display: grid; grid-template-columns: 130px 1fr; gap: 8px 12px; align-items: center; max-width: 380px; margin: 0 auto;">
-        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Signature <span class="hi">हस्ताक्षर</span></label>
-        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_signature_note" name="signature_note" placeholder="(Original signed)">
+      <div class="sig-block" style="flex: 1; display: grid; grid-template-columns: 90px 1fr; gap: 8px 12px; align-items: center; margin: 0 auto; width: 100%;">
+        <label style="font-weight: 500; white-space: nowrap; text-align: right; font-size: 13px;">Signature <span class="hi" style="font-size:11px;">हस्ताक्षर</span></label>
+        <input style="border: none; border-bottom: 1px solid #cbd5e1; padding: 2px; width: 100%; outline: none; font-family: monospace; font-size: 12px;" id="advance_signature_note" name="signature_note" placeholder="(Original signed)">
 
-        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Name <span class="hi">नाम</span></label>
-        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_name" name="name" placeholder="Full name" required>
+        <label style="font-weight: 500; white-space: nowrap; text-align: right; font-size: 13px;">Name <span class="hi" style="font-size:11px;">नाम</span></label>
+        <input style="border: none; border-bottom: 1px solid #cbd5e1; padding: 2px; width: 100%; outline: none; font-family: monospace; font-size: 12px;" id="advance_name" name="name" placeholder="Full name" required>
 
-        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Rank <span class="hi">रैंक</span></label>
-        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_rank" name="rank" placeholder="Rank / Designation">
+        <label style="font-weight: 500; white-space: nowrap; text-align: right; font-size: 13px;">Rank <span class="hi" style="font-size:11px;">रैंक</span></label>
+        <input style="border: none; border-bottom: 1px solid #cbd5e1; padding: 2px; width: 100%; outline: none; font-family: monospace; font-size: 12px;" id="advance_rank" name="rank" placeholder="Rank / Designation">
 
-        <label style="font-weight: 500; white-space: nowrap; text-align: right;">Corps/Dept <span class="hi">कोर</span></label>
-        <input style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; width: 100%; outline: none;" id="advance_corps_dept" name="corps_dept" placeholder="Corps or Dept">
+        <label style="font-weight: 500; white-space: nowrap; text-align: right; font-size: 13px;">Corps <span class="hi" style="font-size:11px;">कोर</span></label>
+        <input style="border: none; border-bottom: 1px solid #cbd5e1; padding: 2px; width: 100%; outline: none; font-family: monospace; font-size: 12px;" id="advance_corps_dept" name="corps_dept" placeholder="Corps or Dept">
       </div>
 
       <!-- 3. Right: Stamp Box (Reduced 50%) -->
@@ -249,19 +249,14 @@
         </div>
       </div>
 
-      <!-- (vii) Cheque mode -->
+      <!-- (vii) Bank Account -->
       <div class="compact-item" style="display: flex; align-items: center; gap: 16px;">
         <div class="compact-label" style="margin: 0; white-space: nowrap;">
           <span>(vii) Cheque to be issued in favour of</span> <span class="hi">व्यक्ति / बैंकर आदि के पक्ष में चेक जारी किए जाएं</span>
         </div>
-        <div class="compact-field-row" style="flex: 0 0 auto; gap: 12px;">
-          <label><input type="radio" id="advance_cheque_favour_self" name="cheque_favour" value="self"> Self</label>
-          <label><input type="radio" id="advance_cheque_favour_banker" name="cheque_favour" value="banker"> Banker</label>
-          <label><input type="radio" id="advance_cheque_favour_other" name="cheque_favour" value="other"> Other</label>
-        </div>
         <div class="compact-field-row" style="flex: 1;">
-          <label>Details</label>
-          <input class="compact-input" id="advance_cheque_name" name="cheque_name" placeholder="Name / Banker details" style="width: 100%;">
+          <label>Bank A/C No.</label>
+          <input class="compact-input" id="advance_bank_account" name="bank_account" placeholder="Enter Bank Account Number" style="width: 100%;">
         </div>
       </div>
 

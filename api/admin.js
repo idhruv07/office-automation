@@ -220,7 +220,7 @@ router.post('/claims/:id/fwd-note', authenticateToken, authorizeRole('Admin'), a
         const username = result.rows[0].username;
         const fwdNotePath = path.join(__dirname, '..', 'server', 'storage', username, 'claims', `${claimId}_forwarding_note.html`);
         
-        await fs.writeFile(fwdNotePath, htmlContent);
+        await fs.outputFile(fwdNotePath, htmlContent);
         res.json({ message: 'Forwarding note saved successfully' });
     } catch (err) {
         console.error(err);
@@ -465,7 +465,7 @@ router.post('/fwd-templates', authenticateToken, authorizeRole('Admin'), async (
         const filePath = path.join(fwdTemplatesDir, `${finalId}.html`);
         const relativePath = `storage/fwd_templates/${finalId}.html`;
 
-        await fs.writeFile(filePath, htmlContent);
+        await fs.outputFile(filePath, htmlContent);
         
         if (!template_id) {
             await db.query('UPDATE fwd_templates SET file_path=$1 WHERE id=$2', [relativePath, finalId]);
