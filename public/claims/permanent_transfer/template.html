@@ -269,15 +269,13 @@
         <thead>
             <tr>
                 <th style="width: 15%;">Dep Station</th>
-                <th style="width: 10%;">Dep Date/Time</th>
+                <th style="width: 11%;">Dep Date/Time</th>
                 <th style="width: 15%;">Arr Station</th>
-                <th style="width: 10%;">Arr Date/Time</th>
-                <th style="width: 4%;">Dist (KM)</th>
-                <th style="width: 8%;">Mode/Class</th>
-                <th style="width: 6%;">Fare/Person</th>
-                <th style="width: 3%;">No.</th>
-                <th style="width: 12%;">Total Claim</th>
-                <th style="width: 17%; padding-right: 6px !important;">Ticket No.</th>
+                <th style="width: 11%;">Arr Date/Time</th>
+                <th style="width: 7%;">Dist (KM)</th>
+                <th style="width: 8%;">Mode/<br>Class</th>
+                <th style="width: 11%;">Total Claim</th>
+                <th style="width: 22%; padding-right: 6px !important;">Remarks</th>
                 <th style="width: 15px;" class="no-print"></th>
             </tr>
         </thead>
@@ -288,30 +286,40 @@
                     <input type="hidden" name="journey_dep_station_1">
                 </td>
                 <td>
-                    <input type="text" name="journey_dep_date_1" class="no-border-input" placeholder="dd/mm/yy">
-                    <input type="time" name="journey_dep_time_1" class="no-border-input">
+                    <input type="text" name="journey_dep_date_1" class="no-border-input td-date-format" placeholder="dd/mm/yy">
+                    <input type="text" name="journey_dep_time_1" class="no-border-input td-time-format" placeholder="HH:MM">
                 </td>
                 <td>
                     <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_arr_station_1"></div>
                     <input type="hidden" name="journey_arr_station_1">
                 </td>
                 <td>
-                    <input type="text" name="journey_arr_date_1" class="no-border-input" placeholder="dd/mm/yy">
-                    <input type="time" name="journey_arr_time_1" class="no-border-input">
+                    <input type="text" name="journey_arr_date_1" class="no-border-input td-date-format" placeholder="dd/mm/yy">
+                    <input type="text" name="journey_arr_time_1" class="no-border-input td-time-format" placeholder="HH:MM">
                 </td>
-                <td><input type="text" name="journey_dist_1" class="no-border-input"></td>
-                <td><input type="text" name="journey_mode_1" class="no-border-input"></td>
-                <td><input type="number" name="journey_fare_1" class="no-border-input ltc-calc-trigger"></td>
-                <td><input type="number" name="journey_persons_1" class="no-border-input ltc-calc-trigger"></td>
-                <td><input type="number" name="journey_total_amt_1" class="no-border-input ltc-journey-total-amt font-bold"></td>
-                <td><input type="text" name="journey_ticket_no_1" class="no-border-input"></td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_dist_1"></div>
+                    <input type="hidden" name="journey_dist_1">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_mode_1"></div>
+                    <input type="hidden" name="journey_mode_1">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-journey-total-amt font-bold ltc-station-sync" data-name="journey_total_amt_1"></div>
+                    <input type="hidden" name="journey_total_amt_1">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_ticket_no_1"></div>
+                    <input type="hidden" name="journey_ticket_no_1">
+                </td>
                 <td class="no-print"><button type="button" class="ltc-final-del-row" style="border: none; background: transparent; color: #ef4444; cursor: pointer; padding: 0; width: 100%; font-size: 14px;">✕</button></td>
             </tr>
         </tbody>
         <tfoot>
             <tr style="background: #f8fafc; font-weight: bold;">
-                <td colspan="8" style="text-align: right; padding-right: 12px !important;">Total Journey Claim:</td>
-                <td><input type="text" id="ltcFinalJourneyTotal" name="total_journey_claim" class="no-border-input font-bold" style="text-align: center;" readonly></td>
+                <td colspan="6" style="text-align: right; padding-right: 12px !important;">Total Journey Claim:</td>
+                <td><input type="text" id="ltcFinalJourneyTotal" name="total_journey_claim" class="no-border-input font-bold" style="text-align: left;" readonly></td>
                 <td colspan="2"></td>
             </tr>
         </tfoot>
