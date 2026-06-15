@@ -99,20 +99,26 @@ router.get('/me', require('./middleware').authenticateToken, async (req, res) =>
 });
 
 router.post('/profile', require('./middleware').authenticateToken, async (req, res) => {
-    const { cghs_ben_id, address, mobile_no, email, basic_pay, pay_level, gpf_ac_no } = req.body;
     try {
-        const cleanCghsBenId = cghs_ben_id && cghs_ben_id.trim() !== '' ? cghs_ben_id.trim() : null;
-        const cleanAddress = address && address.trim() !== '' ? address.trim() : null;
-        const cleanMobileNo = mobile_no && mobile_no.trim() !== '' ? mobile_no.trim() : null;
-        const cleanEmail = email && email.trim() !== '' ? email.trim() : null;
-        const cleanBasicPay = basic_pay && basic_pay.trim() !== '' ? basic_pay.trim() : null;
-        const cleanPayLevel = pay_level && pay_level.trim() !== '' ? pay_level.trim() : null;
-        const cleanGpfAcNo = gpf_ac_no && gpf_ac_no.trim() !== '' ? gpf_ac_no.trim() : null;
+        const allowedFields = ['cghs_ben_id', 'address', 'mobile_no', 'email', 'basic_pay', 'pay_level', 'gpf_ac_no'];
+        const updates = [];
+        const values = [];
+        let index = 1;
 
-        await db.query(
-            'UPDATE users SET cghs_ben_id = $1, address = $2, mobile_no = $3, email = $4, basic_pay = $6, pay_level = $7, gpf_ac_no = $8 WHERE id = $5',
-            [cleanCghsBenId, cleanAddress, cleanMobileNo, cleanEmail, req.user.id, cleanBasicPay, cleanPayLevel, cleanGpfAcNo]
-        );
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updates.push(`${field} = $${index}`);
+                const val = req.body[field];
+                values.push(val && String(val).trim() !== '' ? String(val).trim() : null);
+                index++;
+            }
+        }
+
+        if (updates.length > 0) {
+            values.push(req.user.id);
+            const query = `UPDATE users SET ${updates.join(', ')} WHERE id = $${index}`;
+            await db.query(query, values);
+        }
         res.json({ message: 'Profile updated' });
     } catch (err) {
         console.error('Profile update failed:', err);
