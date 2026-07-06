@@ -4057,7 +4057,11 @@ body.theme-amber #sidebar-toggle:hover {
 }
 #editor-content p {
     margin-top: 0;
-    margin-bottom: 1em;
+    margin-bottom: 4px; /* Tight, professional spacing for notes and letters */
+}
+#editor-content h1, #editor-content h2, #editor-content h3, #editor-content h4, #editor-content h5, #editor-content h6 {
+    margin-top: 0.5em;
+    margin-bottom: 0.3em;
 }
 #editor-content table {
     border-collapse: collapse;

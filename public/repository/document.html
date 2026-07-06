@@ -43,28 +43,95 @@
             background: var(--primary-color);
             color: white;
         }
-        .toolbar {
-            background: #f1f5f9;
-            padding: 8px;
-            border-bottom: 1px solid #cbd5e1;
+        .toolbar-modern {
+            background: #f8fafc;
+            padding: 6px 12px;
+            border-bottom: 1px solid #e2e8f0;
             display: none;
-            gap: 8px;
+            align-items: center;
+            gap: 6px;
             margin: -40px -40px 20px -40px;
             border-radius: 12px 12px 0 0;
             position: sticky;
             top: -40px;
             z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
         }
-        .toolbar button {
-            padding: 4px 8px;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
+        .toolbar-modern button {
+            padding: 6px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
             cursor: pointer;
-            color: black;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            height: 32px;
+            min-width: 32px;
         }
-        .toolbar button:hover {
-            background: #e2e8f0;
+        .toolbar-modern button:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: #cbd5e1;
+        }
+        .toolbar-modern button .material-symbols-outlined {
+            font-size: 20px;
+        }
+        .toolbar-separator {
+            width: 1px;
+            height: 20px;
+            background: #cbd5e1;
+            margin: 0 6px;
+            display: inline-block;
+        }
+        .toolbar-select {
+            padding: 4px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: white;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            height: 32px;
+            transition: all 0.2s;
+        }
+        .toolbar-select:hover {
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+        .btn-ask-ai {
+            background: var(--primary-color, #4f46e5) !important;
+            color: white !important;
+            font-weight: 700;
+            border: none !important;
+            padding: 6px 12px !important;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+            transition: all 0.2s;
+        }
+        .btn-ask-ai:hover {
+            background: var(--primary-hover, #3730a3) !important;
+            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+            transform: translateY(-1px);
+        }
+        .auto-save-text {
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 600;
+            padding-top: 4px;
+            margin-right: 12px;
+            display: none;
+        }
+        .version-text {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            padding-top: 4px;
         }
         #editor-content {
             min-height: 500px;
@@ -333,8 +400,40 @@
             transition: all 0.2s;
         }
         .dropdown-tree-node:hover {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
             color: white;
+        }
+
+        /* Print Media Styles */
+        @media print {
+            body, #app-container, #main-content, #content, #repo-app, .doc-layout, #page-viewer {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+                height: auto !important;
+            }
+            #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #search-bar, #lock-banner, .page-divider {
+                display: none !important;
+            }
+            #editor-content {
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+                color: black !important;
+                display: block !important;
+            }
+            .page-block {
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            .page-block:last-child {
+                page-break-after: avoid;
+            }
         }
     </style>
 </head>
@@ -366,6 +465,9 @@
                     <div id="global-search-results" class="repo-search-results"></div>
                 </div>
                 <div id="action-buttons" style="display: flex; gap: 12px;">
+                    <button id="btn-print" class="btn-primary" style="background:#0284c7; display:flex; align-items:center; gap:6px;" onclick="window.print()">
+                        <span style="font-size:14px; margin-top:-2px;">🖨️</span> Print
+                    </button>
                     <button id="btn-history" class="btn-primary" style="background:#64748b; display:none;">View History</button>
                     <button id="btn-edit" class="btn-primary" style="display:none;">Edit Page</button>
                     <button id="btn-save" class="btn-primary" style="background:#10b981; display:none;">Save Changes</button>
@@ -389,28 +491,73 @@
                     <button onclick="searchNav(1)">▼</button>
                     <button onclick="closeSearch()">✕</button>
                 </div>
-                <div id="toolbar" class="toolbar">
-                    <button onclick="document.execCommand('undo')" title="Undo (Ctrl+Z)">↶</button>
-                    <button onclick="document.execCommand('redo')" title="Redo (Ctrl+Y)">↷</button>
-                    <span style="border-right: 1px solid #ccc; margin: 0 4px;"></span>
-                    <button onclick="document.execCommand('bold')"><b>B</b></button>
-                    <button onclick="document.execCommand('italic')"><i>I</i></button>
-                    <button onclick="document.execCommand('underline')"><u>U</u></button>
-                    <button onclick="document.execCommand('insertOrderedList')">1.</button>
-                    <button onclick="document.execCommand('insertUnorderedList')">•</button>
-                    <span style="border-right: 1px solid #ccc; margin: 0 4px;"></span>
-                    <button onclick="document.execCommand('justifyLeft')" title="Align Left">⫷</button>
-                    <button onclick="document.execCommand('justifyCenter')" title="Align Center">≡</button>
-                    <button onclick="document.execCommand('justifyRight')" title="Align Right">⫸</button>
-                    <button onclick="document.execCommand('justifyFull')" title="Justify">▤</button>
-                    <span style="border-right: 1px solid #ccc; margin: 0 4px;"></span>
-                    <button onclick="insertTable()" title="Insert Table">▦ Table</button>
-                    <button onclick="toggleBorders()" title="Toggle Borders">◧ Borders</button>
-                    <button onclick="applyZeroSpacing()" title="Zero Spacing">0px Spacing</button>
-                    <button id="btn-ask-ai" style="background: var(--primary-color, #3b82f6); color: white; border: none; font-weight: bold; margin-left: 8px;">Ask AI</button>
+                <div id="toolbar" class="toolbar-modern">
+                    <!-- History actions -->
+                    <button onclick="document.execCommand('undo')" title="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
+                    <button onclick="document.execCommand('redo')" title="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
+                    
+                    <span class="toolbar-separator"></span>
+                    
+                    <!-- Font Family Select -->
+                    <select id="font-family-select" onchange="applyFontFamily(this.value)" title="Font Family" class="toolbar-select">
+                        <option value="Times New Roman" selected>Times New Roman</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Calibri">Calibri</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Segoe UI">Segoe UI</option>
+                    </select>
+
+                    <!-- Font Size Select -->
+                    <select id="font-size-select" onchange="applyFontSize(this.value)" title="Font Size" class="toolbar-select" style="width: 75px;">
+                        <option value="1">10pt</option>
+                        <option value="2">11pt</option>
+                        <option value="3">12pt</option>
+                        <option value="4" selected>13pt</option>
+                        <option value="5">14pt</option>
+                        <option value="6">18pt</option>
+                        <option value="7">24pt</option>
+                    </select>
+                    
+                    <span class="toolbar-separator"></span>
+
+                    <!-- Formatting actions -->
+                    <button onclick="document.execCommand('bold')" title="Bold"><span class="material-symbols-outlined" style="font-weight: bold;">format_bold</span></button>
+                    <button onclick="document.execCommand('italic')" title="Italic"><span class="material-symbols-outlined">format_italic</span></button>
+                    <button onclick="document.execCommand('underline')" title="Underline"><span class="material-symbols-outlined">format_underlined</span></button>
+                    
+                    <span class="toolbar-separator"></span>
+
+                    <!-- Alignment actions -->
+                    <button onclick="document.execCommand('justifyLeft')" title="Align Left"><span class="material-symbols-outlined">format_align_left</span></button>
+                    <button onclick="document.execCommand('justifyCenter')" title="Align Center"><span class="material-symbols-outlined">format_align_center</span></button>
+                    <button onclick="document.execCommand('justifyRight')" title="Align Right"><span class="material-symbols-outlined">format_align_right</span></button>
+                    <button onclick="document.execCommand('justifyFull')" title="Justify"><span class="material-symbols-outlined">format_align_justify</span></button>
+                    
+                    <span class="toolbar-separator"></span>
+
+                    <!-- List actions -->
+                    <button onclick="document.execCommand('insertOrderedList')" title="Numbered List"><span class="material-symbols-outlined">format_list_numbered</span></button>
+                    <button onclick="document.execCommand('insertUnorderedList')" title="Bulleted List"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+                    
+                    <span class="toolbar-separator"></span>
+
+                    <!-- Table & Spacing -->
+                    <button onclick="insertTable()" title="Insert Table"><span class="material-symbols-outlined">table_chart</span></button>
+                    <button onclick="toggleBorders()" title="Toggle Table Borders"><span class="material-symbols-outlined">border_outer</span></button>
+                    <button onclick="applyZeroSpacing()" title="Set Spacing to 0px"><span class="material-symbols-outlined">format_line_spacing</span> <span>0px</span></button>
+                    
+                    <span class="toolbar-separator"></span>
+
+                    <!-- Ask AI -->
+                    <button id="btn-ask-ai" class="btn-ask-ai" title="Ask AI Autocomplete"><span class="material-symbols-outlined" style="font-size: 16px;">psychology</span> Ask AI</button>
+                    
                     <span style="flex:1"></span>
-                    <span id="auto-save-indicator" style="font-size:12px; color:#10b981; padding-top:4px; margin-right: 12px; display: none;">Saved</span>
-                    <span id="version-badge" style="font-size:12px; color:#64748b; padding-top:4px;"></span>
+                    
+                    <!-- Auto-save / Version -->
+                    <span id="auto-save-indicator" class="auto-save-text">Saved</span>
+                    <span id="version-badge" class="version-text"></span>
                 </div>
                 <div id="editor-content">
                     <div style="color: #94a3b8; text-align:center; padding-top: 40px;">Select a page from the left to view.</div>
@@ -431,6 +578,14 @@
     <script src="/assets/menu.js"></script>
     <script src="/assets/layout.js"></script>
     <script>
+        window.applyFontFamily = function(font) {
+            document.execCommand('fontName', false, font);
+        };
+
+        window.applyFontSize = function(size) {
+            document.execCommand('fontSize', false, size);
+        };
+
         document.addEventListener('DOMContentLoaded', async () => {
             const token = localStorage.getItem('token');
             if (!token) { window.location.href = '/'; return; }
