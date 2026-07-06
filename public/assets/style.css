@@ -4301,3 +4301,253 @@ body.theme-amber #sidebar-toggle:hover {
 #content {
     margin: 1.5rem auto 2rem auto !important;
 }
+
+/* ══════════════════════════════════════════════════
+   PREMIUM GLASSMORPHIC OVERRIDES (DASHBOARD, MY CLAIMS, PROFILE)
+   ══════════════════════════════════════════════════ */
+
+/* Dashboard Clean Glassmorphic Cards */
+.dash-hero {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(79, 70, 229, 0.12) 100%) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25) !important;
+    border-radius: 20px !important;
+}
+
+.dash-metrics-grid .metric-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    color: white !important;
+    border-radius: 16px !important;
+}
+
+.dash-metrics-grid .metric-card:hover {
+    border-color: var(--primary-color, #38bdf8) !important;
+    transform: translateY(-4px) !important;
+    box-shadow: 0 15px 35px rgba(56, 189, 248, 0.12) !important;
+}
+
+.metric-value {
+    color: #ffffff !important;
+}
+
+.metric-label {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.dash-metrics-grid .metric-icon {
+    background: rgba(56, 189, 248, 0.08) !important;
+    color: var(--primary-color, #38bdf8) !important;
+    border-radius: 12px !important;
+}
+
+.metric-card.returned-highlight {
+    border-left: 4px solid #ef4444 !important;
+}
+
+.metric-card.returned-highlight .metric-icon {
+    background: rgba(239, 68, 68, 0.08) !important;
+    color: #ef4444 !important;
+}
+
+/* Charts Cards */
+.dash-charts-grid .chart-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    color: white !important;
+    border-radius: 16px !important;
+}
+
+.chart-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.chart-title {
+    color: #f1f5f9 !important;
+}
+
+/* Quick Actions Card */
+.quick-actions-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    color: white !important;
+    border-radius: 16px !important;
+}
+
+.quick-actions-card h3 {
+    color: #f1f5f9 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding-bottom: 12px !important;
+    font-weight: 700 !important;
+}
+
+.action-button-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: #cbd5e1 !important;
+    border-radius: 14px !important;
+    transition: all 0.25s ease !important;
+}
+
+.action-button-card:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--primary-color, #38bdf8) !important;
+    color: white !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.action-button-title {
+    color: #ffffff !important;
+}
+
+.action-button-desc {
+    color: #94a3b8 !important;
+}
+
+/* My Claims Page Spacing & Select Box styling */
+.view-period-box select,
+#filter-year {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    outline: none !important;
+    cursor: pointer !important;
+}
+
+.view-period-box select option,
+#filter-year option {
+    background: #0f172a !important;
+    color: white !important;
+}
+
+/* Profile Form & Inputs edit panel */
+.profile-edit-panel {
+    background: rgba(15, 23, 42, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(24px) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3) !important;
+    padding: 24px !important;
+    margin-top: 16px !important;
+}
+
+.profile-edit-field label {
+    color: #94a3b8 !important;
+}
+
+.profile-edit-field input,
+.profile-edit-field select {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: white !important;
+    border-radius: 10px !important;
+    padding: 8px 14px !important;
+}
+
+.profile-edit-field input:focus {
+    border-color: var(--primary-color, #38bdf8) !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15) !important;
+}
+
+.profile-edit-field input.bg-gray-100 {
+    background: rgba(255, 255, 255, 0.01) !important;
+    color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Family tree card container */
+.family-tree-container {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 24px !important;
+}
+
+.family-tree-container h3 {
+    color: white !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding-bottom: 12px !important;
+    font-weight: 700 !important;
+}
+
+/* Family Tree connection lines */
+.family-tree li::before,
+.family-tree li::after,
+.family-tree ul ul::before,
+.family-tree li:last-child::before {
+    border-color: var(--primary-color, #38bdf8) !important;
+}
+
+/* Modern Card style nodes */
+.family-tree-node {
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important; /* modern rounded card shape */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.family-tree-node:hover {
+    transform: translateY(-4px) scale(1.04) !important;
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25) !important;
+    border-color: var(--primary-color, #38bdf8) !important;
+}
+
+.root-node {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+}
+
+/* Glassmorphic dependent fruit glow colors */
+.family-tree-node.spouse-fruit {
+    background: rgba(236, 72, 153, 0.08) !important;
+    border-color: rgba(236, 72, 153, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.12), inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+.family-tree-node.spouse-fruit:hover {
+    border-color: #ec4899 !important;
+    box-shadow: 0 12px 30px rgba(236, 72, 153, 0.3) !important;
+}
+
+.family-tree-node.son-fruit {
+    background: rgba(14, 165, 233, 0.08) !important;
+    border-color: rgba(14, 165, 233, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12), inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+.family-tree-node.son-fruit:hover {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.3) !important;
+}
+
+.family-tree-node.daughter-fruit {
+    background: rgba(245, 158, 11, 0.08) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12), inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+.family-tree-node.daughter-fruit:hover {
+    border-color: #f59e0b !important;
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.3) !important;
+}
+
+.family-tree-node.parent-fruit {
+    background: rgba(34, 197, 94, 0.08) !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.12), inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+.family-tree-node.parent-fruit:hover {
+    border-color: #22c55e !important;
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.3) !important;
+}
