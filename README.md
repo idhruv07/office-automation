@@ -13,6 +13,14 @@ A secure web application for government office claim management. This system all
 - **Profile & Dependent Management**: Manage personal profiles, designations, basic pay, pay levels, and dependents.
 - **Explorer-style Folder Navigation**: Collapsible, recursive directory tree layout for saved claims and bills, supporting deep nested subfolders.
 - **Export to DOCX**: Claims can be exported to Word (`.docx`) format for physical printing and processing.
+- **Global Top Navigation Layout**: A horizontal glassmorphic top header bar (`height: 70px`) with absolute floating submenus, replacing the old left-side navigation panel.
+- **Vibrant HUD & Neon Accent Borders**: Beautiful backdrop blur effects (`backdrop-filter: blur(30px) saturate(180%)`) combined with a dynamic bottom neon glow line matching the active theme color.
+- **Curated Theme Switcher Dropdown**: Floating theme selector panel opening on hover, supporting 8 modern presets (Royal Indigo, Emerald Wealth, Slate Gray, Ocean Navy, Midnight Amber, Cyberpunk Neon, Aurora Forest, Crimson Sunset) with preview swatches and descriptions.
+- **Visual Drag Handles**: Interactive drag handles (`⋮⋮`) in the dashboard widget grid supporting custom grid configurations.
+- **Thoughtful Menu Icons**: Adaptive, crisp outline SVG icons prepended before menu item titles to structure navigation.
+- **Admin Password Reset**: Admins can edit user accounts and reset passwords via `PUT /api/admin/users/:id/password`, automatically setting `must_reset_password = true` to force change upon next login.
+- **Contingent Bill Menu Differentiations**: Differentiated menu item names ("My Saved Bills" vs "Manage Contingent Bills") to separate employee draft views from administrative review screens.
+- **Auto-Healing FDW Host Configuration**: Dynamic active host IP resolver that automatically corrects PostgreSQL Foreign Data Wrapper (FDW) server hosts at startup to keep database linkages online.
 
 ---
 
