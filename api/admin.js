@@ -111,6 +111,28 @@ router.put('/users/:id', authenticateToken, authorizeRole('Admin'), async (req, 
     }
 });
 
+// Reset user password (by Admin)
+router.put('/users/:id/password', authenticateToken, authorizeRole('Admin'), async (req, res) => {
+    const userId = req.params.id;
+    const { password } = req.body;
+    
+    if (!password || password.trim() === '') {
+        return res.status(400).json({ message: 'Password is required' });
+    }
+    
+    try {
+        const passwordHash = await bcrypt.hash(password, 12);
+        await db.query(
+            'UPDATE users SET password_hash = $1, must_reset_password = true WHERE id = $2',
+            [passwordHash, userId]
+        );
+        res.json({ message: 'User password reset successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error resetting user password' });
+    }
+});
+
 
 // Get all claims (grouped by type, sorted by submitted_at DESC)
 router.get('/claims', authenticateToken, authorizeRole('Admin'), async (req, res) => {

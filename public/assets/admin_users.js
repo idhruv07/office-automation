@@ -542,6 +542,46 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('close-edit-modal-btn').addEventListener('click', closeEditModal);
         document.getElementById('cancel-edit-modal-btn').addEventListener('click', closeEditModal);
         
+        const resetPasswordBtn = document.getElementById('reset-password-btn');
+        if (resetPasswordBtn) {
+            resetPasswordBtn.addEventListener('click', async () => {
+                const id = document.getElementById('edit-user-id').value;
+                const username = document.getElementById('edit-username').value;
+                
+                const newPassword = prompt(`Enter new temporary password for user @${username}:`);
+                if (newPassword === null) return; // User cancelled
+                
+                const trimmed = newPassword.trim();
+                if (trimmed === '') {
+                    alert('Password cannot be empty!');
+                    return;
+                }
+                
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`/api/admin/users/${id}/password`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ password: trimmed })
+                    });
+                    
+                    const resData = await res.json();
+                    if (!res.ok) {
+                        alert(resData.message || 'Failed to reset password');
+                    } else {
+                        alert('Password reset successfully! The user will be forced to change it upon next login.');
+                        closeEditModal();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Connection error while resetting password');
+                }
+            });
+        }
+        
         document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-user-id').value;
