@@ -434,6 +434,38 @@
             .page-block:last-child {
                 page-break-after: avoid;
             }
+            .pb-break {
+                page-break-after: always !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                height: 0 !important;
+            }
+            .pb-break::after {
+                display: none !important;
+            }
+        }
+
+        .pb-break {
+            border: none !important;
+            border-top: 2px dashed #f43f5e !important;
+            margin: 24px 0 !important;
+            position: relative !important;
+            height: 1px !important;
+            clear: both !important;
+        }
+        .pb-break::after {
+            content: '✂ PAGE BREAK ✂' !important;
+            position: absolute !important;
+            top: -10px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            background: white !important;
+            padding: 0 12px !important;
+            color: #f43f5e !important;
+            font-size: 10px !important;
+            font-weight: bold !important;
+            letter-spacing: 0.15em !important;
         }
     </style>
 </head>
@@ -546,7 +578,16 @@
                     <!-- Table & Spacing -->
                     <button onclick="insertTable()" title="Insert Table"><span class="material-symbols-outlined">table_chart</span></button>
                     <button onclick="toggleBorders()" title="Toggle Table Borders"><span class="material-symbols-outlined">border_outer</span></button>
-                    <button onclick="applyZeroSpacing()" title="Set Spacing to 0px"><span class="material-symbols-outlined">format_line_spacing</span> <span>0px</span></button>
+                    <button onclick="insertPageBreak()" title="Insert Page Break"><span class="material-symbols-outlined">insert_page_break</span></button>
+                    <span class="toolbar-separator"></span>
+                    <select id="line-spacing-select" onchange="applyLineSpacing(this.value)" title="Line Spacing" class="toolbar-select" style="width: 120px;">
+                        <option value="" disabled selected>Line Spacing</option>
+                        <option value="0">0px (No Spacing)</option>
+                        <option value="1.0">1.0 (Single)</option>
+                        <option value="1.15">1.15</option>
+                        <option value="1.5">1.5</option>
+                        <option value="2.0">2.0 (Double)</option>
+                    </select>
                     
                     <span class="toolbar-separator"></span>
 
@@ -1010,10 +1051,15 @@
                 const activeBlock = getActiveBlock();
                 if (!activeBlock) return;
 
-                // Tab to accept ghost text
-                if (e.key === 'Tab' && ghostNode) {
+                // Tab handler
+                if (e.key === 'Tab') {
                     e.preventDefault();
-                    acceptGhostText();
+                    if (ghostNode) {
+                        acceptGhostText();
+                    } else {
+                        // Insert 4 non-breaking spaces for tab space inside edit document
+                        document.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                    }
                     return;
                 }
 
@@ -1253,7 +1299,14 @@
                 }
             };
 
-            window.applyZeroSpacing = function() {
+            window.insertPageBreak = function() {
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) return;
+                const html = '<hr class="pb-break" /><p><br></p>';
+                document.execCommand('insertHTML', false, html);
+            };
+
+            window.applyLineSpacing = function(spacingValue) {
                 const activeBlock = getActiveBlock();
                 if (!activeBlock) return;
                 
@@ -1279,18 +1332,36 @@
                 }
                 
                 elements.forEach(el => {
-                    // Apply to elements that intersect with selection
                     if (sel.containsNode(el, true) || el === container || el === node) {
-                        el.style.margin = '0';
-                        el.style.padding = '0';
-                        el.style.lineHeight = '1';
-                        if (el.nodeName === 'LI' && el.parentNode) {
-                            el.parentNode.style.marginTop = '0';
-                            el.parentNode.style.marginBottom = '0';
-                            el.parentNode.style.lineHeight = '1';
+                        if (spacingValue === '0') {
+                            el.style.margin = '0px';
+                            el.style.padding = '0px';
+                            el.style.lineHeight = '1';
+                        } else if (spacingValue === '1.0') {
+                            el.style.margin = '0 0 8px 0';
+                            el.style.padding = '';
+                            el.style.lineHeight = '1.15';
+                        } else if (spacingValue === '1.15') {
+                            el.style.margin = '0 0 10px 0';
+                            el.style.padding = '';
+                            el.style.lineHeight = '1.15';
+                        } else if (spacingValue === '1.5') {
+                            el.style.margin = '0 0 12px 0';
+                            el.style.padding = '';
+                            el.style.lineHeight = '1.5';
+                        } else if (spacingValue === '2.0') {
+                            el.style.margin = '0 0 16px 0';
+                            el.style.padding = '';
+                            el.style.lineHeight = '2';
                         }
                     }
                 });
+                
+                // Reset select dropdown value
+                setTimeout(() => {
+                    const selEl = document.getElementById('line-spacing-select');
+                    if (selEl) selEl.value = '';
+                }, 100);
             };
 
             // ============================================================
