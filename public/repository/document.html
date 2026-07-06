@@ -33,6 +33,34 @@
         #action-buttons button:active {
             transform: translateY(0) !important;
         }
+        #workflow-panel {
+            position: fixed;
+            right: 0;
+            top: 70px;
+            width: 340px;
+            height: calc(100vh - 70px);
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 0 !important;
+            padding: 24px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 20px !important;
+            overflow-y: auto !important;
+            z-index: 1040 !important;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5) !important;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-sizing: border-box !important;
+        }
+        #workflow-panel.open {
+            transform: translateX(0);
+        }
+        #btn-workflow-close:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
         .doc-layout {
             display: flex;
             height: calc(100vh - 120px);
@@ -539,12 +567,14 @@
                     <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel Edit
                     </button>
+                    <button id="btn-workflow-toggle" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span> Workflow
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div style="display: flex; gap: 20px; align-items: stretch; width: 100%;">
-            <div class="doc-layout" style="flex: 1;">
+        <div class="doc-layout">
             <div class="page-sidebar" id="page-list">
                 <div style="color: #94a3b8; text-align:center;">Loading pages...</div>
             </div>
@@ -640,52 +670,57 @@
                     <div style="color: #94a3b8; text-align:center; padding-top: 40px;">Select a page from the left to view.</div>
                 </div>
             </div>
-            
-            <!-- Document Workflow routing panel -->
-            <div class="workflow-sidebar" id="workflow-panel" style="flex: 0 0 300px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; height: calc(100vh - 120px); box-sizing: border-box;">
-                <div style="font-weight: 800; font-size: 15px; color: white; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 4px;">
+        </div>
+        
+        <!-- Document Workflow routing panel -->
+        <div class="workflow-sidebar" id="workflow-panel">
+            <div style="font-weight: 800; font-size: 15px; color: white; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">assignment_turned_in</span>
                     Document Workflow
                 </div>
+                <button id="btn-workflow-close" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: all 0.2s;">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+                </button>
+            </div>
+            
+            <!-- Current Status -->
+            <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Current Status</div>
+                <div id="wf-status-val" style="font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 4px;">Draft</div>
                 
-                <!-- Current Status -->
-                <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Current Status</div>
-                    <div id="wf-status-val" style="font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 4px;">Draft</div>
-                    
-                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px;">Current Owner</div>
-                    <div id="wf-owner-val" style="font-size: 13px; color: white; margin-top: 2px;">AUDITOR</div>
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px;">Current Owner</div>
+                <div id="wf-owner-val" style="font-size: 13px; color: white; margin-top: 2px;">AUDITOR</div>
+            </div>
+
+            <!-- Action Controls -->
+            <div id="wf-actions-container" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Actions</div>
+                
+                <!-- Comments area -->
+                <textarea id="wf-comments-input" placeholder="Enter routing comments here..." style="width: 100%; height: 70px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; color: white; font-size: 12px; resize: none; outline: none; box-sizing: border-box;"></textarea>
+
+                <div style="display: flex; gap: 8px;">
+                    <button id="wf-btn-submit" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px; background: #10b981;">Forward</button>
+                    <button id="wf-btn-rollback" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px; background: #ef4444;">Return</button>
                 </div>
-
-                <!-- Action Controls -->
-                <div id="wf-actions-container" style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Actions</div>
-                    
-                    <!-- Comments area -->
-                    <textarea id="wf-comments-input" placeholder="Enter routing comments here..." style="width: 100%; height: 70px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; color: white; font-size: 12px; resize: none; outline: none; box-sizing: border-box;"></textarea>
-
-                    <div style="display: flex; gap: 8px;">
-                        <button id="wf-btn-submit" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px; background: #10b981;">Forward</button>
-                        <button id="wf-btn-rollback" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px; background: #ef4444;">Return</button>
-                    </div>
-                    
-                    <button id="wf-btn-pullback" class="btn-primary" style="width: 100%; padding: 8px 12px; font-size: 12px; background: #f59e0b; display: none;">Pull Back (Retrieve)</button>
-                    
-                    <!-- Return target selector -->
-                    <div id="wf-return-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
-                        <label style="font-size: 10px; color: #94a3b8;">Select Return Target Rank:</label>
-                        <select id="wf-return-target" style="width:100%; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 6px; font-size: 12px;">
-                            <!-- Dynamically populated -->
-                        </select>
-                    </div>
+                
+                <button id="wf-btn-pullback" class="btn-primary" style="width: 100%; padding: 8px 12px; font-size: 12px; background: #f59e0b; display: none;">Pull Back (Retrieve)</button>
+                
+                <!-- Return target selector -->
+                <div id="wf-return-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
+                    <label style="font-size: 10px; color: #94a3b8;">Select Return Target Rank:</label>
+                    <select id="wf-return-target" style="width:100%; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 6px; font-size: 12px;">
+                        <!-- Dynamically populated -->
+                    </select>
                 </div>
+            </div>
 
-                <!-- Audit Log / Comments Feed -->
-                <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">Audit Log & Comments</div>
-                    <div id="wf-comments-feed" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
-                        <!-- Populate comments feed dynamically -->
-                    </div>
+            <!-- Audit Log / Comments Feed -->
+            <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">Audit Log & Comments</div>
+                <div id="wf-comments-feed" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+                    <!-- Populate comments feed dynamically -->
                 </div>
             </div>
         </div>
@@ -950,6 +985,22 @@
                 submitWorkflowAction('rollback', { target_role: target });
             };
             wfBtnPullback.onclick = () => submitWorkflowAction('pullback');
+
+            // Slide out drawer toggle bindings
+            const wfPanel = document.getElementById('workflow-panel');
+            const btnWfToggle = document.getElementById('btn-workflow-toggle');
+            const btnWfClose = document.getElementById('btn-workflow-close');
+            
+            if (btnWfToggle && wfPanel) {
+                btnWfToggle.onclick = () => {
+                    wfPanel.classList.toggle('open');
+                };
+            }
+            if (btnWfClose && wfPanel) {
+                btnWfClose.onclick = () => {
+                    wfPanel.classList.remove('open');
+                };
+            }
 
             loadDocumentWorkflow();
 
