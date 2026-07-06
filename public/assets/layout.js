@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </nav>
                 <div class="sidebar-user-block" style="padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); margin-top: auto; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02);">
                     <a href="/profile.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; width: 100%; cursor: pointer;">
-                        <img id="sidebar-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.2); object-fit: cover; flex-shrink: 0;">
+                        <img id="sidebar-avatar" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNlMmU4ZjAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjgiIHI9IjQiIGZpbGw9IiM5NGEzYjgiLz48cGF0aCBkPSJNMTIgMTRjLTQuNDIgMC04IDIuNTgtOCA2djFjMCAuNTUuNDUgMSAxIDFoMTRjLjU1IDAgMS0uNDUgMS0xdi0xYzAtMy40Mi0zLjU4LTYtOC02eiIgZmlsbD0iIzk0YTNiOCIvPjwvc3ZnPg==" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.2); object-fit: cover; flex-shrink: 0;">
                         <div style="display: flex; flex-direction: column; overflow: hidden; line-height: 1.2;">
                             <span id="sidebar-user-name" style="font-size: 13px; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Loading...</span>
                             <span id="sidebar-user-desig" style="font-size: 10px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">—</span>
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>&copy; 2026 Office Automation System</span>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span id="footer-user-info" class="footer-user-badge"></span>
-                        <img id="footer-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e2e8f0'/><circle cx='12' cy='8' r='4' fill='%2394a3b8'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%2394a3b8'/></svg>" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                        <img id="footer-avatar" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNlMmU4ZjAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjgiIHI9IjQiIGZpbGw9IiM5NGEzYjgiLz48cGF0aCBkPSJNMTIgMTRjLTQuNDIgMC04IDIuNTgtOCA2djFjMCAuNTUuNDUgMSAxIDFoMTRjLjU1IDAgMS0uNDUgMS0xdi0xYzAtMy40Mi0zLjU4LTYtOC02eiIgZmlsbD0iIzk0YTNiOCIvPjwvc3ZnPg==" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                     </div>
                 </footer>
             </main>
@@ -376,6 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const sidebarAvatar = document.getElementById('sidebar-avatar');
                 if (sidebarAvatar) {
                     sidebarAvatar.src = url;
+                }
+                const dashboardAvatar = document.getElementById('dashboard-avatar');
+                if (dashboardAvatar) {
+                    dashboardAvatar.src = url;
                 }
             })
             .catch(() => { });
