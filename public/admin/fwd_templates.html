@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FWD Templates - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <h1>FWD Note Templates</h1>
+    <p style="color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 2rem;">Create, save, and manage reusable Forwarding Note templates.</p>
+
+    <!-- Section A: Create / Edit Template -->
+    <div class="form-container" style="max-width: 860px; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1.5rem;">
+            <span id="ft-form-title">Compose New Template</span>
+        </h2>
+
+        <input type="hidden" id="ft-id" value="">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group">
+                <label for="ft-name">Template Name <span style="color:red">*</span></label>
+                <input type="text" id="ft-name" placeholder="e.g. Medical Claim – Standard FWD">
+            </div>
+            <div class="form-group">
+                <label for="ft-folder">Folder Name</label>
+                <input type="text" id="ft-folder" placeholder="e.g. General" list="ft-folder-list">
+                <datalist id="ft-folder-list"></datalist>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ft-desc">Description (optional)</label>
+            <input type="text" id="ft-desc" placeholder="Brief note about what this template is for">
+        </div>
+
+        <!-- Live letterhead preview / editor -->
+        <div class="form-group" style="margin-top: 1.5rem;">
+            <label>Forwarding Note Content <span style="color:red">*</span></label>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0.25rem 0 0.75rem;">
+                The office letterhead below is auto-populated from your Office Settings. Edit the body paragraphs as needed.
+            </p>
+
+            <!-- Letterhead (read-only display, built from officeConfig) -->
+            <div id="ft-letterhead-preview" style="border: 1.5px solid var(--border-color); border-radius: 12px 12px 0 0; padding: 1.5rem 2rem; background: #fafafa;">
+                <div class="fwd-letterhead">
+                    <div class="fwd-lh-img"><img id="ft-logo-left" src="/admin/images/emblem.png" alt="Emblem" style="height:60px;"></div>
+                    <div class="fwd-lh-center" style="text-align:center; flex:1;">
+                        <div class="fwd-lh-title" id="ft-office-name" style="font-weight:700; font-size:1rem;"></div>
+                        <div id="ft-office-address" style="font-size:0.85rem;"></div>
+                        <div id="ft-office-sub" style="font-size:0.85rem;"></div>
+                        <div id="ft-office-city" style="font-size:0.85rem;"></div>
+                        <div id="ft-office-email" style="font-size:0.82rem;"></div>
+                        <div id="ft-office-phone" style="font-size:0.82rem;"></div>
+                    </div>
+                    <div class="fwd-lh-img"><img id="ft-logo-right" src="/admin/images/azadi.png" alt="Logo" style="height:60px;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:1rem; font-size:0.85rem; border-top: 1px solid var(--border-color); padding-top:0.75rem;">
+                    <span>No. <span id="ft-fwd-ref"></span></span>
+                    <span>Date: <span id="ft-date"></span></span>
+                </div>
+            </div>
+
+            <!-- Editable body area -->
+            <div id="ft-body-editor" style="border: 1.5px solid var(--border-color); border-top: none; border-radius: 0 0 12px 12px; padding: 1.5rem 2rem; background:#fff; min-height: 260px;">
+                <div style="font-size:0.9rem; color:#475569; margin-bottom: 0.75rem;">To<br>The Officer in charge<br>Admin-Pay<br>O/o the CDA Secunderabad<br>No. 1 Staff Road, Secunderabad-09</div>
+                <div style="margin: 1rem 0; font-size:0.9rem; color:#475569; border-top:1px solid #e2e8f0; padding-top:0.75rem;">Sub : <span contenteditable="true" id="ft-subject" spellcheck="false" style="border-bottom: 1.5px dashed var(--border-color); min-width:200px; display:inline-block; outline:none; padding:0 4px;">Medical claim in r/o [Name] – Reg.</span></div>
+                <hr style="border:none; border-top:1px solid #e2e8f0; margin: 0.75rem 0;">
+                <div contenteditable="true" id="ft-body-para" spellcheck="true" style="font-size:0.9rem; min-height:80px; outline:none; line-height:1.8; padding: 0.5rem 0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Medical reimbursement claim in r/o [Name], [Designation]/[Personal No.] is forwarded herewith for further necessary action at your end please.</div>
+                <div style="margin-top:2rem; font-size:0.9rem; color:#475569;" id="ft-sig">
+                    <span id="ft-sig-name"></span><br><span id="ft-sig-dept"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="ft-toast" style="display:none; padding:0.75rem 1.25rem; border-radius:10px; margin-top:1rem; font-weight:600; font-size:0.9rem;"></div>
+
+        <div style="display:flex; gap:1rem; margin-top:2rem;">
+            <button type="button" id="ft-save-btn">Save Template</button>
+            <button type="button" id="ft-save-new-btn" style="display:none; background:var(--secondary-color);">Save as New</button>
+            <button type="button" id="ft-clear-btn" style="background:#f1f5f9; color:#475569;">Clear</button>
+        </div>
+    </div>
+
+    <!-- Section B: Saved Templates -->
+    <div class="form-container" style="max-width: 860px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+            <h2 style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin:0;">
+                Saved FWD Templates
+            </h2>
+            <span id="ft-count" style="font-size:0.85rem; color:var(--text-muted);"></span>
+        </div>
+        <div id="ft-list-container">
+            <p style="color:var(--text-muted); padding:1rem 0;">Loading templates…</p>
+        </div>
+    </div>
+
+    <!-- Template View Modal -->
+    <div id="ft-view-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; overflow-y:auto;">
+        <div style="background:#fff; max-width:720px; margin: 2rem auto; border-radius:16px; overflow:hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color,#4f46e5)); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:#fff; font-weight:700;">Template Preview</span>
+                <button id="ft-close-modal" style="background:rgba(255,255,255,0.2); color:#fff; border:none; border-radius:8px; padding:0.4rem 1rem; cursor:pointer; font-weight:600;">✕ Close</button>
+            </div>
+            <div id="ft-modal-body" style="padding:2rem;"></div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="ft-success-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:10000; justify-content:center; align-items:center;">
+        <div style="background:#fff; border-radius:16px; overflow:hidden; text-align:center; padding: 2rem; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <img id="ft-success-img" src="" style="max-height: 200px; max-width: 100%; margin: 0 auto 1.5rem auto; object-fit: contain; display: block; border-radius: 8px;">
+            <h3 id="ft-success-title" style="margin-top:0; color:#1e293b; font-size: 1.5rem;">Success</h3>
+            <p id="ft-success-msg" style="color:var(--text-muted); font-size: 1rem; margin-bottom: 1.5rem;"></p>
+            <button onclick="document.getElementById('ft-success-modal').style.display='none'" style="width: 100%; padding: 0.75rem; font-size: 1rem;">Close</button>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/admin_fwd_templates.js"></script>
+</body>
+</html>

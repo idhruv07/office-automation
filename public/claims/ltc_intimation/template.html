@@ -1,0 +1,260 @@
+<style>
+    .ltc-intimation-compact {
+        font-size: 12px !important;
+        line-height: 1.2;
+    }
+    .ltc-intimation-compact label {
+        font-size: 12px !important;
+        margin-bottom: 2px !important;
+    }
+    .ltc-intimation-compact input, 
+    .ltc-intimation-compact textarea, 
+    .ltc-intimation-compact select {
+        padding: 4px 8px !important;
+        font-size: 12px !important;
+        min-height: unset !important;
+        border: 1px solid var(--border-light) !important;
+        border-radius: 6px !important;
+        background: white !important;
+        color: var(--text-main) !important;
+        transition: all 0.2s ease !important;
+    }
+    .ltc-intimation-compact input:focus, 
+    .ltc-intimation-compact textarea:focus, 
+    .ltc-intimation-compact select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+        outline: none !important;
+    }
+    .ltc-intimation-compact .mb-4, 
+    .ltc-intimation-compact .mb-6 {
+        margin-bottom: 8px !important;
+    }
+    .ltc-intimation-compact h2 {
+        font-size: 18px !important;
+        margin-bottom: 8px !important;
+        line-height: 1.1;
+        color: var(--primary-color) !important;
+        text-align: center !important;
+    }
+    .ltc-intimation-compact h2 span {
+        font-size: 14px !important;
+        color: var(--text-muted) !important;
+    }
+    .ltc-intimation-compact h3 {
+        font-size: 13px !important;
+        margin-bottom: 4px !important;
+        color: var(--primary-color) !important;
+        border-left: 3px solid var(--accent-color) !important;
+        padding-left: 0.5rem !important;
+        font-weight: 700 !important;
+    }
+    .ltc-intimation-compact .p-4 {
+        padding: 8px !important;
+    }
+    .ltc-intimation-compact table th {
+        background: var(--primary-color) !important;
+        color: white !important;
+        border: 1px solid var(--primary-color) !important;
+        font-weight: 600 !important;
+    }
+    .ltc-intimation-compact table td {
+        padding: 4px !important;
+        border: 1px solid var(--border-light) !important;
+    }
+    .ltc-intimation-compact .warning-box {
+        background: rgba(239, 68, 68, 0.04) !important;
+        border-left: 4px solid var(--danger-color) !important;
+        border-radius: 8px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 16px !important;
+        color: var(--text-main) !important;
+    }
+    .ltc-intimation-compact .warning-box p {
+        margin: 0 !important;
+        font-size: 11px !important;
+    }
+    .ltc-intimation-compact .warning-box p:first-child {
+        margin-bottom: 4px !important;
+        font-weight: 600 !important;
+    }
+    @media print {
+        .ltc-intimation-compact {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 10.5px !important;
+            line-height: 1.15 !important;
+        }
+        .ltc-intimation-compact h2 {
+            font-size: 14px !important;
+            margin-bottom: 4px !important;
+        }
+        .ltc-intimation-compact h2 span {
+            font-size: 11px !important;
+        }
+        .ltc-intimation-compact h3 {
+            font-size: 11px !important;
+            margin-bottom: 2px !important;
+        }
+        .ltc-intimation-compact .mb-4, 
+        .ltc-intimation-compact .mb-6 {
+            margin-bottom: 4px !important;
+        }
+        .ltc-intimation-compact table th, 
+        .ltc-intimation-compact table td {
+            padding: 2px 4px !important;
+        }
+        .ltc-intimation-compact input, 
+        .ltc-intimation-compact textarea, 
+        .ltc-intimation-compact select {
+            padding: 2px 4px !important;
+            font-size: 10.5px !important;
+        }
+        .ltc-intimation-compact .warning-box {
+            padding: 6px 10px !important;
+            margin-bottom: 6px !important;
+        }
+        .ltc-intimation-compact .warning-box p {
+            font-size: 9px !important;
+        }
+    }
+</style>
+<div class="template-wrapper ltc-intimation-compact">
+    <h2 class="text-2xl font-bold text-center mb-6">
+        LTC Intimation Form <br>
+        <span class="text-lg font-normal text-gray-600">एल.टी.सी. सूचना प्रपत्र</span>
+    </h2>
+
+    <div class="mb-4">
+        <label class="block font-bold mb-2">प्रेषक / From</label>
+        <input type="text" name="ltc_int_from" id="ltc_int_from" class="w-full p-2 border rounded">
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-bold mb-1">सेवा में / To</label>
+        <textarea name="ltc_int_to" rows="2" class="w-full p-1 border rounded">The C.D.A, AN/Pay Section, No.1 Staff Road, Secunderabad-9</textarea>
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-bold mb-1">विषय / Subject</label>
+        <input type="text" name="ltc_int_subject" value="Intention of availing HOMETOWN / All India LTC for the block year." class="w-full p-1 border rounded">
+    </div>
+
+    <div class="mb-6">
+        <label class="block font-bold mb-2">मैं निम्न अवधि के दौरान अपने गृहनगर / अखिल भारतीय एल.टी.सी. का उपयोग करना चाहता/चाहती हूँ। / I intend to avail HOMETOWN / ALL INDIA LTC</label>
+        <table class="w-full border-collapse border border-gray-400">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-400 p-1 text-center" style="width: 15%;">ब्लॉक वर्ष / Block Year</th>
+                    <th class="border border-gray-400 p-1 text-center">गृहनगर / पसंद स्टेशन / Home Town / Choice Station</th>
+                    <th class="border border-gray-400 p-1 text-center" style="width: 15%;">अवधि से / Period From</th>
+                    <th class="border border-gray-400 p-1 text-center" style="width: 15%;">अवधि तक / Period To</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="border border-gray-400 p-1">
+                        <input type="text" name="ltc_int_block_year" placeholder="20__-20__" class="w-full border-0">
+                    </td>
+                    <td class="border border-gray-400 p-1">
+                        <input type="text" name="ltc_int_choice_station" class="w-full border-0">
+                    </td>
+                    <td class="border border-gray-400 p-1">
+                        <input type="text" placeholder="dd/mm/yyyy" name="ltc_int_period_from" class="w-full border-0">
+                    </td>
+                    <td class="border border-gray-400 p-1">
+                        <input type="text" placeholder="dd/mm/yyyy" name="ltc_int_period_to" class="w-full border-0">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="font-bold text-lg mb-2">परिवार के सदस्य / Family Members</h3>
+        <table class="border-collapse border border-gray-400" id="ltc_int_family_table" style="width: auto; min-width: 400px;">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border border-gray-400 p-1 text-left">सदस्य / Member</th>
+                    <th class="border border-gray-400 p-1 text-left" style="width: 150px;">संबंध / Relationship</th>
+                    <th class="border border-gray-400 p-1 text-left" style="width: 80px;">आयु / Age</th>
+                    <th class="border border-gray-400 p-1 text-center no-print" style="width: 70px;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="ltc_int_family_body">
+                <!-- Rows will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="font-bold text-lg mb-2">स्वीकृत अवकाश व यात्रा तिथि / Sanctioned Leave & Journey Date</h3>
+        <table class="w-full border-collapse border border-gray-400">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-400 p-1 text-center" style="width: 25%;">से / From</th>
+                    <th class="border border-gray-400 p-1 text-center" style="width: 25%;">तक / To</th>
+                    <th class="border border-gray-400 p-1 text-center">यात्रा प्रारम्भ तिथि / Journey Commencement Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="border border-gray-400 p-1">
+                        <input type="text" placeholder="dd/mm/yyyy" name="ltc_int_leave_from" class="w-full border-0">
+                    </td>
+                    <td class="border border-gray-400 p-1">
+                        <input type="text" placeholder="dd/mm/yyyy" name="ltc_int_leave_to" class="w-full border-0">
+                    </td>
+                    <td class="border border-gray-400 p-1">
+                        <input type="text" placeholder="dd/mm/yyyy" name="ltc_int_journey_date" class="w-full border-0">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="warning-box">
+        <p>यदि मैं यात्रा नहीं करता/करती अथवा निर्धारित अवधि में समायोजन बिल प्रस्तुत नहीं करता/करती हूँ, तो मुझे भुगतान की गई अग्रिम राशि दंडात्मक ब्याज सहित मेरे वेतन से वसूल की जा सकती है।</p>
+        <p>If I do not perform the journey or fail to submit the adjustment claim within the stipulated period, the advance paid to me is recoverable with penal interest from my salary.</p>
+    </div>
+
+    <div class="mb-6">
+        <p class="font-bold">यह मुख्य कार्यालय की सूचनार्थ है। / This is for information of Main Office please.</p>
+    </div>
+
+    <table class="w-full border-0 mt-4 mb-4" style="border-collapse: collapse;">
+        <tr>
+            <!-- Left Side: Meta Details -->
+            <td style="vertical-align: top; width: 61%; padding-top: 10px;">
+                <div class="mb-4">
+                    <label class="font-bold block mb-1">दिनांक / Date:</label>
+                    <input type="text" placeholder="dd/mm/yyyy" name="ltc_int_date" id="ltc_int_date" class="p-1 border rounded w-full" style="max-width: 150px;">
+                </div>
+                <div class="mb-2">
+                    <label class="font-bold block mb-1">स्थान / Place:</label>
+                    <input type="text" name="ltc_int_place" class="p-1 border rounded w-full" style="max-width: 150px;" value="Secunderabad">
+                </div>
+            </td>
+            <!-- Right Side: Signature Block -->
+            <td style="vertical-align: top; text-align: right; padding-top: 10px; padding-right: 0;">
+                <p style="margin-bottom: 30px;">हस्ताक्षर / Signature</p>
+                <p class="mb-2">____________________</p>
+                <div style="line-height: 1.6; font-size: 11px;">
+                    <p><strong>नाम / Name:</strong> <input type="text" name="ltc_int_emp_name" id="ltc_int_emp_name" class="border-0 p-0 m-0 font-bold" readonly style="background: transparent; display: inline; width: auto; text-align: right;"></p>
+                    <p><strong>पदनाम / Grade:</strong> <input type="text" name="ltc_int_emp_grade" id="ltc_int_emp_grade" class="border-0 p-0 m-0" readonly style="background: transparent; display: inline; width: auto; text-align: right;"></p>
+                    <p><strong>लेखा सं. / A/c No.:</strong> <input type="text" name="ltc_int_emp_ac" id="ltc_int_emp_ac" class="border-0 p-0 m-0" readonly style="background: transparent; display: inline; width: auto; text-align: right;"></p>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Action Buttons Row -->
+    <div class="flex justify-end no-print mt-4 mb-6">
+        <div class="flex gap-2">
+            <button type="button" id="ltc_int_btn_draft" class="btn-draft px-3 py-1 text-xs">Save as Draft</button>
+            <button type="button" id="ltc_int_btn_preview" class="btn-preview px-3 py-1 text-xs">Print Preview</button>
+            <button type="button" id="ltc_int_btn_submit" class="btn-primary px-3 py-1 text-xs">Submit Claim</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,436 @@
+<style>
+    .ltc-compact {
+        font-size: 12px !important;
+        line-height: 1.1;
+        color: #1e293b;
+    }
+
+    .ltc-compact h2 {
+        font-size: 16px !important;
+        text-align: center;
+        margin-bottom: 8px !important;
+        border-bottom: 1.5px solid #333;
+        padding-bottom: 2px;
+        font-weight: 800;
+    }
+
+    .ltc-compact h3 {
+        font-size: 12px !important;
+        background: #f1f5f9;
+        padding: 2px 10px;
+        margin: 8px 0 4px 0 !important;
+        border-left: 4px solid #3b82f6;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ltc-compact table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        table-layout: auto;
+    }
+
+    .ltc-compact table th, 
+    .ltc-compact table td {
+        border: 1px solid #94a3b8;
+        padding: 2px 6px !important;
+        line-height: 1.1 !important;
+        vertical-align: top;
+        height: auto;
+    }
+
+    .ltc-compact table th {
+        background-color: #f8fafc;
+        text-align: left;
+        font-weight: 700;
+        font-size: 11px;
+    }
+
+    .ltc-compact .no-border-input {
+        border: none !important;
+        width: 100%;
+        padding: 2px 4px !important;
+        margin: 0 !important;
+        background: transparent !important;
+        font-size: 12px !important;
+        outline: none;
+        line-height: 1.1;
+    }
+
+    .ltc-compact .editable-td {
+        min-height: 18px;
+        width: 100%;
+        padding: 2px 0;
+        outline: none;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 12px;
+        line-height: 1.1;
+        display: block;
+    }
+    .ltc-compact .no-border-input:focus,
+    .ltc-compact .editable-td:focus {
+        background: #f0f9ff !important;
+    }
+
+    .ltc-compact .hi {
+        font-size: 10px;
+        display: block;
+        color: #475569;
+        margin-bottom: 1px;
+    }
+
+    .ltc-compact .en {
+        font-size: 12px;
+        font-weight: 600;
+        display: block;
+    }
+
+    .ltc-compact .journey-table th {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 10px;
+    }
+
+    .ltc-compact .journey-table td input {
+        text-align: center;
+    }
+
+    /* Screen-Only Color Theming (Guarantees zero change to Print Preview) */
+    @media screen {
+        .ltc-compact h3 {
+            background: rgba(79, 70, 229, 0.04) !important;
+            border-left: 4px solid var(--accent-color) !important;
+            color: var(--primary-color) !important;
+            font-weight: 700 !important;
+        }
+        .ltc-compact table th {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border-color: var(--primary-color) !important;
+        }
+        .ltc-compact input:focus, 
+        .ltc-compact select:focus, 
+        .ltc-compact .editable-td:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+            background: white !important;
+            outline: none !important;
+        }
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .ltc-compact {
+            width: 100%;
+            padding: 0 !important;
+        }
+    }
+</style>
+
+<div class="ltc-compact p-4">
+    <h2>
+        <span style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 2px;">छुट्टी यात्रा रियायात हेतु
+            दावा</span>
+        CLAIM FOR LEAVE TRAVEL CONCESSION
+    </h2>
+
+    <div style="display: flex; gap: 20px;">
+        <!-- Section 1 -->
+        <div style="flex: 1;">
+            <h3>1. व्यक्तिगत ब्यौरा / Personal Details</h3>
+            <table>
+                <tr>
+                    <th style="width: 40%;"><span class="hi">नाम</span><span class="en">Name</span></th>
+                    <td><input type="text" id="ltc_final_personal_name" name="name" class="no-border-input font-bold"
+                            readonly></td>
+                </tr>
+                <tr>
+                    <th><span class="hi">पदनाम</span><span class="en">Designation</span></th>
+                    <td><input type="text" id="ltc_final_designation" name="designation" class="no-border-input"
+                            readonly></td>
+                </tr>
+                <tr>
+                    <th><span class="hi">व्यक्तिगत सं.</span><span class="en">Personal No.</span></th>
+                    <td><input type="text" id="ltc_final_personal_no" name="personal_no" class="no-border-input"
+                            readonly></td>
+                </tr>
+                <tr>
+                    <th><span class="hi">यूनिट/फॉर्मेशन</span><span class="en">Unit/Formation</span></th>
+                    <td><input type="text" name="unit_formation" class="no-border-input" value="ITSDC" style="padding-left: 4px !important;"></td>
+                </tr>
+                <tr>
+                    <th><span class="hi">मूल वेतन</span><span class="en">Basic Pay</span></th>
+                    <td><input type="text" id="ltc_final_basic_pay" name="basic_pay" class="no-border-input" readonly>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Section 2 -->
+        <div style="flex: 1;">
+            <h3>2. छुट्टी का ब्यौरा / Leave Details</h3>
+            <table>
+                <tr>
+                    <th style="width: 40%;"><span class="hi">अवधि</span><span class="en">Leave Period</span></th>
+                    <td>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <input type="text" placeholder="dd/mm/yyyy" name="leave_from" class="no-border-input" style="width: 85px;">
+                            <span>to</span>
+                            <input type="text" placeholder="dd/mm/yyyy" name="leave_to" class="no-border-input" style="width: 85px;">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th><span class="hi">प्राधिकार सं.</span><span class="en">Authority Order No.</span></th>
+                    <td><input type="text" name="authority_order_no" class="no-border-input"></td>
+                </tr>
+                <tr>
+                    <th><span class="hi">आदेश तिथि</span><span class="en">Order Date</span></th>
+                    <td><input type="text" placeholder="dd/mm/yyyy" name="authority_date" class="no-border-input"></td>
+                </tr>
+                <tr>
+                    <th><span class="hi">घोषित स्टेशन</span><span class="en">Declared Station</span></th>
+                    <td><input type="text" name="declared_station" class="no-border-input"></td>
+                </tr>
+                <tr>
+                    <th><span class="hi">दावा तिथि</span><span class="en">Claim Date</span></th>
+                    <td><input type="text" placeholder="dd/mm/yyyy" name="claim_preferred_date" class="no-border-input"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 3 -->
+    <h3>
+        3. परिवार का ब्यौरा / Family Details
+        <div class="no-print" style="display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 10px; font-weight: 400;">Add from profile:</span>
+            <select id="ltc_final_family"
+                style="font-size: 10px; padding: 2px 6px; border: 1px solid #ccc; border-radius: 4px; background: white;">
+                <option value="">-- Select Member --</option>
+            </select>
+        </div>
+    </h3>
+    <table id="ltcFinalFamilyTable">
+        <thead>
+            <tr>
+                <th style="width: 40px; text-align: center;">SL</th>
+                <th>Name / नाम</th>
+                <th style="width: 80px;">Age / आयु</th>
+                <th style="width: 200px;">Relationship / संबंध</th>
+                <th style="width: 40px;" class="no-print">Action</th>
+            </tr>
+        </thead>
+        <tbody id="ltcFinalFamilyBody">
+            <!-- Rows added dynamically -->
+        </tbody>
+        <tfoot class="no-print">
+            <tr>
+                <td colspan="5">
+                    <button type="button" id="ltcFinalAddFamilyBtn" class="no-border-input"
+                        style="color: #2563eb; font-weight: 700; text-align: left; cursor: pointer;">+ Add Custom
+                        Row</button>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Section 4 -->
+    <h3>
+        <span>4. यात्रा का ब्यौरा / Journey Details</span>
+        <button type="button" id="ltcFinalAddJourneyBtn" class="no-print" style="background: #3b82f6; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">+ Add Journey Segment</button>
+    </h3>
+    <table class="journey-table" id="ltcFinalJourneyTable">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Dep Station</th>
+                <th style="width: 11%;">Dep Date/Time</th>
+                <th style="width: 15%;">Arr Station</th>
+                <th style="width: 11%;">Arr Date/Time</th>
+                <th style="width: 7%;">Dist (KM)</th>
+                <th style="width: 8%;">Mode/<br>Class</th>
+                <th style="width: 11%;">Total Claim</th>
+                <th style="width: 22%; padding-right: 6px !important;">Remarks</th>
+                <th style="width: 15px;" class="no-print"></th>
+            </tr>
+        </thead>
+        <tbody id="ltcFinalJourneyBody">
+            <tr>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_dep_station_1"></div>
+                    <input type="hidden" name="journey_dep_station_1">
+                </td>
+                <td>
+                    <input type="text" name="journey_dep_date_1" class="no-border-input td-date-format" placeholder="dd/mm/yy">
+                    <input type="text" name="journey_dep_time_1" class="no-border-input td-time-format" placeholder="HH:MM">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_arr_station_1"></div>
+                    <input type="hidden" name="journey_arr_station_1">
+                </td>
+                <td>
+                    <input type="text" name="journey_arr_date_1" class="no-border-input td-date-format" placeholder="dd/mm/yy">
+                    <input type="text" name="journey_arr_time_1" class="no-border-input td-time-format" placeholder="HH:MM">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_dist_1"></div>
+                    <input type="hidden" name="journey_dist_1">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_mode_1"></div>
+                    <input type="hidden" name="journey_mode_1">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-journey-total-amt font-bold ltc-station-sync" data-name="journey_total_amt_1"></div>
+                    <input type="hidden" name="journey_total_amt_1">
+                </td>
+                <td>
+                    <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_ticket_no_1"></div>
+                    <input type="hidden" name="journey_ticket_no_1">
+                </td>
+                <td class="no-print"><button type="button" class="ltc-final-del-row" style="border: none; background: transparent; color: #ef4444; cursor: pointer; padding: 0; width: 100%; font-size: 14px;">✕</button></td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr style="background: #f8fafc; font-weight: bold;">
+                <td colspan="6" style="text-align: right; padding-right: 12px !important;">Total Journey Claim:</td>
+                <td><input type="text" id="ltcFinalJourneyTotal" name="total_journey_claim" class="no-border-input font-bold" style="text-align: left;" readonly></td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Calculation Section -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+        <table style="width: 350px;">
+            <tr>
+                <th style="width: 60%;">Total Amount Claimed</th>
+                <td><input type="text" id="ltcFinalTotalClaimed" name="total_amount_claimed"
+                        class="no-border-input font-bold text-right" readonly placeholder="₹"></td>
+            </tr>
+            <tr>
+                <th>Less Advance Drawn</th>
+                <td><input type="number" id="ltcFinalLessAdvance" name="less_advance" class="no-border-input text-right"
+                        placeholder="₹"></td>
+            </tr>
+            <tr style="background: #fefce8;">
+                <th style="color: #854d0e;">Balance / Recovery Due</th>
+                <td><input type="text" id="ltcFinalBalanceDue" name="balance_due"
+                        class="no-border-input font-bold text-right" readonly placeholder="₹" style="color: #854d0e;">
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Signature Block 1 (End of Page 1) -->
+    <table style="width: 100%; border: none; margin-top: 10px; margin-bottom: 20px;">
+        <tr>
+            <td style="width: 50%; border: none; vertical-align: top;">
+                <div class="mb-2"><strong>Date:</strong> <input type="text" placeholder="dd/mm/yyyy" name="sig_date_p1"
+                        class="no-border-input ltc_final_date_sync" style="width: 120px; display: inline;"></div>
+                <div><strong>Place:</strong> <input type="text" name="declaration_place" class="no-border-input"
+                        style="width: 150px; display: inline;" value="Secunderabad"></div>
+            </td>
+            <td style="width: 50%; border: none; text-align: right; vertical-align: top;">
+                <div style="margin-bottom: 30px;">Signature of the Claimant / दावादार के हस्ताक्षर</div>
+                <div style="font-size: 10px; line-height: 1.4;">
+                    <strong>Name:</strong> <input type="text" name="claimant_name"
+                        class="no-border-input ltc_final_name_sync" style="width: 150px; text-align: right;"
+                        readonly><br>
+                    <strong>Grade:</strong> <input type="text" name="claimant_designation"
+                        class="no-border-input ltc_final_desig_sync" style="width: 150px; text-align: right;"
+                        readonly><br>
+                    <strong>Personal No:</strong> <input type="text" name="claimant_personal_no"
+                        class="no-border-input ltc_final_pno_sync" style="width: 150px; text-align: right;" readonly>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Certificates & Signature (Page 2) -->
+    <div style="page-break-before: always; padding-top: 20px;">
+        <div style="border: 1px solid #cbd5e1; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; background: transparent; border: none; padding: 0;">Certificates / प्रमाणपत्र</h3>
+            <div style="font-size: 11px; color: #475569; margin-bottom: 10px;">I hereby certify that:</div>
+            <ul style="padding-left: 15px; margin: 0; list-style-type: decimal;">
+                <li class="mb-2">I have not submitted any other claim for LTC for my family in r/o block year <input
+                        type="text" name="block_year_1"
+                        style="width: 90px; border: none; border-bottom: 1px solid #94a3b8; outline: none; text-align: center;">
+                    to <input type="text" name="block_year_2"
+                        style="width: 90px; border: none; border-bottom: 1px solid #94a3b8; outline: none; text-align: center;">.
+                </li>
+                <li class="mb-2">Family members for whom claim is made were entirely dependent and residing with me.
+                </li>
+                <li class="mb-2">The journey was actually performed by the shortest route in the class claimed.</li>
+                <li class="mb-2">Journey was performed by Mail/Express trains and no student concession was <select
+                        name="student_concession"
+                        style="display: inline-block; border: 1.5px solid #2563eb; border-radius: 4px; background-color: #eff6ff; font-weight: bold; font-size: 11px; padding: 1px 4px; outline: none; height: auto; cursor: pointer; color: #1e3a8a; vertical-align: middle;">
+                        <option value="availed">availed</option>
+                        <option value="not_availed" selected>not availed</option>
+                    </select>.</li>
+            </ul>
+        </div>
+
+        <!-- Signature Block 2 (End of Page 2) -->
+        <table style="width: 100%; border: none; margin-top: 20px;">
+            <tr>
+                <td style="width: 50%; border: none; vertical-align: top;">
+                    <div class="mb-2"><strong>Date:</strong> <input type="text" placeholder="dd/mm/yyyy" id="ltc_final_sig_date"
+                            name="signature_date" class="no-border-input ltc_final_date_sync"
+                            style="width: 120px; display: inline;"></div>
+                    <div><strong>Place:</strong> <input type="text" name="declaration_place_p2" class="no-border-input"
+                            style="width: 150px; display: inline;" value="Secunderabad"></div>
+                </td>
+                <td style="width: 50%; border: none; text-align: right; vertical-align: top;">
+                    <div style="margin-bottom: 30px;">Signature of the Claimant / दावादार के हस्ताक्षर</div>
+                    <div style="font-size: 10px; line-height: 1.4;">
+                        <strong>Name:</strong> <input type="text" id="ltc_final_sig_name" name="claimant_name_p2"
+                            class="no-border-input ltc_final_name_sync" style="width: 150px; text-align: right;"
+                            readonly><br>
+                        <strong>Grade:</strong> <input type="text" id="ltc_final_sig_desig"
+                            name="claimant_designation_p2" class="no-border-input ltc_final_desig_sync"
+                            style="width: 150px; text-align: right;" readonly><br>
+                        <strong>Personal No:</strong> <input type="text" id="ltc_final_sig_pno"
+                            name="claimant_personal_no_p2" class="no-border-input ltc_final_pno_sync"
+                            style="width: 150px; text-align: right;" readonly>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Admin Section (Follows Signature on Page 2) -->
+        <div style="border-top: 2px dashed #e2e8f0; padding-top: 20px; margin-top: 40px;">
+            <h2 class="text-center">Admin Verification / प्रशासनिक सत्यापन</h2>
+            <div style="font-size: 12px; line-height: 1.6;">
+                Certified that necessary entries have been made in the Service Book of Shri/Smt ______________________.
+                The dependents shown in the claim are verified as per records. The claim is checked and passed for
+                payment of ₹ __________ (Rupees ________________________________________________________________).
+            </div>
+
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 60px; text-align: center;">
+                <div style="border-top: 1px solid #333; padding-top: 5px; font-weight: 700;">Auditor / लेखापरीक्षक</div>
+                <div style="border-top: 1px solid #333; padding-top: 5px; font-weight: 700;">SO(A) / AAO</div>
+                <div style="border-top: 1px solid #333; padding-top: 5px; font-weight: 700;">AO / ले.अ.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-2 no-print mt-8">
+        <button type="button" id="ltc_final_btn_draft"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded font-bold border border-gray-300">Save
+            Draft</button>
+        <button type="button" id="ltc_final_btn_preview"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded font-bold border border-gray-300">Preview</button>
+        <button type="button" id="ltc_final_btn_submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-bold">Submit Claim</button>
+    </div>
+</div>

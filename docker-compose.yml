@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  repo-db:
+    image: pgvector/pgvector:pg17
+    container_name: office_repo_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: repo_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - repo_db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  repo_db_data:

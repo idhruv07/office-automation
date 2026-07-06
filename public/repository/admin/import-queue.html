@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Review Queue - Admin</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        .queue-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .job-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .job-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .error-log {
+            color: #ef4444;
+            font-family: monospace;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .action-bar {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+        }
+        .manual-form {
+            background: rgba(0,0,0,0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+        .manual-form input {
+            display: block;
+            margin-bottom: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="queue-container">
+        <h2>Import Review Queue</h2>
+        <p style="color: #94a3b8">The following files failed automatic heuristics (missing dates, ambiguous splits, or unrecognized header images) and require manual review.</p>
+        
+        <div id="queue-list">Loading queue...</div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = '/'; return; }
+
+            const queueList = document.getElementById('queue-list');
+
+            async function loadQueue() {
+                try {
+                    const res = await fetch('/api/repo/admin/queue', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) {
+                        if (res.status === 403) {
+                            queueList.innerHTML = '<span style="color:red">Access Denied: Office Admin required.</span>';
+                            return;
+                        }
+                        throw new Error('Failed to fetch');
+                    }
+                    const jobs = await res.json();
+                    renderQueue(jobs);
+                } catch (err) {
+                    console.error(err);
+                    queueList.innerHTML = '<span style="color:red">Error loading queue</span>';
+                }
+            }
+
+            function renderQueue(jobs) {
+                if (jobs.length === 0) {
+                    queueList.innerHTML = '<div style="color:#10b981">Queue is empty! All clear.</div>';
+                    return;
+                }
+
+                queueList.innerHTML = '';
+                jobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'job-card';
+                    
+                    const extracted = job.detected_dates || {};
+                    const datesStr = JSON.stringify(extracted, null, 2);
+
+                    card.innerHTML = `
+                        <h3>${job.original_filename}</h3>
+                        <div style="font-size:12px; color:#94a3b8; margin-bottom: 12px;">Path: ${job.source_path}</div>
+                        <div><strong>Reason for Review:</strong></div>
+                        <div class="error-log">${job.error_log || 'Unknown error'}</div>
+                        
+                        <div style="margin-top: 12px;"><strong>Detected Metadata:</strong></div>
+                        <pre style="font-size:12px; color:#94a3b8; background:rgba(0,0,0,0.1); padding:8px;">${datesStr}</pre>
+
+                        <div class="action-bar">
+                            <button class="btn-primary" onclick="toggleForm(${job.id})">Manual Override</button>
+                            <button class="btn-primary" style="background: #3b82f6" onclick="resolveJob(${job.id}, 'retry')">Retry Import</button>
+                            <button class="btn-primary" style="background: #ef4444" onclick="resolveJob(${job.id}, 'discard')">Discard</button>
+                        </div>
+
+                        <div class="manual-form" id="form-${job.id}">
+                            <h4>Force Import Data</h4>
+                            <label>Folder ID</label>
+                            <input type="number" id="folder-${job.id}" placeholder="e.g. 1 (Unsorted)" value="1">
+                            
+                            <label>Document Subject/Title</label>
+                            <input type="text" id="subj-${job.id}" value="${extracted.subject || job.original_filename.replace(/\.[^/.]+$/, "")}">
+                            
+                            <label>Page Date (DD-MM-YYYY)</label>
+                            <input type="text" id="date-${job.id}" value="${extracted.date || ''}" placeholder="e.g. 21-08-2024">
+                            
+                            <button class="btn-primary" style="background: #10b981; margin-top: 12px" onclick="forceImport(${job.id})">Confirm & Re-Queue</button>
+                        </div>
+                    `;
+                    queueList.appendChild(card);
+                });
+            }
+
+            window.toggleForm = function(id) {
+                const form = document.getElementById(`form-${id}`);
+                form.style.display = form.style.display === 'block' ? 'none' : 'block';
+            };
+
+            window.resolveJob = async function(id, action) {
+                try {
+                    const res = await fetch(`/api/repo/admin/queue/${id}/resolve`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ action })
+                    });
+                    if (res.ok) {
+                        loadQueue();
+                    } else {
+                        const data = await res.json();
+                        alert('Error: ' + data.message);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+
+            window.forceImport = async function(id) {
+                const folder_id = document.getElementById(`folder-${id}`).value;
+                const document_title = document.getElementById(`subj-${id}`).value;
+                const page_date = document.getElementById(`date-${id}`).value;
+
+                if (!folder_id || !document_title || !page_date) {
+                    alert('Please fill all manual fields.');
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/api/repo/admin/queue/${id}/resolve`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            action: 'force_import',
+                            folder_id,
+                            document_title,
+                            page_date
+                        })
+                    });
+                    if (res.ok) {
+                        loadQueue();
+                    } else {
+                        const data = await res.json();
+                        alert('Error: ' + data.message);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+
+            loadQueue();
+        });
+    </script>
+</body>
+</html>

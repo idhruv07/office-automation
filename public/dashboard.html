@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Beautiful Dashboard Grid & Styling */
+        .dash-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .dash-hero::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+        }
+        .dash-hero-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0 0 4px 0;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .dash-hero-sub {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        /* Metric Cards Grid */
+        .dash-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .metric-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-color);
+        }
+        .metric-card.returned-highlight {
+            border-left: 4px solid var(--danger-color);
+        }
+        .metric-card.returned-highlight:hover {
+            border-color: var(--danger-color);
+        }
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .metric-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+        .metric-icon {
+            font-size: 28px;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--border-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .metric-card.returned-highlight .metric-icon {
+            background: rgba(239, 68, 68, 0.08);
+            color: var(--danger-color);
+        }
+
+        /* Charts Layout Grid */
+        .dash-charts-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 16px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 1024px) {
+            .dash-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+        }
+
+        /* Quick Navigation Actions Card */
+        .quick-actions-card {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+        }
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .action-button-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--border-light);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .action-button-card:hover {
+            background: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+        }
+        .action-button-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        .action-button-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .action-button-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Main Dashboard Widgets Container (Draggable Flow) -->
+    <div id="dashboard-widgets-container" style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 15px; align-items: stretch; width: 100%;">
+
+        <!-- Premium Gamified Hero Banner -->
+        <div class="profile-id-card-wrapper draggable-widget" draggable="true" data-widget-id="hero-widget" style="max-width: none; padding: 0; margin-bottom: 0; width: 100%;">
+            <div class="profile-id-card">
+                <!-- Animated decorative blobs -->
+                <div class="profile-blob profile-blob-1"></div>
+                <div class="profile-blob profile-blob-2"></div>
+                <div class="profile-blob profile-blob-3"></div>
+
+                <!-- Avatar + name hero -->
+                <div class="profile-hero">
+                    <div class="profile-avatar-wrap">
+                        <img id="dashboard-avatar"
+                            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23e0e7ff'/><circle cx='12' cy='8' r='4' fill='%236366f1'/><path d='M12 14c-4.42 0-8 2.58-8 6v1c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-1c0-3.42-3.58-6-8-6z' fill='%236366f1'/></svg>"
+                            alt="Profile Photo" class="profile-avatar-img">
+                    </div>
+                    <div class="profile-hero-text">
+                        <div class="profile-badge">Government Officer</div>
+                        <h2 class="profile-hero-name" id="welcome-message">Welcome back, Employee! 👋</h2>
+                        <div class="profile-hero-sub" id="current-date-str">Workspace Overview</div>
+                    </div>
+                </div>
+
+                <!-- Claims Completion Progress Tracker -->
+                <div class="xp-tracker" style="margin-top: 24px; padding: 0 5px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 6px; letter-spacing: 0.02em;">
+                        <span id="xp-level-name">Claims Completion Progress (Last 6 Months)</span>
+                        <span id="xp-numbers">0%</span>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.2); height: 10px; border-radius: 99px; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px);">
+                        <div id="xp-bar-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 99px; transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Cards Grid -->
+        <div class="profile-id-card-wrapper draggable-widget" draggable="true" data-widget-id="metrics-widget" style="max-width: none; padding: 0; margin-bottom: 0; width: 100%;">
+            <div class="profile-id-card" style="padding: 16px;">
+                <!-- Animated decorative blobs -->
+                <div class="profile-blob profile-blob-1" style="width: 180px; height: 180px; top: -40px; right: -40px;"></div>
+                <div class="profile-blob profile-blob-2" style="width: 180px; height: 180px; bottom: -40px; left: -40px;"></div>
+                
+                <div class="dash-metrics-grid" style="margin-bottom: 0; border: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="profile-chip" style="padding: 16px 20px; gap: 14px; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                        <span class="profile-chip-icon" style="font-size: 28px;">📑</span>
+                        <div>
+                            <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5);">Submitted Claims</div>
+                            <div id="val-submitted" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #ffffff;">0</div>
+                        </div>
+                    </div>
+                    <div class="profile-chip" style="padding: 16px 20px; gap: 14px; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                        <span class="profile-chip-icon" style="font-size: 28px;">✏️</span>
+                        <div>
+                            <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5);">Draft Claims</div>
+                            <div id="val-drafts" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #ffffff;">0</div>
+                        </div>
+                    </div>
+                    <div class="profile-chip returned-highlight" style="padding: 16px 20px; gap: 14px; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.35);">
+                        <span class="profile-chip-icon" style="font-size: 28px;">⚠️</span>
+                        <div>
+                            <div class="profile-chip-label" style="font-size: 11px; color: rgba(254,226,226,0.6);">Returned for Action</div>
+                            <div id="val-returned" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #fecaca;">0</div>
+                        </div>
+                    </div>
+                    <div class="profile-chip" style="padding: 16px 20px; gap: 14px; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                        <span class="profile-chip-icon" style="font-size: 28px;">🗂️</span>
+                        <div>
+                            <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5);">Claim Categories</div>
+                            <div id="val-categories" class="profile-chip-val" style="font-size: 28px; font-weight: 800; color: #ffffff;">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity History Bar Chart -->
+        <div class="profile-id-card-wrapper draggable-widget" draggable="true" data-widget-id="history-chart-widget" style="max-width: none; padding: 0; margin-bottom: 0; flex: 1 1 45%; min-width: 320px;">
+            <div class="profile-id-card" style="padding: 16px; min-height: 250px; display: flex; flex-direction: column;">
+                <div class="profile-blob profile-blob-1" style="width: 160px; height: 160px; top: -30px; right: -30px;"></div>
+                <div class="chart-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 12px;">
+                    <h3 class="chart-title" style="color: #ffffff; font-weight: 800; font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px;">📊 Submission History</h3>
+                </div>
+                <div class="chart-wrapper" style="flex: 1; min-height: 180px; position: relative;">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Doughnut Chart -->
+        <div class="profile-id-card-wrapper draggable-widget" draggable="true" data-widget-id="status-chart-widget" style="max-width: none; padding: 0; margin-bottom: 0; flex: 1 1 45%; min-width: 320px;">
+            <div class="profile-id-card" style="padding: 16px; min-height: 250px; display: flex; flex-direction: column;">
+                <div class="profile-blob profile-blob-2" style="width: 160px; height: 160px; bottom: -30px; left: -30px;"></div>
+                <div class="chart-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 12px;">
+                    <h3 class="chart-title" style="color: #ffffff; font-weight: 800; font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px;">🎯 Status Distribution</h3>
+                </div>
+                <div class="chart-wrapper" style="flex: 1; min-height: 180px; position: relative;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Ledger -->
+        <div class="profile-id-card-wrapper draggable-widget" draggable="true" data-widget-id="quick-actions-widget" style="max-width: none; padding: 0; margin-bottom: 0; width: 100%;">
+            <div class="profile-id-card" style="padding: 16px;">
+                <div class="profile-blob profile-blob-3" style="width: 200px; height: 200px; top: -50px; right: -50px;"></div>
+                <div class="chart-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 12px;">
+                    <h3 class="chart-title" style="color: #ffffff; font-weight: 800; font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px;">🚀 Quick Actions Navigation</h3>
+                </div>
+                <div class="quick-actions-grid" style="margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <a href="/claims/new.html" class="profile-chip" style="padding: 20px; flex-direction: column; text-align: center; gap: 10px; justify-content: center; text-decoration: none; cursor: pointer; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                        <span class="profile-chip-icon" style="font-size: 28px;">➕</span>
+                        <div>
+                            <div class="profile-chip-val" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.15);">Create New Claim</div>
+                            <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: none; letter-spacing: normal;">Submit a new request</div>
+                        </div>
+                    </a>
+                    <a href="/claims/my.html" class="profile-chip" style="padding: 20px; flex-direction: column; text-align: center; gap: 10px; justify-content: center; text-decoration: none; cursor: pointer; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                        <span class="profile-chip-icon" style="font-size: 28px;">📂</span>
+                        <div>
+                            <div class="profile-chip-val" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.15);">My Claims</div>
+                            <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: none; letter-spacing: normal;">View existing submissions</div>
+                        </div>
+                    </a>
+                    <a href="/profile.html" class="profile-chip" style="padding: 20px; flex-direction: column; text-align: center; gap: 10px; justify-content: center; text-decoration: none; cursor: pointer; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+                        <span class="profile-chip-icon" style="font-size: 28px;">👤</span>
+                        <div>
+                            <div class="profile-chip-val" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.15);">My Profile</div>
+                            <div class="profile-chip-label" style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: none; letter-spacing: normal;">Update personal information</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/dashboard.js"></script>
+</body>
+</html>

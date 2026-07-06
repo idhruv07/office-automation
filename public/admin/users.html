@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .modal-form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+        }
+        .modal-form-group input, .modal-form-group select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #1e293b;
+            background-color: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-form-group input:focus, .modal-form-group select:focus {
+            border-color: #3b82f6;
+        }
+        .modal-form-group input:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header section with title and Add User button -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; margin-top: 0.5rem;">
+        <h1 style="font-weight: 700; font-size: 1.25rem; color: #1e293b; margin: 0;">User Management</h1>
+    </div>
+
+    <!-- Edit User Modal Overlay -->
+    <div id="edit-user-modal" class="fixed inset-0 bg-slate-900/60 z-[9999] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl max-w-[600px] w-full mx-4 overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300" style="box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-lg text-slate-800" style="margin: 0;">Edit User Account</h3>
+                <button type="button" id="close-edit-modal-btn" class="text-slate-400 hover:text-slate-600 bg-transparent border-0 cursor-pointer text-xl font-semibold">✕</button>
+            </div>
+            <form id="edit-user-form" style="padding: 1.5rem; overflow-y: auto; max-height: 75vh; display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" id="edit-user-id">
+                <div class="modal-form-group">
+                    <label for="edit-username">Username (Account No.)</label>
+                    <input type="text" id="edit-username" disabled style="background-color: #f3f4f6;">
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-name">Full Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-designation">Designation</label>
+                    <select id="edit-designation" required>
+                        <option value="AAO">AAO</option>
+                        <option value="SAO">SAO</option>
+                        <option value="AUDITOR">AUDITOR</option>
+                        <option value="SR AUDITOR">SR AUDITOR</option>
+                        <option value="ACDA">ACDA</option>
+                        <option value="DCDA">DCDA</option>
+                        <option value="JCDA">JCDA</option>
+                        <option value="ADDL CDA">ADDL CDA</option>
+                        <option value="STENO GRADE - II">STENO GRADE - II</option>
+                    </select>
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-email">Email</label>
+                    <input type="email" id="edit-email" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-personal_no">Personal No</label>
+                    <input type="text" id="edit-personal_no" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-gender">Gender</label>
+                    <select id="edit-gender" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-role">Role</label>
+                    <select id="edit-role" required>
+                        <option value="Individual">Individual (Employee)</option>
+                        <option value="Admin">Admin (Manager)</option>
+                    </select>
+                </div>
+                <div id="edit-user-error" class="hidden text-red-600 text-xs font-semibold"></div>
+                <div class="flex gap-3 mt-2">
+                    <button type="submit" class="btn-primary flex-1">✓ Save Changes</button>
+                    <button type="button" id="cancel-edit-modal-btn" class="border border-slate-200 bg-slate-50 text-slate-600 rounded-xl px-4 py-2 text-sm font-semibold cursor-pointer">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create User Modal Overlay -->
+    <div id="create-user-modal" class="fixed inset-0 bg-slate-900/60 z-[9999] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl max-w-[600px] w-full mx-4 overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300" style="box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-lg text-slate-800" style="margin: 0;">Create New User Account</h3>
+                <button type="button" id="close-create-modal-btn" class="text-slate-400 hover:text-slate-600 bg-transparent border-0 cursor-pointer text-xl font-semibold">✕</button>
+            </div>
+            <form id="create-user-form" style="padding: 1.5rem; overflow-y: auto; max-height: 75vh; display: flex; flex-direction: column; gap: 16px;">
+                <div class="modal-form-group">
+                    <label for="new-username">Username (Account No.)</label>
+                    <input type="text" id="new-username" required placeholder="e.g. 98345722">
+                </div>
+                <div class="modal-form-group">
+                    <label for="new-password">Password</label>
+                    <input type="password" id="new-password" required placeholder="Enter temporary password">
+                </div>
+                <div class="modal-form-group">
+                    <label for="new-name">Full Name</label>
+                    <input type="text" id="new-name" required placeholder="Enter employee full name">
+                </div>
+                <div class="modal-form-group">
+                    <label for="new-designation">Designation</label>
+                    <select id="new-designation" required>
+                        <option value="" disabled selected>Select designation</option>
+                        <option value="AAO">AAO</option>
+                        <option value="SAO">SAO</option>
+                        <option value="AUDITOR">AUDITOR</option>
+                        <option value="SR AUDITOR">SR AUDITOR</option>
+                        <option value="ACDA">ACDA</option>
+                        <option value="DCDA">DCDA</option>
+                        <option value="JCDA">JCDA</option>
+                        <option value="ADDL CDA">ADDL CDA</option>
+                        <option value="STENO GRADE - II">STENO GRADE - II</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="new-email">Email</label>
+                    <input type="email" id="new-email" required placeholder="e.g. employee@domain.com">
+                </div>
+                <div class="form-group">
+                    <label for="new-personal_no">Personal No</label>
+                    <input type="text" id="new-personal_no" required placeholder="Enter unique personal number">
+                </div>
+                <div class="form-group">
+                    <label for="new-gender">Gender</label>
+                    <select id="new-gender" required>
+                        <option value="" disabled selected>Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="new-role">Role</label>
+                    <select id="new-role" required>
+                        <option value="" disabled selected>Select role</option>
+                        <option value="Individual">Individual (Employee)</option>
+                        <option value="Admin">Admin (Manager)</option>
+                    </select>
+                </div>
+                <div id="create-user-error" class="hidden text-red-600 text-xs font-semibold"></div>
+                <div class="flex gap-3 mt-2">
+                    <button type="submit" class="btn-primary flex-1">✓ Create User</button>
+                    <button type="button" id="cancel-create-modal-btn" class="border border-slate-200 bg-slate-50 text-slate-600 rounded-xl px-4 py-2 text-sm font-semibold cursor-pointer">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Active Users Table View -->
+    <div class="bg-white rounded-xl w-full border border-gray-100 shadow-sm">
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Search box -->
+                <div style="position: relative;">
+                    <input type="text" id="filter-search-input" placeholder="Search name or personal no..." style="background-color: white; border: 1px solid #e5e7eb; color: #374151; font-size: 0.875rem; border-radius: 4px; padding: 0.375rem 0.75rem 0.375rem 2.2rem; outline: none; width: 220px; transition: border-color 0.2s;">
+                    <span class="material-symbols-outlined" style="color: #9ca3af; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 18px;">search</span>
+                </div>
+                <!-- User Role dropdown -->
+                <div style="position: relative;">
+                    <select id="filter-role-select" style="background-color: white; border: 1px solid #e5e7eb; color: #6b7280; font-size: 0.875rem; border-radius: 4px; padding: 0.375rem 2rem 0.375rem 0.75rem; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                        <option value="all">User Role</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Individual">Individual</option>
+                    </select>
+                    <span class="material-symbols-outlined" style="color: #9ca3af; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 18px;">expand_more</span>
+                </div>
+                <!-- Designation dropdown -->
+                <div style="position: relative;">
+                    <select id="filter-designation-select" style="background-color: white; border: 1px solid #e5e7eb; color: #6b7280; font-size: 0.875rem; border-radius: 4px; padding: 0.375rem 2rem 0.375rem 0.75rem; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                        <option value="all">Designation</option>
+                        <option value="AAO">AAO</option>
+                        <option value="SAO">SAO</option>
+                        <option value="AUDITOR">AUDITOR</option>
+                        <option value="SR AUDITOR">SR AUDITOR</option>
+                        <option value="ACDA">ACDA</option>
+                        <option value="DCDA">DCDA</option>
+                        <option value="JCDA">JCDA</option>
+                        <option value="ADDL CDA">ADDL CDA</option>
+                        <option value="STENO GRADE - II">STENO GRADE - II</option>
+                    </select>
+                    <span class="material-symbols-outlined" style="color: #9ca3af; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 18px;">expand_more</span>
+                </div>
+                <!-- Status dropdown -->
+                <div style="position: relative;">
+                    <select id="filter-status-select" style="background-color: white; border: 1px solid #e5e7eb; color: #6b7280; font-size: 0.875rem; border-radius: 4px; padding: 0.375rem 2rem 0.375rem 0.75rem; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                        <option value="all">Status</option>
+                        <option value="online">Active</option>
+                        <option value="offline">Disabled</option>
+                    </select>
+                    <span class="material-symbols-outlined" style="color: #9ca3af; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 18px;">expand_more</span>
+                </div>
+            </div>
+            
+            <button id="open-create-modal-btn" style="display: flex; align-items: center; gap: 4px; background-color: #65a30d; color: white; font-weight: 500; padding: 0.375rem 1rem; border-radius: 4px; cursor: pointer; border: none; font-size: 0.875rem; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#4d7c0f'" onmouseout="this.style.backgroundColor='#65a30d'">
+                <span class="material-symbols-outlined" style="font-size: 16px; font-weight: bold;">add</span> Add Admin User
+            </button>
+        </div>
+        <div>
+            <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #f3f4f6; font-size: 0.75rem; color: #6b7280; text-transform: uppercase; font-weight: 500;">
+                        <th style="width: 48px; padding: 12px 16px; text-align: center;"><input type="checkbox" style="border-radius: 4px; border: 1px solid #d1d5db; cursor: pointer;"></th>
+                        <th style="padding: 12px 16px;">Name & Username</th>
+                        <th style="padding: 12px 16px;">Designation</th>
+                        <th style="padding: 12px 16px;">Email</th>
+                        <th style="padding: 12px 16px;">Role</th>
+                        <th style="padding: 12px 16px;">Created On</th>
+                        <th style="padding: 12px 16px;">Status</th>
+                        <th style="padding: 12px 16px; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Loaded dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- User Profile Details Section -->
+    <div id="user-profile-card-container" class="profile-id-card-wrapper hidden" style="margin-top: 2.5rem; margin-bottom: 3rem;">
+        <!-- Dynamic Premium Card details render here -->
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/admin_users.js"></script>
+</body>
+</html>

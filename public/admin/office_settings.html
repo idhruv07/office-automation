@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Settings - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <h1>Office Settings</h1>
+    <p style="color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 2rem;">Configure the letterhead that appears on all Forwarding Notes.</p>
+
+    <div class="form-container" style="max-width: 760px;">
+        <form id="office-config-form">
+
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Letterhead Details</h2>
+
+            <div class="form-group">
+                <label for="oc_office_name">Office Name <span style="color:red">*</span></label>
+                <input type="text" id="oc_office_name" required placeholder="OFFICE OF THE CDA ( IT &amp; SDC)">
+            </div>
+
+            <div class="form-group">
+                <label for="oc_office_address">Address Line 1 <span style="color:red">*</span></label>
+                <input type="text" id="oc_office_address" required placeholder="Street / Building name">
+            </div>
+
+            <div class="form-group">
+                <label for="oc_office_sub_address">Address Line 2</label>
+                <input type="text" id="oc_office_sub_address" placeholder="Area, City – PIN">
+            </div>
+
+            <div class="form-group">
+                <label for="oc_city_state_pin">City / State / PIN (optional 3rd line)</label>
+                <input type="text" id="oc_city_state_pin" placeholder="e.g. Secunderabad – 500 015">
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="form-group">
+                    <label for="oc_phone">Phone / Fax</label>
+                    <input type="text" id="oc_phone" placeholder="040-XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label for="oc_email">Email</label>
+                    <input type="email" id="oc_email" placeholder="office@nic.in">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="oc_fwd_ref_no">Forwarding Note Reference Number</label>
+                <input type="text" id="oc_fwd_ref_no" placeholder="IT&amp;SDC/Estt/Vol-VI">
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="form-group">
+                    <label for="oc_signatory_name">Signatory Name</label>
+                    <input type="text" id="oc_signatory_name" placeholder="Sr. Accounts Officer">
+                </div>
+                <div class="form-group">
+                    <label for="oc_signatory_dept">Signatory Department</label>
+                    <input type="text" id="oc_signatory_dept" placeholder="(IT&amp;SDC)">
+                </div>
+            </div>
+
+            <h2 style="margin: 1.5rem 0 1rem; font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Logo URLs</h2>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="form-group">
+                    <label for="oc_logo_left_url">Left Logo URL</label>
+                    <input type="text" id="oc_logo_left_url" placeholder="/admin/images/emblem.png">
+                </div>
+                <div class="form-group">
+                    <label for="oc_logo_right_url">Right Logo URL</label>
+                    <input type="text" id="oc_logo_right_url" placeholder="/admin/images/azadi.png">
+                </div>
+            </div>
+
+            <div id="oc-toast" style="display:none; padding:0.75rem 1.25rem; border-radius:10px; margin-top:1rem; font-weight:600; font-size:0.9rem;"></div>
+
+            <div style="display:flex; gap:1rem; margin-top:2rem;">
+                <button type="submit" id="oc-save-btn">Save Settings</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/admin_office_settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<style>
+    .mrc-compact {
+        font-size: 12px !important;
+        line-height: 1.2;
+    }
+    .mrc-compact h2 {
+        font-size: 16px !important;
+        text-align: center;
+        margin-bottom: 8px !important;
+        border-bottom: 1.5px solid #333;
+        padding-bottom: 2px;
+    }
+    .mrc-compact h3 {
+        font-size: 13px !important;
+        background: #f8fafc;
+        padding: 2px 8px;
+        margin: 8px 0 4px 0 !important;
+        border-left: 3px solid #3b82f6;
+    }
+    .mrc-compact input, 
+    .mrc-compact select, 
+    .mrc-compact textarea {
+        font-size: 12px !important;
+        padding: 2px 4px !important;
+        border: 1px solid #d1d5db;
+        border-radius: 2px;
+    }
+    .mrc-compact table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 8px;
+    }
+    .mrc-compact table th, 
+    .mrc-compact table td {
+        border: 1px solid #9ca3af;
+        padding: 2px 4px !important;
+    }
+    .mrc-compact table th {
+        background-color: #f9fafb;
+        text-align: left;
+        font-weight: bold;
+    }
+    .mrc-compact .no-border-input {
+        border: none !important;
+        width: 100%;
+        padding: 2px 4px !important;
+        margin: 0 !important;
+        background: transparent !important;
+    }
+    
+    /* Screen-Only Color Theming (Guarantees zero change to Print Preview) */
+    @media screen {
+        .mrc-compact h3 {
+            background: rgba(79, 70, 229, 0.04) !important;
+            border-left: 3px solid var(--accent-color) !important;
+            color: var(--primary-color) !important;
+            font-weight: 700 !important;
+        }
+        .mrc-compact table th {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border-color: var(--primary-color) !important;
+        }
+        .mrc-compact input:focus, 
+        .mrc-compact select:focus, 
+        .mrc-compact textarea:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+            outline: none !important;
+        }
+        .mrc-compact .mrc-doc-column-header {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            font-weight: 600 !important;
+        }
+        .mrc-compact .warning-box {
+            background: rgba(239, 68, 68, 0.04) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important;
+            border-left: 4px solid var(--danger-color) !important;
+            border-radius: 6px !important;
+            padding: 10px 14px !important;
+            color: var(--text-main) !important;
+        }
+    }
+
+    @media print {
+        .no-print { display: none !important; }
+        body { margin: 0; padding: 0; }
+        .mrc-compact { width: 100%; padding: 0 !important; font-size: 10.5px !important; }
+        .mrc-compact h2 { font-size: 13px !important; margin-bottom: 4px !important; }
+        .mrc-compact h3 { font-size: 11px !important; margin: 4px 0 2px 0 !important; }
+        .mrc-compact table { margin-bottom: 4px !important; }
+        .mrc-compact table th, 
+        .mrc-compact table td { padding: 1px 3px !important; font-size: 10.5px !important; }
+        .mrc-doc-section { margin-top: 4px !important; border-radius: 4px !important; }
+        .mrc-doc-column-header { padding: 3px 6px !important; font-size: 10px !important; }
+        .mrc-doc-column { padding: 4px 6px !important; }
+        .mrc-checkbox-group { margin-bottom: 1px !important; padding: 1px 2px !important; gap: 4px !important; }
+        .mrc-checkbox-group input[type="checkbox"] { width: 11px !important; height: 11px !important; margin-top: 1px !important; }
+        .mrc-checkbox-group label { font-size: 10px !important; }
+        .warning-box { margin-top: 4px !important; padding: 3px 6px !important; font-size: 9px !important; }
+        .mrc-signature-row { margin-top: 8px !important; margin-bottom: 4px !important; }
+        .mrc-signature-row input { height: 16px !important; }
+    }
+</style>
+
+<div class="mrc-compact p-4">
+    <div style="display: flex; flex-direction: column; width: 100%; margin-bottom: 12px;">
+        <div style="text-align: right; font-weight: bold; font-size: 11px; line-height: 1.2;">
+            FORM - MRC (S)<br>
+            <span style="font-weight: normal; font-size: 10px; font-style: italic;">(For serving employees)</span>
+        </div>
+        <div style="text-align: center; font-weight: bold; font-size: 15px; margin-top: 4px; border-bottom: 1.5px solid #333; padding-bottom: 6px; text-transform: uppercase; line-height: 1.3;">
+            CENTRAL GOVERNMENT HEALTH SCHEME<br>
+            <span style="font-size: 13px; font-weight: bold;">MEDICAL REIMBURSEMENT CLAIM FORM</span>
+        </div>
+    </div>
+
+    <h3>1. Principal CGHS Card Holder Details</h3>
+    <table class="mb-4">
+        <tr>
+            <th style="width: 20%;">Name</th>
+            <td style="width: 30%;"><input type="text" id="mrc_name" name="card_holder_name" readonly class="no-border-input font-bold"></td>
+            <th style="width: 20%;">CGHS Ben ID</th>
+            <td style="width: 30%;"><input type="text" id="mrc_cghs_ben_id" name="cghs_ben_id" class="no-border-input"></td>
+        </tr>
+        <tr>
+            <th>Employee Code</th>
+            <td><input type="text" id="mrc_personal_no" name="employee_code" readonly class="no-border-input"></td>
+            <th>Ward Entitlement</th>
+            <td>
+                <select name="ward_entitlement" class="no-border-input">
+                    <option value="General">General</option>
+                    <option value="Semi-Private">Semi-Private</option>
+                    <option value="Private">Private</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>Mobile Number</th>
+            <td><input type="tel" id="mrc_mobile_number" name="mobile_number" class="no-border-input"></td>
+            <th>Email</th>
+            <td><input type="email" id="mrc_email" name="email" class="no-border-input"></td>
+        </tr>
+        <tr>
+            <th>Full Address</th>
+            <td colspan="3"><input type="text" id="mrc_full_address" name="full_address" class="no-border-input" placeholder="Enter complete residential address"></td>
+        </tr>
+    </table>
+
+    <h3>2. Patient Details</h3>
+    <table>
+        <tr>
+            <th style="width: 20%;">Patient Name</th>
+            <td style="width: 30%;">
+                <select id="mrc_patient_name" name="patient_name" class="no-border-input">
+                    <option value="">Select Patient...</option>
+                    <option value="Self">Self</option>
+                </select>
+            </td>
+            <th style="width: 20%;">Patient Ben ID</th>
+            <td style="width: 30%;"><input type="text" id="mrc_patient_cghs" name="patient_cghs_ben_id" readonly class="no-border-input"></td>
+        </tr>
+        <tr>
+            <th>Relationship</th>
+            <td colspan="3"><input type="text" id="mrc_patient_relation" name="relationship" readonly class="no-border-input"></td>
+        </tr>
+    </table>
+
+    <h3>3. Hospital & Treatment Details</h3>
+    <table>
+        <tr>
+            <th style="width: 25%;">Hospital Name & Address</th>
+            <td colspan="3"><input type="text" name="hospital_details" class="no-border-input"></td>
+        </tr>
+        <tr>
+            <th>Empanelled?</th>
+            <td>
+                <select name="is_empanelled" class="no-border-input">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </td>
+            <th>Emergency?</th>
+            <td>
+                <select name="is_emergency" class="no-border-input">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>Treatment Type</th>
+            <td>
+                <div style="display: flex; flex-direction: column; gap: 4px; padding: 2px 4px;">
+                    <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 11px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" name="treatment_type_opd" style="width: 13px; height: 13px; margin: 0; cursor: pointer;"> OPD Treatment
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 11px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" name="treatment_type_indoor" style="width: 13px; height: 13px; margin: 0; cursor: pointer;"> Indoor Treatment
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 11px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" name="treatment_type_test" style="width: 13px; height: 13px; margin: 0; cursor: pointer;"> Tests/Investigation
+                    </label>
+                </div>
+            </td>
+            <th>Prior Permission?</th>
+            <td>
+                <select name="prior_permission" class="no-border-input">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>Medical Insurance?</th>
+            <td>
+                <select name="medical_insurance" class="no-border-input">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </td>
+            <th>Amount Received (Ins.)</th>
+            <td><input type="number" name="amount_claimed_received" class="no-border-input" value="0"></td>
+        </tr>
+        <tr>
+            <th>Advance Taken</th>
+            <td colspan="3"><input type="number" name="medical_advance_taken" class="no-border-input" value="0"></td>
+        </tr>
+    </table>
+
+    <h3>4. Claim Amount Details (INR)</h3>
+    <table>
+        <tr>
+            <th style="text-align: center;">OPD Amount</th>
+            <th style="text-align: center;">Indoor Amount</th>
+            <th style="text-align: center;">Tests/Investigation</th>
+            <th style="text-align: center;">Total Claimed</th>
+        </tr>
+        <tr>
+            <td><input type="number" name="opd_amount" class="no-border-input text-center" value="0"></td>
+            <td><input type="number" name="indoor_amount" class="no-border-input text-center" value="0"></td>
+            <td><input type="number" name="test_investigation_amount" class="no-border-input text-center" value="0"></td>
+            <td id="mrc_total_claimed" class="bg-gray-100 font-bold text-center">0.00</td>
+        </tr>
+    </table>
+
+    <h3>5. Bank Details (for Reimbursement)</h3>
+    <table class="mb-4">
+        <tr>
+            <th style="width: 20%;">Bank A/C No</th>
+            <td style="width: 30%;"><input type="text" name="bank_account_no" class="no-border-input" placeholder="Enter Account Number"></td>
+            <th style="width: 20%;">IFSC</th>
+            <td style="width: 30%;"><input type="text" name="bank_ifsc" class="no-border-input" placeholder="IFSC Code"></td>
+        </tr>
+    </table>
+    <div class="no-print" style="font-size: 10px; color: #ef4444; padding-left: 5px; margin-top: -4px; margin-bottom: 8px; font-weight: 500;">
+        * Remarks: Bank A/c details not saved.
+    </div>
+
+    <div class="mrc-doc-section mt-4">
+        <div class="mrc-doc-header-grid-3">
+            <div class="mrc-doc-column-header">Required Documents</div>
+            <div class="mrc-doc-column-header">Treatment Details</div>
+            <div class="mrc-doc-column-header">Compliance</div>
+        </div>
+        <div class="mrc-doc-body-grid-3">
+            <div class="mrc-doc-column">
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_cghs" id="chk_cghs"> <label for="chk_cghs">CGHS Card</label></div>
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_permission" id="chk_perm"> <label for="chk_perm">Permission Letter</label></div>
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_emergency" id="chk_emerg"> <label for="chk_emerg">Emergency Cert.</label></div>
+                <div class="mrc-checkbox-group" style="padding: 1px 4px !important; margin-bottom: 2px !important;"><input type="checkbox" name="mrc_chk_discharge" id="chk_disc"> <label for="chk_disc">Discharge Summary</label></div>
+            </div>
+            <div class="mrc-doc-column">
+                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_ambulance" id="chk_amb"> <label for="chk_amb">Ambulance Cert.</label></div>
+                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_bills" id="chk_bills"> <label for="chk_bills">Bills / Vouchers</label></div>
+                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_breakup" id="chk_break"> <label for="chk_break">Inv. Break-up</label></div>
+            </div>
+            <div class="mrc-doc-column">
+                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_lost_aff" id="chk_lost"> <label for="chk_lost">Lost Doc Affidavit</label></div>
+                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_implant" id="chk_imp"> <label for="chk_imp">Implant Invoice</label></div>
+                <div class="mrc-checkbox-group"><input type="checkbox" name="mrc_chk_stent" id="chk_stent"> <label for="chk_stent">Stent/Pacemaker</label></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-box mt-4 p-2 border text-xs italic">
+        <b>Note:</b> Misuse of CGHS facilities is a criminal offence. False statements may lead to disciplinary action.
+    </div>
+
+        <!-- ── Station / Date / Countersigned / Signature ── -->
+        <div class="mrc-signature-row" style="display:grid; grid-template-columns: 1fr auto 1fr; align-items:flex-end; margin-top:30px; margin-bottom:15px; gap:20px; width: 100%; font-size: 12px;">
+            <!-- Left: Station & Date -->
+            <div style="width: 220px; text-align: left;">
+                <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">
+                    <span>स्टेशन / Station:</span>
+                    <input type="text" style="border:none; border-bottom:1px solid #9ca3af !important; width:140px; height:22px !important; padding:2px 4px !important; background:transparent;" name="declaration_place" value="Secunderabad">
+                </div>
+                <div style="display:flex; align-items:baseline; gap:6px;">
+                    <span>दिनांक / Date:</span>
+                    <input type="text" placeholder="dd/mm/yyyy" style="border:none; border-bottom:1px solid #9ca3af !important; width:150px; height:22px !important; padding:2px 4px !important; background:transparent;" name="declaration_date" id="declaration_date">
+                </div>
+            </div>
+
+            <!-- Middle: Countersigned by ACDA/DCDA... -->
+            <div style="width: 240px; text-align:center;">
+                <div style="border: 1px solid #555; width: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; margin: 0 auto; min-height:80px; padding: 10px 0;">
+                    <div style="font-size:11px; font-weight:bold;">Countersigned by</div>
+                    <div style="font-size:11px; font-weight:bold; margin-top: 5px;">ACDA/DCDA/JCDA/Addn CDA</div>
+                </div>
+            </div>
+
+            <!-- Right: Signature & Name -->
+            <div style="text-align:right;">
+                <div style="display:flex; justify-content:flex-end; align-items:baseline; gap:6px; margin-bottom:6px;">
+                    <span style="font-weight:bold;">हस्ताक्षर / Signature of Deponent:</span>
+                    <input type="text" style="border:none; border-bottom:1px solid #9ca3af; width:100px; background:transparent;" name="declaration_signature">
+                </div>
+                <div style="display:flex; justify-content:flex-end; align-items:baseline; gap:6px;">
+                    <span>नाम व पदनाम / Name & Designation:</span>
+                    <input type="text" style="border:none; border-bottom:1px solid #9ca3af; width:140px; background:transparent;" name="declaration_name_desig" id="declaration_name_desig">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 border-t pt-4" style="page-break-before: always;">
+        <h3 class="mt-0 text-center" style="border-left: none; background: transparent; font-size: 16px !important; text-decoration: underline;">Declaration</h3>
+        <textarea id="declarationText" name="generated_declaration" rows="4" class="w-full mt-2 p-2 border bg-gray-50 text-xs">I {Name Of Individual}, resident of [Adress] hereby declare that the statements made in the application are true to the best of my knowledge and belief and the person for whom medical expenses were incurred is wholly dependent on me. I am a CGHS beneficiary and the CGHS card was valid at the time of treatment. I agree for the reimbursement as is admissible under the rules.</textarea>
+        
+        <table class="w-full border-0 mt-4" style="border-collapse: collapse;">
+            <tr>
+                <td style="vertical-align: top; width: 75%; padding-top: 10px;">
+                    <div class="flex items-center gap-2 mb-1">
+                        <strong>Date:</strong> <input type="text" placeholder="dd/mm/yyyy" name="declaration_page_date" id="declaration_page_date" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 100px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <strong>Place:</strong> <input type="text" name="declaration_page_place" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 120px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;" value="Secunderabad">
+                    </div>
+                </td>
+                <td style="vertical-align: top; text-align: right; padding-top: 10px; padding-right: 0;">
+                    <p style="margin-bottom: 30px;">Signature of CGHS Card Holder</p>
+                    <p>____________________</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="mt-8 border-t pt-4" style="page-break-before: always;">
+        <h3 class="mt-0 text-center" style="border-left: none; background: transparent; font-size: 16px !important; text-decoration: underline;">Annexure I – Affidavit for Duplicate Claim Papers</h3>
+        <textarea id="affidavitText" name="generated_affidavit" rows="4" class="w-full mt-2 p-2 border bg-gray-50 text-xs">I, [Your Name], resident of [Address], have lost/misplaced the original claim papers/bills. I hereby undertake that I have not received any payment against these original bills from any source. If the original papers are traced, I shall not stake claim against them in future.</textarea>
+        
+        <table class="w-full border-0 mt-4" style="border-collapse: collapse;">
+            <tr>
+                <td style="vertical-align: top; width: 75%; padding-top: 10px;">
+                    <div class="flex items-center gap-2 mb-1">
+                        <strong>Date:</strong> <input type="text" placeholder="dd/mm/yyyy" name="affidavit_date" id="affidavit_date" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 100px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <strong>Place:</strong> <input type="text" name="affidavit_place" style="border: none !important; border-bottom: 1px solid #9ca3af !important; width: 120px; height: 22px !important; padding: 2px 4px !important; background: transparent !important;" value="Secunderabad">
+                    </div>
+                </td>
+                <td style="vertical-align: top; text-align: right; padding-top: 10px; padding-right: 0;">
+                    <p style="margin-bottom: 30px;">Signature of Deponent</p>
+                    <p>____________________</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Claim Forwarding Note</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body id="fwd-body">
+
+<div class="fwd-action-bar">
+  <button class="btn fwd-btn-preview" id="btnPreview">&#128065; Save &amp; Print Preview</button>
+</div>
+
+<div class="fwd-page" id="formPage">
+
+  <!-- LETTERHEAD -->
+  <div class="fwd-letterhead">
+    <div class="fwd-lh-img">
+      <img id="logoLeft" src="images/emblem.png" alt="Emblem">
+    </div>
+    <div class="fwd-lh-center">
+      <div class="fwd-lh-title" id="officeName">OFFICE OF THE CDA ( IT &amp; SDC)</div>
+      <div class="fwd-lh-sub" id="officeAddress">Mornington Road, PAO(ORs)AOC Compound,</div>
+      <div class="fwd-lh-sub" id="officeSubAddr">Trimulgherry, Secunderabad &ndash; 500 015.</div>
+      <div class="fwd-lh-sub" id="officeCityPin"></div>
+      <div class="fwd-lh-email">Email: <span id="officeEmail">itsdcsec-cda@nic.in</span></div>
+      <div class="fwd-lh-phone">Phone/ Fax No: <span id="officePhone">040-27742553/29805085</span></div>
+    </div>
+    <div class="fwd-lh-img">
+      <img id="logoRight" src="images/azadi.png" alt="Azadi Ka Amrit Mahotsav">
+    </div>
+  </div>
+
+  <!-- Ref & Date -->
+  <div class="fwd-meta-row">
+    <span>No. <span id="fwdRefNo">IT&amp;SDC/Estt/Vol-VI</span></span>
+    <div class="fwd-date-wrap">
+      <span>Date:</span>
+      <input type="date" id="letterDate">
+    </div>
+  </div>
+
+  <!-- To -->
+  <div class="fwd-to-block">
+    To<br>
+    The Officer in charge<br>
+    Admin-Pay<br>
+    O/o the CDA Secunderabad<br>
+    No. 1 Staff Road<br>
+    Secunderabad-09
+  </div>
+
+  <!-- Subject — editable claim type, multi-person -->
+  <div class="fwd-sub-block">
+    <div class="fwd-sub-line">
+      <span>Sub&nbsp;:&nbsp;Submission of <span class="fwd-ghost" id="subClaimType" contenteditable="true" spellcheck="false">Medical claim</span> &ndash; Reg.</span>
+    </div>
+  </div>
+
+  <div class="fwd-divider">&lt;&lt;&lt;&gt;&gt;&gt;</div>
+
+  <!-- Body -->
+  <div class="fwd-body-para">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fwd-ghost" id="bodyClaimType" contenteditable="true" spellcheck="false">Medical reimbursement claim</span> in r/o of the individuals mentioned below is forwarded herewith for further necessary action at your end please:
+  </div>
+
+  <!-- Individuals Table -->
+  <table id="individualsTable" style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:13px;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:8%;">Sr. No.</th>
+        <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:52%;">Name</th>
+        <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:40%;">Post/Personal Number</th>
+      </tr>
+    </thead>
+    <tbody id="individualsBody">
+      <!-- Rows injected by multi_fwd_note.js -->
+    </tbody>
+  </table>
+
+  <div class="fwd-sig-block">
+    <span id="signatoryName">Sr. Accounts Officer</span><br>
+    <span id="signatoryDept">(IT&amp;SDC)</span>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="fwd-modal-overlay" id="previewModal">
+  <div class="fwd-modal-inner">
+    <div class="fwd-modal-bar">
+      <button class="btn fwd-btn-do-print" id="btnDoPrint">&#128438; Print</button>
+      <button class="btn fwd-btn-close" id="btnClosePreview">&#10005; Close Preview</button>
+    </div>
+    <div class="fwd-preview-page" id="previewContent"></div>
+  </div>
+</div>
+
+<script src="/assets/menu.js"></script>
+<script src="/assets/layout.js"></script>
+<script src="/assets/multi_fwd_note.js"></script>
+</body>
+</html>

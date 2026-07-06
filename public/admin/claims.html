@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Claims - Admin - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .btn-sm { padding: 4px 8px; font-size: 12px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h1 style="margin-bottom: 2rem; font-weight: 800; color: #0f172a;">Claims Dashboard</h1>
+
+    <!-- Metrics Row -->
+    <div class="adm-stats-grid">
+        <div class="adm-stat-card">
+            <span class="adm-stat-label">Total Submissions</span>
+            <span class="adm-stat-value" id="stat-total">0</span>
+        </div>
+        <div class="adm-stat-card" style="border-left: 4px solid #3b82f6;">
+            <span class="adm-stat-label" style="color: #3b82f6;">Pending Review</span>
+            <span class="adm-stat-value" id="stat-pending">0</span>
+        </div>
+        <div class="adm-stat-card" style="border-left: 4px solid #059669;">
+            <span class="adm-stat-label" style="color: #059669;">Approved Today</span>
+            <span class="adm-stat-value" id="stat-approved">0</span>
+        </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <!-- Tab-like Filter Bar -->
+        <div class="adm-filter-bar">
+            <button id="btn-show-all" class="adm-filter-btn active">All Claims</button>
+            <button id="btn-show-pending" class="adm-filter-btn">Pending</button>
+            <button id="btn-show-approved" class="adm-filter-btn">Approved</button>
+            <button id="btn-show-returned" class="adm-filter-btn">Returned</button>
+            <button id="btn-show-rejected" class="adm-filter-btn">Rejected</button>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
+            <label for="filter-period" style="font-weight: 600; font-size: 0.85rem; color: #64748b;">Period:</label>
+            <select id="filter-period" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none; cursor: pointer;">
+                <option value="5d" selected>Last 5 Days</option>
+                <option value="3w">Last 3 Weeks</option>
+                <option value="1m">Last 1 Month</option>
+                <option value="custom">Select Date</option>
+            </select>
+            <input type="date" id="filter-custom-date" style="display:none; padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem; outline: none; cursor: pointer;">
+        </div>
+    </div>
+
+    <div class="adm-table-section">
+        <div class="adm-table-header">
+            <h3 id="view-title">All Submitted Claims</h3>
+            <span id="result-count" style="font-size: 0.8rem; color: #64748b; font-weight: 600;">0 Results</span>
+        </div>
+        <div id="admin-claims-dynamic-content" style="padding: 1rem;">
+            <p style="padding: 1rem; color: #64748b;">Loading claim data...</p>
+        </div>
+    </div>
+
+    <!-- Modal for Approval/Rejection Remarks -->
+    <div id="action-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 400px;">
+            <h3 id="modal-title">Action</h3>
+            <textarea id="action-remarks" placeholder="Optional remarks..." style="width: 100%; height: 80px; margin-bottom: 10px;"></textarea>
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-confirm-action" style="background: var(--primary-color);">Confirm</button>
+                <button onclick="document.getElementById('action-modal').style.display='none'" style="background: #ccc; color: black;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/admin_claims.js"></script>
+</body>
+</html>

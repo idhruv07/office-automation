@@ -1,0 +1,13 @@
+node_modules/
+.env
+server/storage/*
+!server/storage/.gitkeep
+.DS_Store
+server.log
+dist/
+
+# Ignored seed files with sensitive data
+db/seeds/create_users.js
+db/seeds/sync_dependents.js
+scratch/create_dhruv.js
+create_dhruv.js

@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Viewer - Office Automation</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        .doc-layout {
+            display: flex;
+            height: calc(100vh - 120px);
+            gap: 20px;
+        }
+        .page-sidebar {
+            flex: 0 0 250px;
+            background: rgba(255,255,255,0.03);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            overflow-y: auto;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .page-content-area {
+            flex: 1;
+            background: white;
+            color: black;
+            border-radius: 12px;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .page-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #e2e8f0;
+        }
+        .page-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .page-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .toolbar {
+            background: #f1f5f9;
+            padding: 8px;
+            border-bottom: 1px solid #cbd5e1;
+            display: none;
+            gap: 8px;
+            margin: -40px -40px 20px -40px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: -40px;
+            z-index: 10;
+        }
+        .toolbar button {
+            padding: 4px 8px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            cursor: pointer;
+            color: black;
+        }
+        .toolbar button:hover {
+            background: #e2e8f0;
+        }
+        #editor-content {
+            min-height: 500px;
+            outline: none;
+        }
+        /* Continuous page view */
+        .page-block {
+            position: relative;
+            margin-bottom: 0;
+        }
+        .page-block-content {
+            min-height: 200px;
+            outline: none;
+        }
+        .page-block-content:focus {
+            outline: none;
+        }
+        .page-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 32px 0 24px 0;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .page-divider::before, .page-divider::after {
+            content: '';
+            flex: 1;
+            border-top: 2px dashed #334155;
+        }
+        .page-divider:first-child { margin-top: 0; }
+        .page-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .page-item.in-view {
+            background: rgba(255,255,255,0.12);
+            border-left: 3px solid var(--primary-color, #3b82f6);
+        }
+        .lock-banner {
+            background: #fef08a;
+            color: #854d0e;
+            padding: 8px 16px;
+            margin: -40px -40px 20px -40px;
+            border-radius: 12px 12px 0 0;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+        }
+        
+
+        /* Modal for History */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.7); display: none;
+            justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-content {
+            background: #1e293b; padding: 24px; border-radius: 12px;
+            width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto;
+        }
+        .version-row {
+            background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 8px;
+            border-radius: 6px; display: flex; justify-content: space-between;
+        }
+
+        /* Ghost Text UI */
+        .ghost-text {
+            color: #94a3b8;
+            pointer-events: none;
+            background: rgba(148, 163, 184, 0.1);
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+        .ai-loading {
+            display: inline-block;
+            width: 12px; height: 12px;
+            border: 2px solid #cbd5e1;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Search Bar */
+        #search-bar {
+            display: none;
+            position: sticky;
+            top: -40px;
+            z-index: 20;
+            background: #1e293b;
+            border-bottom: 2px solid var(--primary-color, #3b82f6);
+            padding: 6px 12px;
+            border-radius: 8px 8px 0 0;
+            gap: 8px;
+            align-items: center;
+            margin: -40px -40px 10px -40px;
+        }
+        #search-bar.visible { display: flex; }
+        #search-input {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            background: #0f172a;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        #search-count { font-size: 12px; color: #94a3b8; min-width: 60px; text-align: center; }
+        #search-bar button {
+            padding: 3px 10px;
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        #search-bar button:hover { background: #475569; }
+        .search-highlight { background: #fbbf24; color: black; border-radius: 2px; }
+        .search-highlight.current { background: #f97316; color: white; }
+
+        /* Google-Style Pill Search Bar */
+        .repo-search-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: white;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            height: 40px;
+            width: 380px;
+            transition: all 0.2s;
+        }
+        .repo-search-container:hover, .repo-search-container:focus-within {
+            box-shadow: 0 1px 6px rgba(32,33,36,0.20);
+            border-color: rgba(223,225,229,0);
+        }
+        .search-icon-svg {
+            margin-left: 14px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .repo-search-input {
+            border: none !important;
+            background: transparent !important;
+            color: #202124 !important;
+            flex: 1;
+            height: 100%;
+            padding: 0 12px 0 0 !important;
+            outline: none !important;
+            font-size: 15px;
+            font-family: var(--font-body);
+            box-shadow: none !important;
+        }
+        .repo-search-input::placeholder {
+            color: #9aa0a6;
+        }
+        .repo-search-results {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            width: 100%;
+            max-height: 320px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #dfe1e5;
+            border-radius: 12px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(32,33,36,0.15);
+            padding: 6px;
+        }
+        .search-result-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            text-align: left;
+            margin-bottom: 2px;
+        }
+        .search-result-item:last-child {
+            margin-bottom: 0;
+        }
+        .search-result-item:hover {
+            background: #f1f3f4;
+        }
+        .search-result-title {
+            font-weight: 600;
+            color: #1a0dab;
+            font-size: 14px;
+            margin-bottom: 2px;
+            text-align: left;
+        }
+        .search-result-item:hover .search-result-title {
+            text-decoration: underline;
+        }
+        .search-result-path {
+            font-size: 11px;
+            color: #006621;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            text-align: left;
+        }
+        .search-result-snippet {
+            font-size: 13px;
+            color: #4d5156;
+            margin-top: 4px;
+            line-height: 1.4;
+            text-align: left;
+        }
+        .search-snippet-match {
+            font-weight: bold;
+            color: #202124;
+            background: transparent;
+        }
+
+        /* Breadcrumb Dropdown */
+        .breadcrumb-container {
+            position: relative;
+            display: inline-block;
+        }
+        .breadcrumb-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #1e293b;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            min-width: 280px;
+            z-index: 1000;
+            margin-top: 8px;
+        }
+        .breadcrumb-container:hover .breadcrumb-dropdown {
+            display: block;
+        }
+        .breadcrumb-dropdown::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 30px;
+            border: 8px solid transparent;
+            border-bottom-color: #1e293b;
+        }
+        .dropdown-tree-node {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #cbd5e1;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .dropdown-tree-node:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="repo-app" style="width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative; z-index: 1001;">
+            <div class="breadcrumb-container">
+                <h2 style="margin:0; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <a href="/repository/index.html" style="color:#94a3b8; text-decoration:none;">Repository</a>
+                    <span style="color:#64748b;">/</span>
+                    <span style="color:#f8fafc;">Document View</span>
+                    <span style="font-size:10px; color:#64748b; padding-left:4px;">▼</span>
+                </h2>
+                <div class="breadcrumb-dropdown">
+                    <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: bold; color: var(--primary-color, #4f46e5); font-size: 13px;">Navigate Folders</div>
+                    <div id="breadcrumb-folders-tree" style="max-height: 280px; overflow-y: auto; padding: 8px;">
+                        <div style="padding: 10px; text-align: center; color: #94a3b8; font-size: 12px;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="repo-search-container">
+                    <span class="search-icon-svg">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 18px; height: 18px; color: #64748b;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input id="global-search-input" type="text" placeholder="Search files, contents, metadata..." class="repo-search-input">
+                    <div id="global-search-results" class="repo-search-results"></div>
+                </div>
+                <div id="action-buttons" style="display: flex; gap: 12px;">
+                    <button id="btn-history" class="btn-primary" style="background:#64748b; display:none;">View History</button>
+                    <button id="btn-edit" class="btn-primary" style="display:none;">Edit Page</button>
+                    <button id="btn-save" class="btn-primary" style="background:#10b981; display:none;">Save Changes</button>
+                    <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">Cancel Edit</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-layout">
+            <div class="page-sidebar" id="page-list">
+                <div style="color: #94a3b8; text-align:center;">Loading pages...</div>
+            </div>
+            
+            <div class="page-content-area" id="page-viewer">
+                <div id="lock-banner" class="lock-banner"></div>
+                <!-- In-page Search Bar (Ctrl+F) -->
+                <div id="search-bar">
+                    <input id="search-input" type="text" placeholder="Search in document... (Ctrl+F)" autocomplete="off">
+                    <span id="search-count">0 / 0</span>
+                    <button onclick="searchNav(-1)">▲</button>
+                    <button onclick="searchNav(1)">▼</button>
+                    <button onclick="closeSearch()">✕</button>
+                </div>
+                <div id="toolbar" class="toolbar">
+                    <button onclick="document.execCommand('undo')" title="Undo (Ctrl+Z)">↶</button>
+                    <button onclick="document.execCommand('redo')" title="Redo (Ctrl+Y)">↷</button>
+                    <span style="border-right: 1px solid #ccc; margin: 0 4px;"></span>
+                    <button onclick="document.execCommand('bold')"><b>B</b></button>
+                    <button onclick="document.execCommand('italic')"><i>I</i></button>
+                    <button onclick="document.execCommand('underline')"><u>U</u></button>
+                    <button onclick="document.execCommand('insertOrderedList')">1.</button>
+                    <button onclick="document.execCommand('insertUnorderedList')">•</button>
+                    <span style="border-right: 1px solid #ccc; margin: 0 4px;"></span>
+                    <button onclick="document.execCommand('justifyLeft')" title="Align Left">⫷</button>
+                    <button onclick="document.execCommand('justifyCenter')" title="Align Center">≡</button>
+                    <button onclick="document.execCommand('justifyRight')" title="Align Right">⫸</button>
+                    <button onclick="document.execCommand('justifyFull')" title="Justify">▤</button>
+                    <span style="border-right: 1px solid #ccc; margin: 0 4px;"></span>
+                    <button onclick="insertTable()" title="Insert Table">▦ Table</button>
+                    <button onclick="toggleBorders()" title="Toggle Borders">◧ Borders</button>
+                    <button onclick="applyZeroSpacing()" title="Zero Spacing">0px Spacing</button>
+                    <button id="btn-ask-ai" style="background: var(--primary-color, #3b82f6); color: white; border: none; font-weight: bold; margin-left: 8px;">Ask AI</button>
+                    <span style="flex:1"></span>
+                    <span id="auto-save-indicator" style="font-size:12px; color:#10b981; padding-top:4px; margin-right: 12px; display: none;">Saved</span>
+                    <span id="version-badge" style="font-size:12px; color:#64748b; padding-top:4px;"></span>
+                </div>
+                <div id="editor-content">
+                    <div style="color: #94a3b8; text-align:center; padding-top: 40px;">Select a page from the left to view.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Page History & Conflict Log</h3>
+            <div id="history-list">Loading...</div>
+            <button class="btn-primary" style="margin-top:20px;" onclick="document.getElementById('history-modal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = '/'; return; }
+
+            // Fetch and render folders for the quick-navigation dropdown
+            async function loadBreadcrumbFolders() {
+                const dropdownTree = document.getElementById('breadcrumb-folders-tree');
+                try {
+                    const res = await fetch('/api/repo/tree', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error('Failed to load tree');
+                    const tree = await res.json();
+                    
+                    dropdownTree.innerHTML = '';
+                    renderDropdownTree(tree, dropdownTree);
+                } catch (err) {
+                    console.error('Error loading breadcrumb folders:', err);
+                    dropdownTree.innerHTML = '<div style="padding: 10px; text-align: center; color: #ef4444; font-size: 12px;">Failed to load folders</div>';
+                }
+            }
+
+            function renderDropdownTree(nodes, container, depth = 0) {
+                nodes.forEach(node => {
+                    const nodeEl = document.createElement('div');
+                    nodeEl.className = 'dropdown-tree-node';
+                    nodeEl.style.paddingLeft = `${depth * 16 + 10}px`;
+                    nodeEl.innerHTML = `<span>📁</span> <span>${node.name}</span>`;
+                    
+                    nodeEl.addEventListener('click', () => {
+                        window.location.href = `/repository/index.html?folderId=${node.id}`;
+                    });
+                    
+                    container.appendChild(nodeEl);
+                    
+                    if (node.children && node.children.length > 0) {
+                        renderDropdownTree(node.children, container, depth + 1);
+                    }
+                });
+            }
+
+            loadBreadcrumbFolders();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const docId = urlParams.get('id');
+            if (!docId) { window.location.href = '/repository'; return; }
+
+            let currentPageId = null;
+            let currentVersion = null;
+
+            const pageListEl = document.getElementById('page-list');
+            const editorEl = document.getElementById('editor-content');
+            const toolbarEl = document.getElementById('toolbar');
+            const lockBanner = document.getElementById('lock-banner');
+            const versionBadge = document.getElementById('version-badge');
+            
+            const btnEdit = document.getElementById('btn-edit');
+            const btnSave = document.getElementById('btn-save');
+            const btnCancel = document.getElementById('btn-cancel');
+            const btnHistory = document.getElementById('btn-history');
+
+            // Load All Pages — Continuous View
+            let allPages = [];
+            let editingPageId = null;
+            let editingVersion = null;
+
+            try {
+                const res = await fetch(`/api/repo/document/${docId}/pages`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed to load pages');
+                allPages = await res.json();
+                
+                pageListEl.innerHTML = '';
+                allPages.forEach((p, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'page-item';
+                    el.dataset.pageId = p.id;
+                    el.innerText = p.title || `Page ${p.sequence_no || (idx+1)}`;
+                    el.onclick = () => scrollToPage(p.id);
+                    pageListEl.appendChild(el);
+                });
+
+                await renderAllPages(allPages);
+                setupScrollSpy();
+
+            } catch (err) {
+                console.error(err);
+                pageListEl.innerHTML = '<span style="color:red">Error loading</span>';
+            }
+
+            async function renderAllPages(pages) {
+                editorEl.innerHTML = '';
+                for (let i = 0; i < pages.length; i++) {
+                    const p = pages[i];
+                    // Divider
+                    const divider = document.createElement('div');
+                    divider.className = 'page-divider';
+                    divider.textContent = p.title || `Page ${p.sequence_no || (i+1)}`;
+                    editorEl.appendChild(divider);
+                    
+                    // Fetch page content
+                    let htmlContent = '<i>Loading...</i>';
+                    try {
+                        const res = await fetch(`/api/repo/page/${p.id}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            htmlContent = data.page.html_content || '<i>Empty Page</i>';
+                            p._version = data.page.version;
+                            p._isEditable = data.is_editable;
+                            p._lock = data.lock;
+                        }
+                    } catch(e) { htmlContent = '<span style="color:red">Error loading</span>'; }
+                    
+                    const block = document.createElement('div');
+                    block.className = 'page-block';
+                    block.dataset.pageId = p.id;
+                    
+                    const blockContent = document.createElement('div');
+                    blockContent.className = 'page-block-content';
+                    blockContent.contentEditable = 'false';
+                    blockContent.innerHTML = htmlContent;
+                    
+                    block.appendChild(blockContent);
+                    editorEl.appendChild(block);
+                }
+                // highlight first page
+                highlightSidebarPage(allPages[0]?.id);
+            }
+
+            function scrollToPage(pageId) {
+                const block = editorEl.querySelector(`.page-block[data-page-id="${pageId}"]`);
+                if (block) {
+                    block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    highlightSidebarPage(pageId);
+                }
+            }
+
+            function highlightSidebarPage(pageId) {
+                currentPageId = pageId;
+                document.querySelectorAll('.page-item').forEach(el => {
+                    const isActive = el.dataset.pageId == pageId;
+                    el.classList.toggle('active', isActive);
+                    el.classList.toggle('in-view', false);
+                });
+                // Show edit/history buttons for active page
+                const page = allPages.find(p => p.id == pageId);
+                if (page) {
+                    btnHistory.style.display = 'block';
+                    editingVersion = page._version;
+                    if (page._isEditable && editorEl.querySelector('.page-block-content[contenteditable="true"]') === null) {
+                        btnEdit.style.display = 'block';
+                        btnEdit.onclick = () => acquireLockAndEdit(pageId, page);
+                    }
+                    if (page._lock) {
+                        lockBanner.style.display = 'block';
+                        lockBanner.innerText = `LOCKED: Being edited by ${page._lock.holder_name} (${page._lock.holder_role})`;
+                    } else {
+                        lockBanner.style.display = 'none';
+                    }
+                }
+            }
+
+            function setupScrollSpy() {
+                const viewer = document.getElementById('page-viewer');
+                viewer.addEventListener('scroll', () => {
+                    const blocks = Array.from(editorEl.querySelectorAll('.page-block'));
+                    let bestId = null;
+                    let bestRatio = -1;
+                    const viewerRect = viewer.getBoundingClientRect();
+                    blocks.forEach(block => {
+                        const rect = block.getBoundingClientRect();
+                        const visible = Math.min(rect.bottom, viewerRect.bottom) - Math.max(rect.top, viewerRect.top);
+                        const ratio = visible / block.offsetHeight;
+                        if (ratio > bestRatio) { bestRatio = ratio; bestId = block.dataset.pageId; }
+                    });
+                    if (bestId && bestId != currentPageId) {
+                        // Only update sidebar highlight, not edit state
+                        document.querySelectorAll('.page-item').forEach(el => {
+                            el.classList.toggle('active', el.dataset.pageId == bestId);
+                        });
+                        currentPageId = bestId;
+                        versionBadge.innerText = '';
+                        // Update edit button for this page
+                        if (editorEl.querySelector('.page-block-content[contenteditable="true"]') === null) {
+                            const page = allPages.find(p => p.id == bestId);
+                            btnEdit.style.display = page?._isEditable ? 'block' : 'none';
+                            btnEdit.onclick = () => acquireLockAndEdit(bestId, page);
+                            editingVersion = page?._version;
+                            if (page?._lock) {
+                                lockBanner.style.display = 'block';
+                                lockBanner.innerText = `LOCKED: Being edited by ${page._lock.holder_name}`;
+                            } else {
+                                lockBanner.style.display = 'none';
+                            }
+                        }
+                    }
+                }, { passive: true });
+            }
+
+            function resetEditorState() {
+                // In continuous view: disable all editable blocks
+                editorEl.querySelectorAll('.page-block-content').forEach(el => el.contentEditable = 'false');
+                toolbarEl.style.display = 'none';
+                lockBanner.style.display = 'none';
+                btnEdit.style.display = 'none';
+                btnSave.style.display = 'none';
+                btnCancel.style.display = 'none';
+                btnHistory.style.display = 'none';
+            }
+
+            async function acquireLockAndEdit(pageId, pageObj) {
+                try {
+                    const res = await fetch(`/api/repo/locks/${pageId}/acquire`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+
+                    if (data.requires_confirmation) {
+                        const confirmMsg = `${data.message}\n\nDo you still want write access? (Rank takeover rules will apply)`;
+                        if (confirm(confirmMsg)) {
+                            const takeoverRes = await fetch(`/api/repo/locks/${pageId}/takeover`, {
+                                method: 'POST',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!takeoverRes.ok) { alert('Failed to takeover lock.'); return; }
+                        } else { return; }
+                    } else if (!data.acquired) {
+                        alert(data.message || 'Could not acquire lock');
+                        return;
+                    }
+
+                    // Find the block for this page and make it editable
+                    const block = editorEl.querySelector(`.page-block[data-page-id="${pageId}"]`);
+                    const blockContent = block?.querySelector('.page-block-content');
+                    if (!blockContent) return;
+
+                    // Disable all other blocks
+                    editorEl.querySelectorAll('.page-block-content').forEach(el => el.contentEditable = 'false');
+
+                    lockBanner.style.display = 'none';
+                    blockContent.contentEditable = 'true';
+                    blockContent.focus();
+                    toolbarEl.style.display = 'flex';
+                    // Scroll to editing block
+                    block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    btnEdit.style.display = 'none';
+                    btnSave.style.display = 'block';
+                    btnCancel.style.display = 'block';
+                    editingVersion = pageObj._version;
+
+                    btnCancel.onclick = async () => {
+                        await fetch(`/api/repo/locks/${pageId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
+                        // Reload that page block only
+                        reloadPageBlock(pageId);
+                        toolbarEl.style.display = 'none';
+                        btnSave.style.display = 'none';
+                        btnCancel.style.display = 'none';
+                        btnEdit.style.display = 'block';
+                        btnEdit.onclick = () => acquireLockAndEdit(pageId, pageObj);
+                    };
+
+                    btnSave.onclick = async () => { await savePage(pageId, blockContent, false); };
+
+                    // Setup autosave for this block
+                    blockContent.addEventListener('input', () => {
+                        if (blockContent.contentEditable !== 'true') return;
+                        indicator.style.display = 'inline';
+                        indicator.style.color = '#f59e0b';
+                        indicator.innerText = 'Unsaved changes...';
+                        clearTimeout(autoSaveTimeout);
+                        autoSaveTimeout = setTimeout(async () => {
+                            indicator.innerText = 'Saving...';
+                            await savePage(pageId, blockContent, true);
+                            indicator.style.color = '#10b981';
+                            indicator.innerText = 'Saved';
+                            setTimeout(() => { if(indicator.innerText==='Saved') indicator.style.display='none'; }, 2000);
+                        }, 2000);
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Error acquiring lock');
+                }
+            }
+
+            async function reloadPageBlock(pageId) {
+                const block = editorEl.querySelector(`.page-block[data-page-id="${pageId}"]`);
+                const blockContent = block?.querySelector('.page-block-content');
+                if (!blockContent) return;
+                try {
+                    const res = await fetch(`/api/repo/page/${pageId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        blockContent.innerHTML = data.page.html_content || '<i>Empty Page</i>';
+                        blockContent.contentEditable = 'false';
+                        const page = allPages.find(p => p.id == pageId);
+                        if (page) { page._version = data.page.version; page._lock = data.lock; }
+                        editingVersion = data.page.version;
+                        versionBadge.innerText = `v${data.page.version}`;
+                    }
+                } catch(e) { console.error(e); }
+            }
+
+            async function savePage(pageId, blockContent, silent = false) {
+                const html = blockContent ? blockContent.innerHTML : '';
+                const version = editingVersion;
+                
+                try {
+                    const res = await fetch(`/api/repo/page/${pageId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            html_content: html,
+                            base_version: version
+                        })
+                    });
+
+                    const data = await res.json();
+                    
+                    if (res.status === 409) {
+                        if (!silent) alert(data.message);
+                        reloadPageBlock(pageId);
+                        toolbarEl.style.display = 'none';
+                        btnSave.style.display = 'none';
+                        btnCancel.style.display = 'none';
+                    } else if (res.ok) {
+                        if (silent) {
+                            editingVersion = data.new_version || (version + 1);
+                        } else {
+                            // Success — keep editing but update version
+                            editingVersion = data.new_version || (version + 1);
+                            versionBadge.innerText = `v${editingVersion}`;
+                            const page = allPages.find(p => p.id == pageId);
+                            if (page) page._version = editingVersion;
+                            if (!silent) {
+                                // finish editing
+                                if (blockContent) blockContent.contentEditable = 'false';
+                                toolbarEl.style.display = 'none';
+                                btnSave.style.display = 'none';
+                                btnCancel.style.display = 'none';
+                                btnEdit.style.display = 'block';
+                                const p = allPages.find(pg => pg.id == pageId);
+                                btnEdit.onclick = () => acquireLockAndEdit(pageId, p);
+                                indicator.style.color = '#10b981';
+                                indicator.innerText = 'Saved ✓';
+                                indicator.style.display = 'inline';
+                                setTimeout(() => { indicator.style.display='none'; }, 3000);
+                            }
+                        }
+                    } else {
+                        if (!silent) alert('Error saving: ' + data.message);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    if (!silent) alert('Fatal error saving page');
+                }
+            }
+
+            // History & Diff
+            btnHistory.onclick = async () => {
+                document.getElementById('history-modal').style.display = 'flex';
+                const histList = document.getElementById('history-list');
+                histList.innerHTML = 'Loading...';
+
+                try {
+                    const res = await fetch(`/api/repo/page/${currentPageId}/versions`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const versions = await res.json();
+                    
+                    if (versions.length === 0) {
+                        histList.innerHTML = '<div>No history available.</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    versions.forEach(v => {
+                        const date = new Date(v.created_at).toLocaleString();
+                        html += `
+                            <div class="version-row">
+                                <div>
+                                    <strong style="color:var(--primary-color)">v${v.version}</strong> • ${date}<br>
+                                    <span style="font-size:12px; color:#94a3b8">By ${v.editor_name || 'System'}</span><br>
+                                    <span style="font-size:12px; color:#10b981">${v.diff_summary || ''}</span>
+                                </div>
+                                <button class="btn-primary" style="padding:4px 8px; font-size:12px;" onclick="viewRawVersion(${v.id})">View Source</button>
+                            </div>
+                        `;
+                    });
+                    histList.innerHTML = html;
+                } catch (err) {
+                    console.error(err);
+                    histList.innerHTML = '<span style="color:red">Error loading history</span>';
+                }
+            };
+
+            window.viewRawVersion = function(id) {
+                alert("Diff/View feature triggered for version ID " + id + ". HTML diff integration would normally open here.");
+            };
+
+            // ----------------------------------------------------
+            // AI Autocomplete (Phase 5)
+            // ----------------------------------------------------
+            let ghostNode = null;
+            let isGenerating = false;
+
+            // Helper: get the currently active (editable) block
+            function getActiveBlock() {
+                return editorEl.querySelector('.page-block-content[contenteditable="true"]');
+            }
+
+            editorEl.addEventListener('keydown', async (e) => {
+                // Ignore if not in edit mode
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) return;
+
+                // Tab to accept ghost text
+                if (e.key === 'Tab' && ghostNode) {
+                    e.preventDefault();
+                    acceptGhostText();
+                    return;
+                }
+
+                // Esc or typing clears ghost text
+                if (ghostNode && e.key !== 'Control' && e.key !== 'Shift') {
+                    if (e.key === 'Escape') e.preventDefault();
+                    clearGhostText();
+                    if (e.key === 'Escape') return;
+                }
+
+                // Ctrl + Space to trigger
+                if (e.ctrlKey && e.code === 'Space') {
+                    e.preventDefault();
+                    if (isGenerating) return;
+                    
+                    const selection = window.getSelection();
+                    if (!selection.rangeCount) return;
+                    
+                    const range = selection.getRangeAt(0);
+                    
+                    // Extract ~500 chars before cursor
+                    const preCaretRange = range.cloneRange();
+                    const activeBlock2 = getActiveBlock();
+                    if (!activeBlock2) return;
+                    preCaretRange.selectNodeContents(activeBlock2);
+                    preCaretRange.setEnd(range.endContainer, range.endOffset);
+                    const fullTextBefore = preCaretRange.toString();
+                    const contextText = fullTextBefore.slice(-500).trim();
+
+                    if (!contextText) return;
+
+                    isGenerating = true;
+                    
+                    // Insert loading spinner
+                    const loadingSpan = document.createElement('span');
+                    loadingSpan.className = 'ai-loading';
+                    range.insertNode(loadingSpan);
+                    range.collapse(false);
+
+                    try {
+                        const res = await fetch('/api/repo/ai/suggest', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                cursor_context: contextText,
+                                page_id: currentPageId
+                            })
+                        });
+
+                        loadingSpan.remove();
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.suggestion) {
+                                showGhostText(data.suggestion, range);
+                            }
+                        } else {
+                            console.error('AI suggestion failed');
+                        }
+                    } catch (err) {
+                        loadingSpan.remove();
+                        console.error('AI error:', err);
+                    } finally {
+                        isGenerating = false;
+                    }
+                }
+            });
+
+            function showGhostText(text, range) {
+                clearGhostText();
+                ghostNode = document.createElement('span');
+                ghostNode.className = 'ghost-text';
+                ghostNode.innerText = text;
+                ghostNode.contentEditable = "false";
+                
+                range.insertNode(ghostNode);
+                
+                // Move cursor before ghost text
+                const newRange = document.createRange();
+                newRange.setStartBefore(ghostNode);
+                newRange.collapse(true);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            }
+
+            function acceptGhostText() {
+                if (!ghostNode) return;
+                const text = ghostNode.innerText;
+                const parent = ghostNode.parentNode;
+                const textNode = document.createTextNode(text);
+                
+                parent.replaceChild(textNode, ghostNode);
+                ghostNode = null;
+                
+                // Move cursor to end of inserted text
+                const newRange = document.createRange();
+                newRange.setStartAfter(textNode);
+                newRange.collapse(true);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            }
+
+            function clearGhostText() {
+                if (ghostNode && ghostNode.parentNode) {
+                    ghostNode.parentNode.removeChild(ghostNode);
+                }
+                ghostNode = null;
+            }
+            
+            // ----------------------------------------------------
+            // Ask AI (Instruct)
+            // ----------------------------------------------------
+            const btnAskAi = document.getElementById('btn-ask-ai');
+            if (btnAskAi) {
+                btnAskAi.addEventListener('mousedown', (e) => {
+                    // Keep focus in editor
+                    if (editorEl.contentEditable === "true") {
+                        e.preventDefault();
+                    }
+                });
+
+                btnAskAi.addEventListener('click', async (e) => {
+                    const activeBlockAI = getActiveBlock();
+                    if (!activeBlockAI) {
+                        alert('Please click Edit Page first, then place your cursor in the document.');
+                        return;
+                    }
+
+                    const selection = window.getSelection();
+                    if (!selection.rangeCount) {
+                        alert("Please place your cursor in the editor first.");
+                        return;
+                    }
+                    const range = selection.getRangeAt(0);
+
+                    const preCaretRange = range.cloneRange();
+                    preCaretRange.selectNodeContents(activeBlockAI);
+                    preCaretRange.setEnd(range.endContainer, range.endOffset);
+                    const fullTextBefore = preCaretRange.toString();
+                    const contextText = fullTextBefore.slice(-500).trim();
+
+                    const instruction = prompt('What do you want the AI to write?');
+                    if (!instruction) return;
+
+                    const btnOriginalText = btnAskAi.innerText;
+                    btnAskAi.innerText = 'Writing...';
+                    btnAskAi.disabled = true;
+
+                    try {
+                        const res = await fetch('/api/repo/ai/instruct', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                cursor_context: contextText,
+                                instruction: instruction
+                            })
+                        });
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.suggestion) {
+                                // Restore selection in case it was lost
+                                selection.removeAllRanges();
+                                selection.addRange(range);
+
+                                // Insert HTML
+                                document.execCommand('insertHTML', false, data.suggestion);
+                            }
+                        } else {
+                            const errData = await res.json().catch(() => ({}));
+                            alert('AI request failed: ' + (errData.message || res.statusText));
+                        }
+                    } catch (err) {
+                        console.error('AI instruction error:', err);
+                        alert('Error calling AI service');
+                    } finally {
+                        btnAskAi.innerText = btnOriginalText;
+                        btnAskAi.disabled = false;
+                    }
+                });
+            }
+            // ----------------------------------------------------
+            // Editor Enhancements (Auto-Save, Tables)
+            // ----------------------------------------------------
+            let autoSaveTimeout = null;
+            const indicator = document.getElementById('auto-save-indicator');
+
+            // (Per-block autosave is handled inside acquireLockAndEdit when the block becomes editable)
+            // The old editorEl-level autosave is removed since editing is now per page block.
+
+            window.insertTable = function() {
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) return;
+                const rows = prompt("Number of rows:", "3");
+                const cols = prompt("Number of columns:", "3");
+                if (!rows || !cols) return;
+                
+                let html = '<table class="table table-bordered" style="width:100%; border-collapse:collapse; margin-bottom:1rem;"><tbody>';
+                for(let r=0; r<rows; r++) {
+                    html += '<tr>';
+                    for(let c=0; c<cols; c++) {
+                        html += '<td style="border:1px solid #ccc; padding:8px;">&nbsp;</td>';
+                    }
+                    html += '</tr>';
+                }
+                html += '</tbody></table><p><br></p>';
+                document.execCommand('insertHTML', false, html);
+            };
+
+            window.toggleBorders = function() {
+                if (!getActiveBlock()) return;
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+                let node = sel.getRangeAt(0).startContainer;
+                while(node && node.nodeName !== 'TABLE' && node.nodeName !== 'BODY') {
+                    node = node.parentNode;
+                }
+                if (node && node.nodeName === 'TABLE') {
+                    node.classList.toggle('table-bordered');
+                    if (node.style.borderCollapse === 'collapse') {
+                        node.style.borderCollapse = 'unset';
+                        node.querySelectorAll('td, th').forEach(cell => cell.style.border = 'none');
+                    } else {
+                        node.style.borderCollapse = 'collapse';
+                        node.querySelectorAll('td, th').forEach(cell => cell.style.border = '1px solid #ccc');
+                    }
+                } else {
+                    alert("Please place your cursor inside a table first.");
+                }
+            };
+
+            window.applyZeroSpacing = function() {
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) return;
+                
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+                
+                let node = sel.anchorNode;
+                if (node.nodeType === 3) node = node.parentNode;
+                
+                let container = sel.getRangeAt(0).commonAncestorContainer;
+                if (container.nodeType === 3) container = container.parentNode;
+                
+                const elements = container.querySelectorAll ? Array.from(container.querySelectorAll('p, li, div, ul, ol')) : [];
+                if (['P', 'LI', 'DIV', 'UL', 'OL'].includes(container.nodeName)) {
+                    elements.push(container);
+                }
+                
+                if (elements.length === 0) {
+                     while(node && node !== activeBlock && !['P', 'LI', 'DIV', 'UL', 'OL'].includes(node.nodeName)) {
+                        node = node.parentNode;
+                     }
+                     if (node && node !== activeBlock) elements.push(node);
+                }
+                
+                elements.forEach(el => {
+                    // Apply to elements that intersect with selection
+                    if (sel.containsNode(el, true) || el === container || el === node) {
+                        el.style.margin = '0';
+                        el.style.padding = '0';
+                        el.style.lineHeight = '1';
+                        if (el.nodeName === 'LI' && el.parentNode) {
+                            el.parentNode.style.marginTop = '0';
+                            el.parentNode.style.marginBottom = '0';
+                            el.parentNode.style.lineHeight = '1';
+                        }
+                    }
+                });
+            };
+
+            // ============================================================
+            // IN-PAGE SEARCH (Ctrl+F)
+            // ============================================================
+            const searchBar = document.getElementById('search-bar');
+            const searchInput = document.getElementById('search-input');
+            const searchCount = document.getElementById('search-count');
+            let searchMatches = [];
+            let searchCurrent = -1;
+
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'f') {
+                    e.preventDefault();
+                    searchBar.classList.add('visible');
+                    searchInput.focus();
+                    searchInput.select();
+                }
+                if (e.key === 'Escape') closeSearch();
+            });
+
+            searchInput.addEventListener('input', () => {
+                doSearch(searchInput.value);
+            });
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); searchNav(e.shiftKey ? -1 : 1); }
+            });
+
+            function doSearch(query) {
+                // Clear previous highlights
+                editorEl.querySelectorAll('.search-highlight').forEach(el => {
+                    el.outerHTML = el.innerHTML;
+                });
+                editorEl.normalize();
+                searchMatches = [];
+                searchCurrent = -1;
+
+                if (!query || query.length < 2) {
+                    searchCount.innerText = '0 / 0';
+                    return;
+                }
+
+                const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                highlightTextNodes(editorEl, regex);
+                searchMatches = Array.from(editorEl.querySelectorAll('.search-highlight'));
+                if (searchMatches.length > 0) {
+                    searchCurrent = 0;
+                    updateCurrent();
+                }
+                searchCount.innerText = `${searchMatches.length > 0 ? 1 : 0} / ${searchMatches.length}`;
+            }
+
+            function highlightTextNodes(node, regex) {
+                if (node.nodeType === 3) { // Text node
+                    const text = node.textContent;
+                    if (!regex.test(text)) return;
+                    regex.lastIndex = 0;
+                    const frag = document.createDocumentFragment();
+                    let lastIndex = 0, m;
+                    while ((m = regex.exec(text)) !== null) {
+                        frag.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
+                        const mark = document.createElement('mark');
+                        mark.className = 'search-highlight';
+                        mark.textContent = m[0];
+                        frag.appendChild(mark);
+                        lastIndex = regex.lastIndex;
+                    }
+                    frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+                    node.parentNode.replaceChild(frag, node);
+                } else if (node.nodeType === 1 && node.nodeName !== 'MARK' && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                    Array.from(node.childNodes).forEach(child => highlightTextNodes(child, regex));
+                }
+            }
+
+            window.searchNav = function(dir) {
+                if (!searchMatches.length) return;
+                searchCurrent = (searchCurrent + dir + searchMatches.length) % searchMatches.length;
+                updateCurrent();
+            };
+
+            function updateCurrent() {
+                searchMatches.forEach((el, i) => el.classList.toggle('current', i === searchCurrent));
+                if (searchMatches[searchCurrent]) {
+                    searchMatches[searchCurrent].scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }
+                searchCount.innerText = `${searchCurrent + 1} / ${searchMatches.length}`;
+            }
+
+            window.closeSearch = function() {
+                searchBar.classList.remove('visible');
+                editorEl.querySelectorAll('.search-highlight').forEach(el => {
+                    el.outerHTML = el.innerHTML;
+                });
+                editorEl.normalize();
+                searchMatches = [];
+                searchInput.value = '';
+                searchCount.innerText = '0 / 0';
+            };
+
+            // ============================================================
+            // GLOBAL REPOSITORY SEARCH (search bar in header)
+            // ============================================================
+            const globalInput = document.getElementById('global-search-input');
+            const globalResults = document.getElementById('global-search-results');
+            let globalDebounce = null;
+
+            globalInput.addEventListener('input', () => {
+                clearTimeout(globalDebounce);
+                const q = globalInput.value.trim();
+                if (q.length < 3) { globalResults.style.display = 'none'; return; }
+                globalDebounce = setTimeout(() => doGlobalSearch(q), 400);
+            });
+
+            globalInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') { globalResults.style.display = 'none'; globalInput.value = ''; }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!globalInput.contains(e.target) && !globalResults.contains(e.target)) {
+                    globalResults.style.display = 'none';
+                }
+            });
+
+            async function doGlobalSearch(query) {
+                globalResults.innerHTML = '<div style="padding:12px;color:#94a3b8;">Searching...</div>';
+                globalResults.style.display = 'block';
+                try {
+                    const res = await fetch(`/api/repo/search?q=${encodeURIComponent(query)}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error('Search failed');
+                    const data = await res.json();
+                    if (!data.results || data.results.length === 0) {
+                        globalResults.innerHTML = '<div style="padding:12px;color:#94a3b8;">No results found.</div>';
+                        return;
+                    }
+                    let html = '';
+                    data.results.forEach(r => {
+                        const snippet = r.snippet.replace(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => `<mark style="background:#fbbf24;color:black;border-radius:2px;">${m}</mark>`);
+                        html += `<div onclick="window.location.href='/repository/document.html?id=${r.document_id}'" style="padding:12px;border-bottom:1px solid #334155;cursor:pointer;transition:0.15s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='transparent'">
+                            <div style="font-weight:bold;color:#e2e8f0;font-size:13px;">${r.doc_title}</div>
+                            <div style="font-size:12px;color:#64748b;margin-top:2px;">${r.folder_path || 'Repository'}</div>
+                            <div style="font-size:12px;color:#94a3b8;margin-top:4px;">${snippet}</div>
+                        </div>`;
+                    });
+                    globalResults.innerHTML = html;
+                } catch (err) {
+                    globalResults.innerHTML = `<div style="padding:12px;color:#ef4444;">${err.message}</div>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
