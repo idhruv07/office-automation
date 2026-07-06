@@ -88,7 +88,7 @@ Complete the sentence or paragraph. Provide a short, logical continuation (max 2
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'qwen:7b',
+                model: process.env.OLLAMA_SUGGEST_MODEL || 'llama3.2:3b',
                 system: systemPrompt,
                 prompt: userPrompt,
                 stream: false,
@@ -201,7 +201,7 @@ IMPORTANT:
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: process.env.OLLAMA_INSTRUCT_MODEL || 'qwen:7b',
+                model: process.env.OLLAMA_INSTRUCT_MODEL || 'llama3.2:3b',
                 system: systemPrompt,
                 prompt: userPrompt,
                 stream: false,
@@ -350,6 +350,49 @@ function formatInstructResponse(suggestion, instruction, docType) {
         }
     }
     clean = clean.trim();
+
+    // 5. Robust Markdown-to-HTML conversion fallback
+    // Always convert bold and italics markdown to HTML tags
+    clean = clean.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    clean = clean.replace(/__(.*?)__/g, '<strong>$1</strong>');
+    clean = clean.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    clean = clean.replace(/_(.*?)_/g, '<em>$1</em>');
+
+    // Convert markdown headings
+    clean = clean.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    clean = clean.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    clean = clean.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+    const hasHtmlTags = /<[a-z][\s\S]*>/i.test(clean);
+    if (!hasHtmlTags) {
+        // Convert markdown list items and wrap in paragraphs
+        let lines = clean.split('\n');
+        let inList = false;
+        let converted = [];
+        for (let line of lines) {
+            let trimmed = line.trim();
+            if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                if (!inList) {
+                    converted.push('<ul>');
+                    inList = true;
+                }
+                converted.push(`<li>${trimmed.substring(2)}</li>`);
+            } else {
+                if (inList) {
+                    converted.push('</ul>');
+                    inList = false;
+                }
+                if (trimmed) {
+                    converted.push(`<p>${trimmed}</p>`);
+                } else {
+                    converted.push('<p><br></p>');
+                }
+            }
+        }
+        if (inList) converted.push('</ul>');
+        clean = converted.join('\n');
+    }
+
     return clean;
 }
 
