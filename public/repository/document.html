@@ -567,7 +567,7 @@
                     <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel Edit
                     </button>
-                    <button id="btn-workflow-toggle" onclick="document.getElementById('workflow-panel').classList.toggle('open'); markWorkflowCommentsAsSeen();" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px;">
+                    <button id="btn-workflow-toggle" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px;">
                         <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span> Workflow <span id="wf-badge-count" style="display:none; background:#ef4444; color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:4px; font-weight:bold; line-height:1;">0</span>
                     </button>
                 </div>
@@ -679,7 +679,7 @@
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">assignment_turned_in</span>
                     Document Workflow
                 </div>
-                <button id="btn-workflow-close" onclick="document.getElementById('workflow-panel').classList.remove('open')" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: all 0.2s;">
+                <button id="btn-workflow-close" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: all 0.2s;">
                     <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
                 </button>
             </div>
@@ -1024,7 +1024,10 @@
             
             if (btnWfToggle && wfPanel) {
                 btnWfToggle.onclick = () => {
-                    wfPanel.classList.toggle('open');
+                    const isOpen = wfPanel.classList.toggle('open');
+                    if (isOpen) {
+                        window.markWorkflowCommentsAsSeen();
+                    }
                 };
             }
             if (btnWfClose && wfPanel) {
