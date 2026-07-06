@@ -44,6 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function getFolderIconSvg(isSelected = false) {
+        const color = isSelected ? '#ffffff' : 'var(--primary-color, #38bdf8)';
+        return `
+            <svg class="tree-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; transition: transform 0.2s;">
+                <path d="M19 20H5C3.89543 20 3 19.1046 3 18V6C3 4.89543 3.89543 4 5 4H10L12 6H19C20.1046 6 21 6.89543 21 8V18C21 19.1046 20.1046 20 19 20Z" 
+                      stroke="${color}" stroke-width="2" fill="${isSelected ? 'rgba(255,255,255,0.15)' : 'rgba(56,189,248,0.06)'}" stroke-linejoin="round"/>
+            </svg>
+        `;
+    }
+
     function renderTree(nodes, container, isRoot = true) {
         container.innerHTML = '';
         nodes.forEach(node => {
@@ -53,14 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const contentEl = document.createElement('div');
             contentEl.className = 'tree-node-content';
             contentEl.dataset.id = node.id;
-            contentEl.innerHTML = `<span class="tree-icon">📁</span><span>${node.name}</span>`;
+            contentEl.innerHTML = `<span class="tree-icon-container">${getFolderIconSvg(false)}</span><span>${node.name}</span>`;
             
             // Drag and Drop
             if (canManageFolders) {
                 // Add delete button
                 const actionsSpan = document.createElement('span');
                 actionsSpan.style.marginLeft = 'auto';
-                actionsSpan.innerHTML = `<span class="folder-del-btn" style="cursor:pointer; opacity:0.5;" title="Delete empty folder">🗑️</span>`;
+                actionsSpan.innerHTML = `<span class="folder-del-btn" style="cursor:pointer; opacity:0.5; padding: 2px 6px;" title="Delete empty folder">🗑️</span>`;
                 contentEl.appendChild(actionsSpan);
 
                 actionsSpan.querySelector('.folder-del-btn').addEventListener('click', async (e) => {
@@ -97,8 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             contentEl.addEventListener('click', () => {
-                document.querySelectorAll('.tree-node-content').forEach(el => el.classList.remove('selected'));
+                document.querySelectorAll('.tree-node-content').forEach(el => {
+                    el.classList.remove('selected');
+                    const iconSpan = el.querySelector('.tree-icon-container');
+                    if (iconSpan) iconSpan.innerHTML = getFolderIconSvg(false);
+                });
                 contentEl.classList.add('selected');
+                const activeIconSpan = contentEl.querySelector('.tree-icon-container');
+                if (activeIconSpan) activeIconSpan.innerHTML = getFolderIconSvg(true);
                 loadDocuments(node.id, node.name);
             });
 
@@ -164,8 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (docs.length === 0) {
                 docContainer.innerHTML = `
-                    <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 16px;">
-                        <h3 style="color:white; margin:0;">${folderName}</h3>
+                    <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 18px; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 11px; color: var(--primary-color, #38bdf8); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Directory</span>
+                            <span style="color: rgba(255,255,255,0.3); font-size: 11px;">/</span>
+                            <h3 style="color:white; margin:0; font-size: 18px; font-weight: 800; letter-spacing: -0.02em;">${folderName}</h3>
+                        </div>
                     </div>
                     <div style="color: #94a3b8; text-align:center; margin-top:40px;">No documents in this folder.</div>
                 `;
@@ -173,21 +193,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             let html = `
-                <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 16px; display: flex; justify-content: space-between;">
-                    <h3 style="color:white; margin:0;">${folderName}</h3>
+                <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 18px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 11px; color: var(--primary-color, #38bdf8); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Directory</span>
+                        <span style="color: rgba(255,255,255,0.3); font-size: 11px;">/</span>
+                        <h3 style="color:white; margin:0; font-size: 18px; font-weight: 800; letter-spacing: -0.02em;">${folderName}</h3>
+                    </div>
                 </div>
-                <div class="doc-list">
+                <div class="modern-file-grid">
             `;
             
             docs.forEach(doc => {
                 const dateStr = doc.latest_page_date ? new Date(doc.latest_page_date).toLocaleDateString() : 'Unknown';
                 html += `
-                    <div class="doc-item">
-                        <div class="doc-info">
-                            <h4>${doc.title}</h4>
-                            <div class="doc-meta">Ref: ${doc.reference_no} • ${doc.page_count} Pages • Last Updated: ${dateStr}</div>
+                    <div class="file-card" onclick="viewDocument(${doc.id})">
+                        <div class="file-card-top">
+                            <div class="file-icon-wrapper">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" 
+                                          stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="file-badge">${doc.page_count} pgs</div>
                         </div>
-                        <button class="btn-primary" style="padding: 6px 12px; font-size:12px;" onclick="viewDocument(${doc.id})">View Pages</button>
+                        <div class="file-card-info">
+                            <h4 class="file-title" title="${doc.title}">${doc.title}</h4>
+                            <div class="file-meta">
+                                <span class="meta-label">Ref:</span>
+                                <span class="meta-value">${doc.reference_no || '—'}</span>
+                            </div>
+                            <div class="file-card-footer">
+                                <span class="file-date">📅 ${dateStr}</span>
+                                <span class="file-action-indicator">Open →</span>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
