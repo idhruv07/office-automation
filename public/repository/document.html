@@ -567,8 +567,8 @@
                     <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel Edit
                     </button>
-                    <button id="btn-workflow-toggle" onclick="document.getElementById('workflow-panel').classList.toggle('open')" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px;">
-                        <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span> Workflow
+                    <button id="btn-workflow-toggle" onclick="document.getElementById('workflow-panel').classList.toggle('open'); markWorkflowCommentsAsSeen();" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span> Workflow <span id="wf-badge-count" style="display:none; background:#ef4444; color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:4px; font-weight:bold; line-height:1;">0</span>
                     </button>
                 </div>
             </div>
@@ -898,10 +898,41 @@
                     
                     renderAuditLog(currentWfState.comments);
                     
+                    // Check for new remarks/comments count
+                    const comments = currentWfState.comments || [];
+                    const seenCountKey = 'seen_wf_comments_' + docId;
+                    
+                    if (wfPanel && wfPanel.classList.contains('open')) {
+                        // If panel is already open, mark all as seen
+                        localStorage.setItem(seenCountKey, comments.length);
+                        document.getElementById('wf-badge-count').style.display = 'none';
+                    } else {
+                        const seenCount = parseInt(localStorage.getItem(seenCountKey) || '0', 10);
+                        const newCount = Math.max(0, comments.length - seenCount);
+                        const badgeEl = document.getElementById('wf-badge-count');
+                        if (badgeEl) {
+                            if (newCount > 0) {
+                                badgeEl.innerText = newCount;
+                                badgeEl.style.display = 'inline-block';
+                            } else {
+                                badgeEl.style.display = 'none';
+                            }
+                        }
+                    }
+                    
                 } catch(e) {
                     console.error('Failed to load document workflow', e);
                 }
             }
+
+            window.markWorkflowCommentsAsSeen = function() {
+                if (currentWfState && currentWfState.comments) {
+                    const seenCountKey = 'seen_wf_comments_' + docId;
+                    localStorage.setItem(seenCountKey, currentWfState.comments.length);
+                    const badgeEl = document.getElementById('wf-badge-count');
+                    if (badgeEl) badgeEl.style.display = 'none';
+                }
+            };
 
             function populateReturnTargets(currentRole) {
                 const roles = ['AUDITOR', 'AAO', 'SAO', 'GO', 'ADDN_CDA'];
