@@ -449,4 +449,174 @@ router.get('/search', authenticateToken, async (req, res) => {
     }
 });
 
+// Helper for workflow role lookup
+async function getUserRoleAndRank(userId, dbClient) {
+    const res = await dbClient.query(
+        `SELECT u.name, r.code as role_code, r.rank 
+         FROM users u 
+         JOIN roles r ON u.role_id = r.id 
+         WHERE u.id = $1`,
+        [userId]
+    );
+    if (res.rows.length === 0) {
+        throw new Error('User not found');
+    }
+    return res.rows[0];
+}
+
+// GET /api/repo/documents/:id/workflow - Get document workflow details
+router.get('/documents/:id/workflow', authenticateToken, async (req, res) => {
+    try {
+        if (!await isOfficeAdminHierarchy(req.user.id, db)) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+        const docId = parseInt(req.params.id);
+        
+        let wfResult = await db.query(
+            'SELECT * FROM document_workflow WHERE document_id = $1',
+            [docId]
+        );
+        
+        if (wfResult.rows.length === 0) {
+            await db.query(
+                `INSERT INTO document_workflow (document_id, status, current_owner_role, comments)
+                 VALUES ($1, 'Draft', 'AUDITOR', '[]'::jsonb)`,
+                [docId]
+            );
+            wfResult = await db.query(
+                'SELECT * FROM document_workflow WHERE document_id = $1',
+                [docId]
+            );
+        }
+        
+        // Also fetch user role to check permissions client-side
+        const userInfo = await getUserRoleAndRank(req.user.id, db);
+        const userRole = userInfo.role_code === 'SR_AUD' ? 'AUDITOR' : userInfo.role_code;
+
+        res.json({
+            workflow: wfResult.rows[0],
+            user: {
+                name: userInfo.name,
+                role: userRole,
+                rank: userInfo.rank
+            }
+        });
+    } catch (err) {
+        console.error('GET /api/repo/documents/:id/workflow error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// POST /api/repo/documents/:id/workflow/action - Execute workflow action
+router.post('/documents/:id/workflow/action', authenticateToken, async (req, res) => {
+    try {
+        if (!await isOfficeAdminHierarchy(req.user.id, db)) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+        const docId = parseInt(req.params.id);
+        const { action, comments, target_role } = req.body;
+        
+        const userInfo = await getUserRoleAndRank(req.user.id, db);
+        const userRole = userInfo.role_code === 'SR_AUD' ? 'AUDITOR' : userInfo.role_code;
+        const userName = userInfo.name;
+        
+        let wfResult = await db.query(
+            'SELECT * FROM document_workflow WHERE document_id = $1',
+            [docId]
+        );
+        if (wfResult.rows.length === 0) {
+            await db.query(
+                `INSERT INTO document_workflow (document_id, status, current_owner_role, comments)
+                 VALUES ($1, 'Draft', 'AUDITOR', '[]'::jsonb)`,
+                [docId]
+            );
+            wfResult = await db.query(
+                'SELECT * FROM document_workflow WHERE document_id = $1',
+                [docId]
+            );
+        }
+        const wf = wfResult.rows[0];
+        
+        let newStatus = wf.status;
+        let newOwnerRole = wf.current_owner_role;
+        
+        if (action === 'submit') {
+            if (wf.current_owner_role !== userRole) {
+                return res.status(400).json({ message: `Only the current owner (${wf.current_owner_role}) can forward this document.` });
+            }
+            if (userRole === 'AUDITOR') {
+                newStatus = 'Submitted to AAO';
+                newOwnerRole = 'AAO';
+            } else if (userRole === 'AAO') {
+                newStatus = 'Submitted to SAO';
+                newOwnerRole = 'SAO';
+            } else if (userRole === 'SAO') {
+                newStatus = 'Submitted to GO';
+                newOwnerRole = 'GO';
+            } else if (userRole === 'GO') {
+                newStatus = 'Submitted to Addl CDA';
+                newOwnerRole = 'ADDN_CDA';
+            } else if (userRole === 'ADDN_CDA') {
+                newStatus = 'Approved';
+                newOwnerRole = 'ADDN_CDA';
+            } else {
+                return res.status(400).json({ message: 'Invalid role for workflow actions.' });
+            }
+        } else if (action === 'rollback') {
+            if (wf.current_owner_role !== userRole) {
+                return res.status(400).json({ message: `Only the current owner (${wf.current_owner_role}) can return this document.` });
+            }
+            if (!target_role) {
+                return res.status(400).json({ message: 'target_role is required for rollback.' });
+            }
+            const roleRanks = { 'AUDITOR': 8, 'AAO': 6, 'SAO': 5, 'GO': 4, 'ADDN_CDA': 3 };
+            if (!roleRanks[target_role] || roleRanks[target_role] <= roleRanks[userRole]) {
+                return res.status(400).json({ message: 'Invalid target role for returning (must be a lower authority rank).' });
+            }
+            
+            newStatus = `Returned to ${target_role === 'AUDITOR' ? 'Auditor' : target_role}`;
+            newOwnerRole = target_role;
+        } else if (action === 'pullback') {
+            const pullBackRules = {
+                'AUDITOR': { expectedStatus: 'Submitted to AAO', targetStatus: 'Draft' },
+                'AAO': { expectedStatus: 'Submitted to SAO', targetStatus: 'Submitted to AAO' },
+                'SAO': { expectedStatus: 'Submitted to GO', targetStatus: 'Submitted to SAO' },
+                'GO': { expectedStatus: 'Submitted to Addl CDA', targetStatus: 'Submitted to GO' }
+            };
+            
+            const rule = pullBackRules[userRole];
+            if (!rule || wf.status !== rule.expectedStatus) {
+                return res.status(400).json({ message: `Cannot pull back document in its current status (${wf.status}) for role ${userRole}.` });
+            }
+            
+            newStatus = rule.targetStatus;
+            newOwnerRole = userRole;
+        } else {
+            return res.status(400).json({ message: 'Invalid action.' });
+        }
+        
+        const commentObj = {
+            role: userRole,
+            user: userName,
+            action: action === 'submit' ? (userRole === 'ADDN_CDA' ? 'Approve' : 'Forward') : (action === 'rollback' ? 'Return' : 'Pull Back'),
+            text: comments || '',
+            date: new Date().toISOString()
+        };
+        
+        const updatedComments = [...(wf.comments || []), commentObj];
+        
+        await db.query(
+            `UPDATE document_workflow 
+             SET status = $1, current_owner_role = $2, comments = $3, updated_at = NOW() 
+             WHERE document_id = $4`,
+            [newStatus, newOwnerRole, JSON.stringify(updatedComments), docId]
+        );
+        
+        res.json({ message: 'Workflow action applied successfully', status: newStatus, current_owner_role: newOwnerRole });
+    } catch (err) {
+        console.error('POST /api/repo/documents/:id/workflow/action error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;

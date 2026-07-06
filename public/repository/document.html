@@ -638,6 +638,55 @@
                 <div id="editor-content">
                     <div style="color: #94a3b8; text-align:center; padding-top: 40px;">Select a page from the left to view.</div>
                 </div>
+                </div>
+                
+                <!-- Document Workflow routing panel -->
+                <div class="workflow-sidebar" id="workflow-panel" style="flex: 0 0 300px; background: rgba(255,255,255,0.03); border-left: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto;">
+                    <div style="font-weight: 800; font-size: 15px; color: white; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 4px;">
+                        <span class="material-symbols-outlined" style="color: var(--primary-color);">assignment_turned_in</span>
+                        Document Workflow
+                    </div>
+                    
+                    <!-- Current Status -->
+                    <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Current Status</div>
+                        <div id="wf-status-val" style="font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 4px;">Draft</div>
+                        
+                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px;">Current Owner</div>
+                        <div id="wf-owner-val" style="font-size: 13px; color: white; margin-top: 2px;">AUDITOR</div>
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div id="wf-actions-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Actions</div>
+                        
+                        <!-- Comments area -->
+                        <textarea id="wf-comments-input" placeholder="Enter routing comments here..." style="width: 100%; height: 70px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; color: white; font-size: 12px; resize: none; outline: none; box-sizing: border-box;"></textarea>
+
+                        <div style="display: flex; gap: 8px;">
+                            <button id="wf-btn-submit" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px; background: #10b981;">Forward</button>
+                            <button id="wf-btn-rollback" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px; background: #ef4444;">Return</button>
+                        </div>
+                        
+                        <button id="wf-btn-pullback" class="btn-primary" style="width: 100%; padding: 8px 12px; font-size: 12px; background: #f59e0b; display: none;">Pull Back (Retrieve)</button>
+                        
+                        <!-- Return target selector -->
+                        <div id="wf-return-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
+                            <label style="font-size: 10px; color: #94a3b8;">Select Return Target Rank:</label>
+                            <select id="wf-return-target" style="width:100%; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 6px; font-size: 12px;">
+                                <!-- Dynamically populated -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Audit Log / Comments Feed -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">Audit Log & Comments</div>
+                        <div id="wf-comments-feed" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+                            <!-- Populate comments feed dynamically -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -648,6 +697,27 @@
             <h3>Page History & Conflict Log</h3>
             <div id="history-list">Loading...</div>
             <button class="btn-primary" style="margin-top:20px;" onclick="document.getElementById('history-modal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <!-- Diff / Compare Modal -->
+    <div id="diff-modal" class="modal-overlay" style="z-index: 101; display: none;">
+        <div class="modal-content" style="max-width: 1200px; width: 95%;">
+            <h3>Compare Version</h3>
+            <div style="display: flex; gap: 20px; margin-top: 15px;">
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <h4 style="color: #94a3b8; margin: 0 0 8px 0;">Selected Historical Version</h4>
+                    <div id="diff-historical-content" style="background: white; color: black; border-radius: 8px; padding: 20px; height: 450px; overflow-y: auto; border: 1px solid #e2e8f0; font-family: sans-serif;"></div>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <h4 style="color: var(--primary-color, #38bdf8); margin: 0 0 8px 0;">Current Live Editor Content</h4>
+                    <div id="diff-live-content" style="background: white; color: black; border-radius: 8px; padding: 20px; height: 450px; overflow-y: auto; border: 1px solid #e2e8f0; font-family: sans-serif;"></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button id="btn-restore-version" class="btn-primary" style="background: #10b981;">Restore This Version</button>
+                <button class="btn-primary" style="background: #64748b;" onclick="document.getElementById('diff-modal').style.display='none'">Back to History</button>
+            </div>
         </div>
     </div>
 
@@ -722,6 +792,166 @@
             const btnSave = document.getElementById('btn-save');
             const btnCancel = document.getElementById('btn-cancel');
             const btnHistory = document.getElementById('btn-history');
+
+            // Document Workflow Routing Logic
+            const wfStatusVal = document.getElementById('wf-status-val');
+            const wfOwnerVal = document.getElementById('wf-owner-val');
+            const wfCommentsInput = document.getElementById('wf-comments-input');
+            const wfCommentsFeed = document.getElementById('wf-comments-feed');
+            
+            const wfBtnSubmit = document.getElementById('wf-btn-submit');
+            const wfBtnRollback = document.getElementById('wf-btn-rollback');
+            const wfBtnPullback = document.getElementById('wf-btn-pullback');
+            const wfReturnSelectorWrap = document.getElementById('wf-return-selector-wrap');
+            const wfReturnTarget = document.getElementById('wf-return-target');
+
+            let currentUserInfo = null;
+            let currentWfState = null;
+
+            async function loadDocumentWorkflow() {
+                try {
+                    const res = await fetch(`/api/repo/documents/${docId}/workflow`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    
+                    currentUserInfo = data.user;
+                    currentWfState = data.workflow;
+                    
+                    // Render status and owner
+                    wfStatusVal.innerText = currentWfState.status;
+                    wfOwnerVal.innerText = currentWfState.current_owner_role;
+                    
+                    // Render action controls visibility based on ownership
+                    const isOwner = currentWfState.current_owner_role === currentUserInfo.role;
+                    
+                    wfCommentsInput.value = '';
+                    wfCommentsInput.style.display = isOwner ? 'block' : 'none';
+                    
+                    if (isOwner) {
+                        wfBtnSubmit.style.display = 'block';
+                        wfBtnSubmit.innerText = currentUserInfo.role === 'ADDN_CDA' ? 'Approve' : 'Forward';
+                        
+                        if (currentWfState.current_owner_role !== 'AUDITOR') {
+                            wfBtnRollback.style.display = 'block';
+                            wfReturnSelectorWrap.style.display = 'flex';
+                            populateReturnTargets(currentWfState.current_owner_role);
+                        } else {
+                            wfBtnRollback.style.display = 'none';
+                            wfReturnSelectorWrap.style.display = 'none';
+                        }
+                    } else {
+                        wfBtnSubmit.style.display = 'none';
+                        wfBtnRollback.style.display = 'none';
+                        wfReturnSelectorWrap.style.display = 'none';
+                    }
+
+                    // Pull back button visibility logic
+                    const pullBackRules = {
+                        'AUDITOR': 'Submitted to AAO',
+                        'AAO': 'Submitted to SAO',
+                        'SAO': 'Submitted to GO',
+                        'GO': 'Submitted to Addl CDA'
+                    };
+                    const expectedPullBackStatus = pullBackRules[currentUserInfo.role];
+                    if (expectedPullBackStatus && currentWfState.status === expectedPullBackStatus) {
+                        wfBtnPullback.style.display = 'block';
+                    } else {
+                        wfBtnPullback.style.display = 'none';
+                    }
+                    
+                    renderAuditLog(currentWfState.comments);
+                    
+                } catch(e) {
+                    console.error('Failed to load document workflow', e);
+                }
+            }
+
+            function populateReturnTargets(currentRole) {
+                const roles = ['AUDITOR', 'AAO', 'SAO', 'GO', 'ADDN_CDA'];
+                const currentIndex = roles.indexOf(currentRole);
+                
+                wfReturnTarget.innerHTML = '';
+                for (let i = 0; i < currentIndex; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = roles[i];
+                    opt.innerText = roles[i] === 'AUDITOR' ? 'Auditor' : roles[i];
+                    wfReturnTarget.appendChild(opt);
+                }
+            }
+
+            function renderAuditLog(comments) {
+                wfCommentsFeed.innerHTML = '';
+                if (!comments || comments.length === 0) {
+                    wfCommentsFeed.innerHTML = '<div style="font-size: 11px; color: #64748b; font-style: italic;">No actions logged yet.</div>';
+                    return;
+                }
+                
+                const reversed = [...comments].reverse();
+                reversed.forEach(c => {
+                    const dateStr = new Date(c.date).toLocaleDateString() + ' ' + new Date(c.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    let actionColor = '#10b981'; 
+                    if (c.action === 'Return') actionColor = '#ef4444'; 
+                    if (c.action === 'Pull Back') actionColor = '#f59e0b'; 
+
+                    const div = document.createElement('div');
+                    div.style.cssText = 'background: rgba(255,255,255,0.02); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); font-size: 11px; margin-bottom: 6px;';
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; font-weight:700; color:white;">
+                            <span>${c.user} (${c.role === 'AUDITOR' ? 'Auditor' : c.role})</span>
+                            <span style="color:${actionColor}">${c.action}</span>
+                        </div>
+                        <div style="font-size:10px; color:#64748b; margin-top:2px;">${dateStr}</div>
+                        ${c.text ? `<div style="color:#cbd5e1; margin-top:4px; font-style:italic;">"${c.text}"</div>` : ''}
+                    `;
+                    wfCommentsFeed.appendChild(div);
+                });
+            }
+
+            async function submitWorkflowAction(action, extraData = {}) {
+                const comments = wfCommentsInput.value.trim();
+                if (action === 'rollback' && !comments) {
+                    alert('Comments are required when returning a document.');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`/api/repo/documents/${docId}/workflow/action`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action,
+                            comments,
+                            ...extraData
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message);
+                        loadDocumentWorkflow();
+                    } else {
+                        alert('Workflow Error: ' + data.message);
+                    }
+                } catch(e) {
+                    console.error(e);
+                    alert('Error executing workflow action');
+                }
+            }
+
+            wfBtnSubmit.onclick = () => submitWorkflowAction('submit');
+            wfBtnRollback.onclick = () => {
+                const target = wfReturnTarget.value;
+                if (!target) return;
+                submitWorkflowAction('rollback', { target_role: target });
+            };
+            wfBtnPullback.onclick = () => submitWorkflowAction('pullback');
+
+            loadDocumentWorkflow();
 
             // Load All Pages — Continuous View
             let allPages = [];
@@ -1040,6 +1270,8 @@
                     });
                     const versions = await res.json();
                     
+                    window.loadedPageVersions = versions;
+                    
                     if (versions.length === 0) {
                         histList.innerHTML = '<div>No history available.</div>';
                         return;
@@ -1047,15 +1279,15 @@
 
                     let html = '';
                     versions.forEach(v => {
-                        const date = new Date(v.created_at).toLocaleString();
+                        const date = v.edited_at ? new Date(v.edited_at).toLocaleString() : 'Initial Seed';
                         html += `
                             <div class="version-row">
                                 <div>
                                     <strong style="color:var(--primary-color)">v${v.version}</strong> • ${date}<br>
-                                    <span style="font-size:12px; color:#94a3b8">By ${v.editor_name || 'System'}</span><br>
+                                    <span style="font-size:12px; color:#cbd5e1">By ${v.editor_name || 'System'}</span><br>
                                     <span style="font-size:12px; color:#10b981">${v.diff_summary || ''}</span>
                                 </div>
-                                <button class="btn-primary" style="padding:4px 8px; font-size:12px;" onclick="viewRawVersion(${v.id})">View Source</button>
+                                <button class="btn-primary" style="padding:6px 10px; font-size:12px;" onclick="viewRawVersion(${v.id})">View & Compare</button>
                             </div>
                         `;
                     });
@@ -1067,7 +1299,32 @@
             };
 
             window.viewRawVersion = function(id) {
-                alert("Diff/View feature triggered for version ID " + id + ". HTML diff integration would normally open here.");
+                if (!window.loadedPageVersions) return;
+                const v = window.loadedPageVersions.find(item => item.id == id);
+                if (!v) return;
+
+                // Load historical HTML
+                document.getElementById('diff-historical-content').innerHTML = v.html_content || '<i>Empty Page</i>';
+                
+                // Load current live block HTML
+                const activeBlock = getActiveBlock() || editorEl.querySelector(`.page-block[data-page-id="${currentPageId}"]`);
+                const currentHtml = activeBlock ? activeBlock.querySelector('.page-block-content')?.innerHTML : '';
+                document.getElementById('diff-live-content').innerHTML = currentHtml || '<i>Empty Editor</i>';
+                
+                // Show diff modal
+                document.getElementById('diff-modal').style.display = 'flex';
+                
+                // Restore button action
+                document.getElementById('btn-restore-version').onclick = () => {
+                    if (confirm(`Are you sure you want to restore Version v${v.version} contents into the editor? This will overwrite the current live block content.`)) {
+                        const blockContent = activeBlock ? activeBlock.querySelector('.page-block-content') : null;
+                        if (blockContent) {
+                            blockContent.innerHTML = v.html_content;
+                        }
+                        document.getElementById('diff-modal').style.display = 'none';
+                        document.getElementById('history-modal').style.display = 'none';
+                    }
+                };
             };
 
             // ----------------------------------------------------
