@@ -109,10 +109,10 @@ class MenuRenderer {
                 });
             });
 
-            // Auto-open active groups on page load
-            this.navContainer.querySelectorAll('.has-submenu.active').forEach(li => {
-                li.classList.add('open');
-            });
+            // Auto-open active groups on page load (Disabled for top-bar hover menus)
+            // this.navContainer.querySelectorAll('.has-submenu.active').forEach(li => {
+            //     li.classList.add('open');
+            // });
 
             // Logout handler
             const logoutBtn = document.getElementById('logout-btn');
