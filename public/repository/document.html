@@ -11,14 +11,27 @@
             height: 38px !important;
             font-size: 13px !important;
             font-weight: 600 !important;
-            border-radius: 8px !important;
+            border-radius: 10px !important;
             white-space: nowrap !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            gap: 6px !important;
+            gap: 8px !important;
             box-sizing: border-box !important;
-            line-height: 1.2 !important;
+            line-height: 1 !important;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            font-family: var(--font-headline) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+        #action-buttons button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+            filter: brightness(1.1) !important;
+            cursor: pointer;
+        }
+        #action-buttons button:active {
+            transform: translateY(0) !important;
         }
         .doc-layout {
             display: flex;
@@ -511,13 +524,21 @@
                     <div id="global-search-results" class="repo-search-results"></div>
                 </div>
                 <div id="action-buttons" style="display: flex; gap: 12px;">
-                    <button id="btn-print" class="btn-primary" style="background:#0284c7; display:flex; align-items:center; gap:6px;" onclick="window.print()">
-                        <span style="font-size:14px; margin-top:-2px;">🖨️</span> Print
+                    <button id="btn-print" class="btn-primary" style="background:#0284c7; display:flex; align-items:center;" onclick="window.print()">
+                        <span class="material-symbols-outlined" style="font-size:18px;">print</span> Print
                     </button>
-                    <button id="btn-history" class="btn-primary" style="background:#64748b; display:none;">View History</button>
-                    <button id="btn-edit" class="btn-primary" style="display:none;">Edit Page</button>
-                    <button id="btn-save" class="btn-primary" style="background:#10b981; display:none;">Save Changes</button>
-                    <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">Cancel Edit</button>
+                    <button id="btn-history" class="btn-primary" style="background:#64748b; display:none;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">history</span> View History
+                    </button>
+                    <button id="btn-edit" class="btn-primary" style="display:none;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">edit</span> Edit Page
+                    </button>
+                    <button id="btn-save" class="btn-primary" style="background:#10b981; display:none;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">save</span> Save Changes
+                    </button>
+                    <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel Edit
+                    </button>
                 </div>
             </div>
         </div>
