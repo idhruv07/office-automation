@@ -4677,6 +4677,7 @@ body.theme-amber #sidebar-toggle:hover {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+#theme-dropdown-selector:hover .theme-dropdown-content,
 #theme-dropdown-selector.open .theme-dropdown-content {
     opacity: 1 !important;
     visibility: visible !important;
