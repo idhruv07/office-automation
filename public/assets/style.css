@@ -85,6 +85,42 @@ body.theme-amber {
     --bg-ambient-2: rgba(251, 146, 60, 0.08);
 }
 
+/* Theme 6: Cyberpunk Neon */
+body.theme-cyberpunk {
+    --primary-color: #ff007f;
+    --primary-hover: #d9006b;
+    --secondary-color: #00f0ff;
+    --bg-sidebar: #0f051d;
+    --header-grad-start: #ff77bc;
+    --header-grad-end: #77f3ff;
+    --bg-ambient-1: rgba(255, 0, 127, 0.08);
+    --bg-ambient-2: rgba(0, 240, 255, 0.08);
+}
+
+/* Theme 7: Aurora Forest */
+body.theme-aurora {
+    --primary-color: #10b981;
+    --primary-hover: #059669;
+    --secondary-color: #a3e635;
+    --bg-sidebar: #051614;
+    --header-grad-start: #6ee7b7;
+    --header-grad-end: #bef264;
+    --bg-ambient-1: rgba(16, 185, 129, 0.08);
+    --bg-ambient-2: rgba(163, 230, 53, 0.08);
+}
+
+/* Theme 8: Crimson Sunset */
+body.theme-sunset {
+    --primary-color: #e11d48;
+    --primary-hover: #be123c;
+    --secondary-color: #f59e0b;
+    --bg-sidebar: #1c050b;
+    --header-grad-start: #fda4af;
+    --header-grad-end: #fcd34d;
+    --bg-ambient-1: rgba(225, 29, 72, 0.08);
+    --bg-ambient-2: rgba(245, 158, 11, 0.08);
+}
+
 /* Utility Classes */
 .text-center {
     text-align: center !important;

@@ -133,6 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button type="button" class="theme-swatch" data-theme="theme-slate" style="background: linear-gradient(135deg, #7C3AED 50%, #8B5CF6 50%);" title="Slate Gray & Violet"></button>
                         <button type="button" class="theme-swatch" data-theme="theme-ocean" style="background: linear-gradient(135deg, #2563EB 50%, #0284C7 50%);" title="Ocean Navy & Azure"></button>
                         <button type="button" class="theme-swatch" data-theme="theme-amber" style="background: linear-gradient(135deg, #D97706 50%, #0a0a0a 50%);" title="Midnight Charcoal & Amber"></button>
+                        <button type="button" class="theme-swatch" data-theme="theme-cyberpunk" style="background: linear-gradient(135deg, #ff007f 50%, #00f0ff 50%);" title="Cyberpunk Neon"></button>
+                        <button type="button" class="theme-swatch" data-theme="theme-aurora" style="background: linear-gradient(135deg, #10b981 50%, #a3e635 50%);" title="Aurora Forest"></button>
+                        <button type="button" class="theme-swatch" data-theme="theme-sunset" style="background: linear-gradient(135deg, #e11d48 50%, #f59e0b 50%);" title="Crimson Sunset"></button>
                     </div>
                 </div>
             </aside>
@@ -184,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 swatch.classList.add('active');
             }
             swatch.addEventListener('click', () => {
-                const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
+                const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber', 'theme-cyberpunk', 'theme-aurora', 'theme-sunset'];
                 document.body.classList.remove(...themes);
                 themeSwatches.forEach(s => s.classList.remove('active'));
 
@@ -258,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dbTheme = data.theme_pref;
                     localStorage.setItem('themePref', dbTheme);
                     updateThemeBadge(dbTheme);
-                    const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber'];
+                    const themes = ['theme-emerald', 'theme-slate', 'theme-ocean', 'theme-amber', 'theme-cyberpunk', 'theme-aurora', 'theme-sunset'];
                     document.body.classList.remove(...themes);
                     if (dbTheme) {
                         document.body.classList.add(dbTheme);
@@ -309,6 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (themeClass === 'theme-slate') label = 'Slate Gray & Electric Violet';
         else if (themeClass === 'theme-ocean') label = 'Ocean Navy & Azure';
         else if (themeClass === 'theme-amber') label = 'Midnight Charcoal & Amber';
+        else if (themeClass === 'theme-cyberpunk') label = 'Cyberpunk Neon';
+        else if (themeClass === 'theme-aurora') label = 'Aurora Forest';
+        else if (themeClass === 'theme-sunset') label = 'Crimson Sunset';
         
         badgeText.textContent = label;
     }
