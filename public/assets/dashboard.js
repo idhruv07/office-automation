@@ -107,14 +107,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-        // 2. Fetch colors designed for dark gradient charts integration
-        const colorSubmitted = '#38bdf8'; // Sky blue glow
-        const colorDrafts = '#34d399'; // Emerald glow
-        const colorReturned = '#fb7185'; // Rose/Coral glow
-        const textWhite = 'rgba(255, 255, 255, 0.95)';
+        // 2. Create gradients for charts
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const historyCtx = document.getElementById('historyChart').getContext('2d');
+
+        const gradSubmitted = statusCtx.createLinearGradient(0, 0, 0, 180);
+        gradSubmitted.addColorStop(0, '#38bdf8');
+        gradSubmitted.addColorStop(1, '#0284c7');
+        
+        const gradDrafts = statusCtx.createLinearGradient(0, 0, 0, 180);
+        gradDrafts.addColorStop(0, '#34d399');
+        gradDrafts.addColorStop(1, '#059669');
+        
+        const gradReturned = statusCtx.createLinearGradient(0, 0, 0, 180);
+        gradReturned.addColorStop(0, '#fb7185');
+        gradReturned.addColorStop(1, '#e11d48');
+
+        const barGradient = historyCtx.createLinearGradient(0, 0, 0, 180);
+        barGradient.addColorStop(0, 'rgba(56, 189, 248, 0.85)');
+        barGradient.addColorStop(1, 'rgba(79, 70, 229, 0.15)');
+
+        const textWhite = 'rgba(255, 255, 255, 0.9)';
 
         // 3. Render Status Doughnut Chart
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
         window.statusChartInstance = new Chart(statusCtx, {
             type: 'doughnut',
             data: {
@@ -122,12 +137,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{
                     data: [countSubmitted, countDrafts, countReturned],
                     backgroundColor: [
-                        colorSubmitted,
-                        colorDrafts,
-                        colorReturned
+                        gradSubmitted,
+                        gradDrafts,
+                        gradReturned
                     ],
                     borderWidth: 2,
-                    borderColor: 'rgba(255, 255, 255, 0.15)',
+                    borderColor: 'rgba(15, 23, 42, 0.5)',
                     hoverOffset: 6
                 }]
             },
@@ -153,7 +168,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         // 4. Render Monthly Activity Bar Chart
-        const historyCtx = document.getElementById('historyChart').getContext('2d');
         window.historyChartInstance = new Chart(historyCtx, {
             type: 'bar',
             data: {
@@ -161,10 +175,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{
                     label: 'Claims Submitted',
                     data: monthlySubmissions,
-                    backgroundColor: colorSubmitted,
+                    backgroundColor: barGradient,
                     borderRadius: 6,
                     borderWidth: 0,
-                    barThickness: 20
+                    barThickness: 16
                 }]
             },
             options: {
@@ -181,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             display: false
                         },
                         ticks: {
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(255, 255, 255, 0.6)',
                             font: {
                                 family: 'Inter, sans-serif',
                                 weight: '600'
@@ -190,10 +204,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     },
                     y: {
                         grid: {
-                            color: 'rgba(255, 255, 255, 0.15)'
+                            color: 'rgba(255, 255, 255, 0.05)'
                         },
                         ticks: {
-                            color: 'rgba(255, 255, 255, 0.8)',
+                            color: 'rgba(255, 255, 255, 0.6)',
                             precision: 0,
                             font: {
                                 family: 'Inter, sans-serif'

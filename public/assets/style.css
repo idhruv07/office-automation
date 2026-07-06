@@ -4542,12 +4542,36 @@ body.theme-amber #sidebar-toggle:hover {
     box-shadow: 0 12px 30px rgba(245, 158, 11, 0.3) !important;
 }
 
-.family-tree-node.parent-fruit {
-    background: rgba(34, 197, 94, 0.08) !important;
-    border-color: rgba(34, 197, 94, 0.3) !important;
-    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.12), inset 0 0 0 1px rgba(255,255,255,0.05) !important;
-}
 .family-tree-node.parent-fruit:hover {
     border-color: #22c55e !important;
     box-shadow: 0 12px 30px rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Dashboard Widget Drag Handles & Dragging states */
+.draggable-widget {
+    position: relative;
+}
+
+.drag-handle {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    color: rgba(255, 255, 255, 0.15) !important;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: grab;
+    user-select: none;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.draggable-widget:hover .drag-handle {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.draggable-widget.dragging {
+    opacity: 0.35;
+    transform: scale(0.995);
+    border: 1px dashed var(--primary-color, #38bdf8) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
 }
