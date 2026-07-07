@@ -574,7 +574,7 @@ router.post('/documents/:id/workflow/action', authenticateToken, async (req, res
             return res.status(403).json({ message: 'Forbidden' });
         }
         const docId = parseInt(req.params.id);
-        const { action, comments, target_role, target_user_name } = req.body;
+        const { action, comments, target_role, target_user_name, selected_page_ids } = req.body;
         
         const userInfo = await getUserRoleAndRank(req.user.id, db);
         const userRole = userInfo.role_code === 'SR_AUD' ? 'AUDITOR' : userInfo.role_code;
@@ -653,6 +653,113 @@ router.post('/documents/:id/workflow/action', authenticateToken, async (req, res
             newOwnerRole = userRole;
         } else {
             return res.status(400).json({ message: 'Invalid action.' });
+        }
+        
+        // Check if we need to split only a subset of pages into a new document for forwarding
+        let splitDocId = null;
+        if (action === 'submit' && selected_page_ids && Array.isArray(selected_page_ids) && selected_page_ids.length > 0) {
+            const allPagesRes = await db.query(
+                'SELECT id FROM document_pages WHERE document_id = $1 ORDER BY sequence_no',
+                [docId]
+            );
+            const totalPageCount = allPagesRes.rows.length;
+            
+            if (selected_page_ids.length < totalPageCount) {
+                const client = await db.pool.connect();
+                try {
+                    await client.query('BEGIN');
+                    
+                    // Get original document details
+                    const docRes = await client.query('SELECT * FROM documents WHERE id = $1', [docId]);
+                    const doc = docRes.rows[0];
+                    
+                    // Create new split document
+                    const splitDocRes = await client.query(
+                        `INSERT INTO documents (folder_id, reference_no, title, owner_type, owner_office_id, transferred_from_id)
+                         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+                        [doc.folder_id, doc.reference_no, `${doc.title} (Split Excerpt)`, doc.owner_type, doc.owner_office_id, docId]
+                    );
+                    splitDocId = splitDocRes.rows[0].id;
+                    
+                    // Fetch pages to move
+                    const pagesToMoveRes = await client.query(
+                        'SELECT id, title FROM document_pages WHERE id = ANY($1)',
+                        [selected_page_ids]
+                    );
+                    
+                    let seq = 1;
+                    for (const pId of selected_page_ids) {
+                        // Move page to split document
+                        await client.query(
+                            `UPDATE document_pages 
+                             SET document_id = $1, sequence_no = $2 
+                             WHERE id = $3`,
+                            [splitDocId, seq++, pId]
+                        );
+                    }
+                    
+                    // Re-sequence remaining pages of original document
+                    const remainingPagesRes = await client.query(
+                        'SELECT id FROM document_pages WHERE document_id = $1 ORDER BY sequence_no',
+                        [docId]
+                    );
+                    let remSeq = 1;
+                    for (const rp of remainingPagesRes.rows) {
+                        await client.query(
+                            'UPDATE document_pages SET sequence_no = $1 WHERE id = $2',
+                            [remSeq++, rp.id]
+                        );
+                    }
+                    
+                    // Create workflow for the new split document
+                    const splitComments = [
+                        {
+                            role: userRole,
+                            user: userName,
+                            action: target_user_name ? `Forward to ${target_user_name}` : 'Forward',
+                            text: `Split excerpt document created from original note. ${comments || ''}`,
+                            date: new Date().toISOString()
+                        }
+                    ];
+                    
+                    await client.query(
+                        `INSERT INTO document_workflow (document_id, status, current_owner_role, comments)
+                         VALUES ($1, $2, $3, $4)`,
+                        [splitDocId, newStatus, newOwnerRole, JSON.stringify(splitComments)]
+                    );
+                    
+                    // Append split log comment to original document workflow comments
+                    const origLog = {
+                        role: userRole,
+                        user: userName,
+                        action: 'Split & Forward Pages',
+                        text: `Split pages [${pagesToMoveRes.rows.map(p => p.title || 'Untitled').join(', ')}] into a new document and forwarded to ${target_user_name || newOwnerRole}.`,
+                        date: new Date().toISOString()
+                    };
+                    const updatedOrigComments = [...(wf.comments || []), origLog];
+                    await client.query(
+                        `UPDATE document_workflow 
+                         SET comments = $1, updated_at = NOW() 
+                         WHERE document_id = $2`,
+                        [JSON.stringify(updatedOrigComments), docId]
+                    );
+                    
+                    await client.query('COMMIT');
+                } catch (err) {
+                    await client.query('ROLLBACK');
+                    throw err;
+                } finally {
+                    client.release();
+                }
+            }
+        }
+        
+        if (splitDocId) {
+            return res.json({ 
+                message: `Pages successfully split into a new document and forwarded.`, 
+                split: true, 
+                new_document_id: splitDocId 
+            });
         }
         
         const commentObj = {

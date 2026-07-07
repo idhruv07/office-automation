@@ -803,6 +803,14 @@
                      </select>
                  </div>
 
+                 <!-- Forward pages selector -->
+                 <div id="wf-page-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 6px;">
+                     <label style="font-size: 10px; color: #94a3b8;">Select Pages to Forward (Uncheck to split/keep remaining):</label>
+                     <div id="wf-page-checkboxes" style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; gap: 6px;">
+                         <!-- Dynamically populated -->
+                     </div>
+                 </div>
+
                  <!-- Return target selector -->
                  <div id="wf-return-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
                      <label style="font-size: 10px; color: #94a3b8;">Select Return Target Rank:</label>
@@ -939,6 +947,8 @@
             const wfReturnTarget = document.getElementById('wf-return-target');
             const wfForwardSelectorWrap = document.getElementById('wf-forward-selector-wrap');
             const wfForwardTarget = document.getElementById('wf-forward-target');
+            const wfPageSelectorWrap = document.getElementById('wf-page-selector-wrap');
+            const wfPageCheckboxes = document.getElementById('wf-page-checkboxes');
 
             let currentUserInfo = null;
             let currentWfState = null;
@@ -971,8 +981,19 @@
                         if (currentUserInfo.role !== 'ADDN_CDA') {
                             wfForwardSelectorWrap.style.display = 'flex';
                             populateForwardTargets(currentUserInfo.role);
+                            
+                            // Populate page selection checklist
+                            wfPageSelectorWrap.style.display = 'flex';
+                            wfPageCheckboxes.innerHTML = '';
+                            allPages.forEach((p, idx) => {
+                                const label = document.createElement('label');
+                                label.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 11px; color: #cbd5e1; cursor: pointer; margin-bottom: 2px;';
+                                label.innerHTML = `<input type="checkbox" class="wf-page-chk" value="${p.id}" checked style="cursor:pointer;"> <span>Page ${idx + 1}: ${p.title || 'Untitled'}</span>`;
+                                wfPageCheckboxes.appendChild(label);
+                            });
                         } else {
                             wfForwardSelectorWrap.style.display = 'none';
+                            wfPageSelectorWrap.style.display = 'none';
                         }
                         
                         if (currentWfState.current_owner_role !== 'AUDITOR') {
@@ -988,6 +1009,7 @@
                         wfBtnRollback.style.display = 'none';
                         wfReturnSelectorWrap.style.display = 'none';
                         wfForwardSelectorWrap.style.display = 'none';
+                        wfPageSelectorWrap.style.display = 'none';
                     }
 
                     // Pull back button visibility logic
@@ -1156,7 +1178,7 @@
                 }
             }
 
-            wfBtnSubmit.onclick = () => {
+            wfBtnSubmit.onclick = async () => {
                 let target_user_name = '';
                 if (currentUserInfo && currentUserInfo.role !== 'ADDN_CDA') {
                     target_user_name = wfForwardTarget.value;
@@ -1165,7 +1187,46 @@
                         return;
                     }
                 }
-                submitWorkflowAction('submit', { target_user_name });
+                
+                // Collect checked pages to forward
+                const checkedChks = Array.from(document.querySelectorAll('.wf-page-chk:checked'));
+                const checkedPageIds = checkedChks.map(el => parseInt(el.value));
+                if (checkedPageIds.length === 0) {
+                    alert('Please select at least one page to forward.');
+                    return;
+                }
+                
+                const comments = wfCommentsInput.value.trim();
+                try {
+                    const res = await fetch(`/api/repo/documents/${docId}/workflow/action`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'submit',
+                            comments,
+                            target_user_name,
+                            selected_page_ids: checkedPageIds
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message);
+                        if (data.split) {
+                            // If split happened, reload document view to show remaining pages
+                            window.location.reload();
+                        } else {
+                            loadDocumentWorkflow();
+                        }
+                    } else {
+                        alert('Workflow Error: ' + data.message);
+                    }
+                } catch(e) {
+                    console.error(e);
+                    alert('Error executing workflow action');
+                }
             };
             wfBtnRollback.onclick = () => {
                 const target = wfReturnTarget.value;
