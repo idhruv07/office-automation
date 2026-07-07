@@ -4775,3 +4775,29 @@ body.theme-amber #sidebar-toggle:hover {
     border-radius: 12px 12px 0 0 !important;
     z-index: 10 !important;
 }
+
+/* Absolute print media overrides - placed at the very end to guarantee precedence */
+@media print {
+    #sidebar,
+    #sidebar-toggle,
+    .no-print,
+    .claim-action-bar,
+    button,
+    .btn,
+    .theme-selector,
+    aside {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    body {
+        background: white !important;
+        background-color: white !important;
+        color: black !important;
+    }
+}
