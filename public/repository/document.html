@@ -1216,6 +1216,25 @@
 
                     lockBanner.style.display = 'none';
                     blockContent.contentEditable = 'true';
+
+                    // Automatically prepend empty Page 1 with header and page break if no page breaks exist yet
+                    if (!blockContent.querySelector('.pb-break')) {
+                        const letterheadHtml = `
+                            <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
+                                <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/emblem.png" alt="Emblem" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
+                                <div class="fwd-lh-center" style="text-align: center; flex: 1; line-height: 1.25;">
+                                    <div class="fwd-lh-title" style="font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">OFFICE OF THE CDA ( IT &amp; SDC )</div>
+                                    <div class="fwd-lh-sub" style="font-size: 11.5px; color: #333; margin-top: 2px;">Mornington Road, PAO(ORs)AOC Compound,</div>
+                                    <div class="fwd-lh-sub" style="font-size: 11.5px; color: #333;">Trimulgherry, Secunderabad – 500 015.</div>
+                                    <div class="fwd-lh-email" style="font-size: 10.5px; color: #555; margin-top: 1px;">Email: itsdcsec-cda@nic.in</div>
+                                    <div class="fwd-lh-phone" style="font-size: 10.5px; color: #555;">Phone/ Fax No: 040-27742553/29805085</div>
+                                </div>
+                                <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/azadi.png" alt="Logo Right" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
+                            </div>
+                        `;
+                        blockContent.innerHTML = letterheadHtml + `<p><br></p><hr class="pb-break" />` + blockContent.innerHTML;
+                    }
+
                     blockContent.focus();
                     toolbarEl.style.display = 'flex';
                     // Scroll to editing block
