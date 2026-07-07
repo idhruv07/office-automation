@@ -95,6 +95,20 @@
             background: var(--primary-color);
             color: white;
         }
+        .page-item-sub {
+            padding-left: 28px !important;
+            font-size: 12px !important;
+            opacity: 0.85;
+            border-left: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0 6px 6px 0 !important;
+            margin-left: 10px;
+        }
+        .page-item-sub.active {
+            border-left-color: var(--accent-color, #0d9488) !important;
+            background: rgba(255,255,255,0.06) !important;
+            color: white !important;
+            box-shadow: none !important;
+        }
         .toolbar-modern {
             background: #f8fafc;
             padding: 6px 12px;
@@ -1049,6 +1063,111 @@
 
             loadDocumentWorkflow();
 
+            // Table column resizer helper
+            function initTableResizer(editor) {
+                let startX, startWidth, activeCell = null;
+                
+                editor.addEventListener('mousemove', (e) => {
+                    if (e.target.tagName === 'TD' || e.target.tagName === 'TH') {
+                        const cell = e.target;
+                        const rect = cell.getBoundingClientRect();
+                        // If cursor is within 8px of the right border, show resize cursor
+                        if (e.clientX > rect.right - 8 && e.clientX < rect.right + 2) {
+                            cell.style.cursor = 'col-resize';
+                        } else {
+                            cell.style.cursor = '';
+                        }
+                    }
+                });
+                
+                editor.addEventListener('mousedown', (e) => {
+                    if (e.target.tagName === 'TD' || e.target.tagName === 'TH') {
+                        const cell = e.target;
+                        const rect = cell.getBoundingClientRect();
+                        if (e.clientX > rect.right - 8 && e.clientX < rect.right + 2) {
+                            activeCell = cell;
+                            startX = e.clientX;
+                            startWidth = cell.offsetWidth;
+                            e.preventDefault();
+                            
+                            const onMouseMove = (moveEvent) => {
+                                if (!activeCell) return;
+                                const diff = moveEvent.clientX - startX;
+                                const newWidth = Math.max(30, startWidth + diff);
+                                activeCell.style.width = newWidth + 'px';
+                                activeCell.setAttribute('width', newWidth);
+                                
+                                const table = activeCell.closest('table');
+                                if (table) {
+                                    table.style.tableLayout = 'fixed';
+                                }
+                            };
+                            
+                            const onMouseUp = () => {
+                                activeCell = null;
+                                document.removeEventListener('mousemove', onMouseMove);
+                                document.removeEventListener('mouseup', onMouseUp);
+                            };
+                            
+                            document.addEventListener('mousemove', onMouseMove);
+                            document.addEventListener('mouseup', onMouseUp);
+                        }
+                    }
+                });
+            }
+
+            function rebuildPageNavigation() {
+                if (!pageListEl) return;
+                pageListEl.innerHTML = '';
+                
+                const blocks = Array.from(editorEl.querySelectorAll('.page-block'));
+                let visualPageCount = 1;
+                
+                blocks.forEach((block) => {
+                    const blockId = block.dataset.pageId;
+                    const blockContent = block.querySelector('.page-block-content');
+                    if (!blockContent) return;
+                    
+                    // First page in this block
+                    const firstItem = document.createElement('div');
+                    firstItem.className = 'page-item';
+                    firstItem.dataset.pageId = blockId;
+                    firstItem.dataset.visualIndex = 0;
+                    firstItem.innerText = `Page ${visualPageCount}`;
+                    
+                    firstItem.onclick = () => {
+                        block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        highlightSidebarPageItem(firstItem);
+                    };
+                    pageListEl.appendChild(firstItem);
+                    visualPageCount++;
+                    
+                    // Search for child page breaks inside this block content
+                    const pageBreaks = Array.from(blockContent.querySelectorAll('.pb-break'));
+                    pageBreaks.forEach((pb, pbIdx) => {
+                        const subItem = document.createElement('div');
+                        subItem.className = 'page-item page-item-sub';
+                        subItem.dataset.pageId = blockId;
+                        subItem.dataset.visualIndex = pbIdx + 1;
+                        subItem.innerText = `Page ${visualPageCount}`;
+                        
+                        subItem.onclick = () => {
+                            pb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            highlightSidebarPageItem(subItem);
+                        };
+                        pageListEl.appendChild(subItem);
+                        visualPageCount++;
+                    });
+                });
+            }
+
+            function highlightSidebarPageItem(selectedEl) {
+                document.querySelectorAll('.page-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                selectedEl.classList.add('active');
+            }
+
             // Load All Pages — Continuous View
             let allPages = [];
             let editingPageId = null;
@@ -1061,17 +1180,9 @@
                 if (!res.ok) throw new Error('Failed to load pages');
                 allPages = await res.json();
                 
-                pageListEl.innerHTML = '';
-                allPages.forEach((p, idx) => {
-                    const el = document.createElement('div');
-                    el.className = 'page-item';
-                    el.dataset.pageId = p.id;
-                    el.innerText = p.title || `Page ${p.sequence_no || (idx+1)}`;
-                    el.onclick = () => scrollToPage(p.id);
-                    pageListEl.appendChild(el);
-                });
-
                 await renderAllPages(allPages);
+                rebuildPageNavigation();
+                initTableResizer(editorEl);
                 setupScrollSpy();
 
             } catch (err) {
@@ -1156,28 +1267,49 @@
             function setupScrollSpy() {
                 const viewer = document.getElementById('page-viewer');
                 viewer.addEventListener('scroll', () => {
+                    // Collect all visual target elements in chronological order
+                    const targets = [];
                     const blocks = Array.from(editorEl.querySelectorAll('.page-block'));
-                    let bestId = null;
-                    let bestRatio = -1;
-                    const viewerRect = viewer.getBoundingClientRect();
                     blocks.forEach(block => {
-                        const rect = block.getBoundingClientRect();
-                        const visible = Math.min(rect.bottom, viewerRect.bottom) - Math.max(rect.top, viewerRect.top);
-                        const ratio = visible / block.offsetHeight;
-                        if (ratio > bestRatio) { bestRatio = ratio; bestId = block.dataset.pageId; }
-                    });
-                    if (bestId && bestId != currentPageId) {
-                        // Only update sidebar highlight, not edit state
-                        document.querySelectorAll('.page-item').forEach(el => {
-                            el.classList.toggle('active', el.dataset.pageId == bestId);
+                        // The block start is the first visual page target
+                        targets.push({ element: block, pageId: block.dataset.pageId });
+                        // The page breaks within this block are subsequent visual page targets
+                        const breaks = Array.from(block.querySelectorAll('.page-block-content .pb-break'));
+                        breaks.forEach(pb => {
+                            targets.push({ element: pb, pageId: block.dataset.pageId });
                         });
-                        currentPageId = bestId;
+                    });
+                    
+                    // Find the target element closest to the top of the viewer
+                    const viewerRect = viewer.getBoundingClientRect();
+                    let bestIndex = 0;
+                    let minDistance = Infinity;
+                    let bestPageId = null;
+                    
+                    targets.forEach((target, index) => {
+                        const rect = target.element.getBoundingClientRect();
+                        const distance = Math.abs(rect.top - viewerRect.top);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            bestIndex = index;
+                            bestPageId = target.pageId;
+                        }
+                    });
+                    
+                    // Highlight the page item at the corresponding index in the sidebar page list
+                    const pageItems = Array.from(document.querySelectorAll('.page-item'));
+                    pageItems.forEach((el, index) => {
+                        el.classList.toggle('active', index === bestIndex);
+                    });
+                    
+                    if (bestPageId && bestPageId != currentPageId) {
+                        currentPageId = bestPageId;
                         versionBadge.innerText = '';
                         // Update edit button for this page
                         if (editorEl.querySelector('.page-block-content[contenteditable="true"]') === null) {
-                            const page = allPages.find(p => p.id == bestId);
+                            const page = allPages.find(p => p.id == bestPageId);
                             btnEdit.style.display = page?._isEditable ? 'block' : 'none';
-                            btnEdit.onclick = () => acquireLockAndEdit(bestId, page);
+                            btnEdit.onclick = () => acquireLockAndEdit(bestPageId, page);
                             editingVersion = page?._version;
                             if (page?._lock) {
                                 lockBanner.style.display = 'block';
@@ -1386,6 +1518,7 @@
                                 setTimeout(() => { indicator.style.display='none'; }, 3000);
                             }
                         }
+                        rebuildPageNavigation();
                     } else {
                         if (!silent) alert('Error saving: ' + data.message);
                     }
