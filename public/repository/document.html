@@ -2255,7 +2255,7 @@
                     @media print {
                         @page {
                             size: ${size} ${orientation} !important;
-                            margin: 15mm !important;
+                            margin: 0 !important; /* Borderless page to allow exact dimensions match */
                         }
                         
                         /* Hide all screen-only UI elements completely */
@@ -2298,12 +2298,14 @@
                         }
 
                         .page-block-content {
+                            width: ${widthMm}mm !important;
+                            max-width: ${widthMm}mm !important;
+                            min-height: ${heightMm}mm !important;
+                            padding: 20mm !important; /* Visual page layout padding matching screen preview exactly */
+                            margin: 0 auto !important;
                             border: none !important;
                             box-shadow: none !important;
-                            padding: 0 !important;
-                            margin: 0 !important;
-                            max-width: 100% !important;
-                            min-height: 0 !important;
+                            box-sizing: border-box !important;
                             color: #000000 !important;
                             background: transparent !important;
                         }
