@@ -420,7 +420,7 @@ router.get('/page/:id/versions', authenticateToken, async (req, res) => {
             `SELECT dpv.id, dpv.version, dpv.edited_at, dpv.diff_summary, dpv.html_content, u.name as editor_name
              FROM document_page_versions dpv
              LEFT JOIN users u ON dpv.edited_by = u.id
-             WHERE dpv.page_id = $1
+             WHERE dpv.page_id = $1 AND dpv.edited_at >= NOW() - INTERVAL '15 days'
              ORDER BY dpv.edited_at DESC`,
             [pageId]
         );
