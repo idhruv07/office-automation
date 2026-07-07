@@ -1214,6 +1214,9 @@
                     // Disable all other blocks
                     editorEl.querySelectorAll('.page-block-content').forEach(el => el.contentEditable = 'false');
 
+                    // Capture original HTML BEFORE any edits or auto-prepends
+                    const originalHtml = blockContent.innerHTML;
+
                     lockBanner.style.display = 'none';
                     blockContent.contentEditable = 'true';
 
@@ -1259,6 +1262,12 @@
                     editingVersion = pageObj._version;
 
                     btnCancel.onclick = async () => {
+                        // Revert content in the DOM
+                        blockContent.innerHTML = originalHtml;
+                        
+                        // Silent save to restore database state back to original
+                        await savePage(pageId, blockContent, true);
+
                         await fetch(`/api/repo/locks/${pageId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
                         // Reload that page block only
                         reloadPageBlock(pageId);
@@ -1461,8 +1470,10 @@
                 if (!v) return;
 
                 // Load current live block HTML
-                const activeBlock = getActiveBlock() || editorEl.querySelector(`.page-block[data-page-id="${currentPageId}"]`);
-                const currentHtml = activeBlock ? activeBlock.querySelector('.page-block-content')?.innerHTML : '';
+                // Load current live block HTML
+                const activeBlockWrapper = editorEl.querySelector(`.page-block[data-page-id="${currentPageId}"]`);
+                const blockContent = activeBlockWrapper ? activeBlockWrapper.querySelector('.page-block-content') : null;
+                const currentHtml = blockContent ? blockContent.innerHTML : '';
                 
                 // Compute highlighted difference markup
                 const diff = computeDiffHTML(v.html_content || '', currentHtml || '');
@@ -1477,11 +1488,12 @@
                 document.getElementById('diff-modal').style.display = 'flex';
                 
                 // Restore button action
-                document.getElementById('btn-restore-version').onclick = () => {
+                document.getElementById('btn-restore-version').onclick = async () => {
                     if (confirm(`Are you sure you want to restore Version v${v.version} contents into the editor? This will overwrite the current live block content.`)) {
-                        const blockContent = activeBlock ? activeBlock.querySelector('.page-block-content') : null;
                         if (blockContent) {
                             blockContent.innerHTML = v.html_content;
+                            // Immediately save restored version to the database
+                            await savePage(currentPageId, blockContent, false);
                         }
                         document.getElementById('diff-modal').style.display = 'none';
                         document.getElementById('history-modal').style.display = 'none';
