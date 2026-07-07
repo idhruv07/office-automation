@@ -50,12 +50,9 @@
             overflow-y: auto !important;
             z-index: 1040 !important;
             box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5) !important;
-            transform: translateX(100%) !important;
+            transform: translateX(100%);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             box-sizing: border-box !important;
-        }
-        #workflow-panel.open {
-            transform: translateX(0) !important;
         }
         #btn-workflow-close:hover {
             background: rgba(255, 255, 255, 0.1) !important;
@@ -567,7 +564,7 @@
                     <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel Edit
                     </button>
-                    <button id="btn-workflow-toggle" onclick="document.getElementById('workflow-panel').classList.toggle('open'); if (typeof window.markWorkflowCommentsAsSeen === 'function') window.markWorkflowCommentsAsSeen(); event.stopPropagation();" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px; position:relative; z-index:1001;">
+                    <button id="btn-workflow-toggle" onclick="const p = document.getElementById('workflow-panel'); const isOpen = p.style.transform === 'translateX(0%)' || p.style.transform === 'translateX(0px)'; p.style.transform = isOpen ? 'translateX(100%)' : 'translateX(0%)'; if (!isOpen && typeof window.markWorkflowCommentsAsSeen === 'function') window.markWorkflowCommentsAsSeen(); event.stopPropagation();" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px; position:relative; z-index:1001;">
                         <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span> Workflow <span id="wf-badge-count" style="display:none; background:#ef4444; color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:4px; font-weight:bold; line-height:1;">0</span>
                     </button>
                 </div>
@@ -679,7 +676,7 @@
                     <span class="material-symbols-outlined" style="color: var(--primary-color);">assignment_turned_in</span>
                     Document Workflow
                 </div>
-                <button id="btn-workflow-close" onclick="document.getElementById('workflow-panel').classList.remove('open'); event.stopPropagation();" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: all 0.2s; position: relative; z-index: 1060;">
+                <button id="btn-workflow-close" onclick="document.getElementById('workflow-panel').style.transform = 'translateX(100%)'; event.stopPropagation();" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: all 0.2s; position: relative; z-index: 1060;">
                     <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
                 </button>
             </div>
@@ -902,7 +899,7 @@
                     const comments = currentWfState.comments || [];
                     const seenCountKey = 'seen_wf_comments_' + docId;
                     
-                    if (wfPanel && wfPanel.classList.contains('open')) {
+                    if (wfPanel && (wfPanel.style.transform === 'translateX(0%)' || wfPanel.style.transform === 'translateX(0px)')) {
                         // If panel is already open, mark all as seen
                         localStorage.setItem(seenCountKey, comments.length);
                         document.getElementById('wf-badge-count').style.display = 'none';
