@@ -728,7 +728,7 @@
         <div class="modal-content">
             <h3>Page History & Conflict Log</h3>
             <div id="history-list">Loading...</div>
-            <button class="btn-primary" style="margin-top:20px;" onclick="document.getElementById('history-modal').style.display='none'">Close</button>
+            <button style="background: #64748b; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top:20px;" onclick="document.getElementById('history-modal').style.display='none'">Close</button>
         </div>
     </div>
 
@@ -747,8 +747,8 @@
                 </div>
             </div>
             <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-                <button id="btn-restore-version" class="btn-primary" style="background: #10b981;">Restore This Version</button>
-                <button class="btn-primary" style="background: #64748b;" onclick="document.getElementById('diff-modal').style.display='none'">Back to History</button>
+                <button id="btn-restore-version" style="background: #10b981; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: bold; cursor: pointer;">Restore This Version</button>
+                <button style="background: #64748b; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: bold; cursor: pointer;" onclick="document.getElementById('diff-modal').style.display='none'">Back to History</button>
             </div>
         </div>
     </div>
@@ -1357,7 +1357,7 @@
                                     <span style="font-size:12px; color:#cbd5e1">By ${v.editor_name || 'System'}</span><br>
                                     <span style="font-size:12px; color:#10b981">${v.diff_summary || ''}</span>
                                 </div>
-                                <button class="btn-primary" style="padding:6px 10px; font-size:12px;" onclick="viewRawVersion(${v.id})">View & Compare</button>
+                                <button style="background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: bold; cursor: pointer;" onclick="viewRawVersion(${v.id})">View & Compare</button>
                             </div>
                         `;
                     });
@@ -1368,18 +1368,69 @@
                 }
             };
 
+            function computeDiffHTML(oldStr, newStr) {
+                const oldDiv = document.createElement('div');
+                oldDiv.innerHTML = oldStr;
+                const oldWords = oldDiv.innerText.split(/\s+/).filter(Boolean);
+
+                const newDiv = document.createElement('div');
+                newDiv.innerHTML = newStr;
+                const newWords = newDiv.innerText.split(/\s+/).filter(Boolean);
+
+                const dp = Array(oldWords.length + 1).fill(null).map(() => Array(newWords.length + 1).fill(0));
+                for (let i = 1; i <= oldWords.length; i++) {
+                    for (let j = 1; j <= newWords.length; j++) {
+                        if (oldWords[i-1] === newWords[j-1]) {
+                            dp[i][j] = dp[i-1][j-1] + 1;
+                        } else {
+                            dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                        }
+                    }
+                }
+
+                let i = oldWords.length;
+                let j = newWords.length;
+                const diffOld = [];
+                const diffNew = [];
+
+                while (i > 0 || j > 0) {
+                    if (i > 0 && j > 0 && oldWords[i-1] === newWords[j-1]) {
+                        diffOld.unshift(oldWords[i-1]);
+                        diffNew.unshift(newWords[j-1]);
+                        i--;
+                        j--;
+                    } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+                        diffNew.unshift(`<mark style="background:#bbf7d0; color:#15803d; border-radius:3px; padding:0 3px; font-weight:bold;">${newWords[j-1]}</mark>`);
+                        j--;
+                    } else if (i > 0 && (j === 0 || dp[i-1][j] > dp[i][j-1])) {
+                        diffOld.unshift(`<mark style="background:#fecaca; color:#b91c1c; border-radius:3px; padding:0 3px; text-decoration:line-through;">${oldWords[i-1]}</mark>`);
+                        i--;
+                    }
+                }
+
+                return {
+                    historical: diffOld.join(' '),
+                    live: diffNew.join(' ')
+                };
+            }
+
             window.viewRawVersion = function(id) {
                 if (!window.loadedPageVersions) return;
                 const v = window.loadedPageVersions.find(item => item.id == id);
                 if (!v) return;
 
-                // Load historical HTML
-                document.getElementById('diff-historical-content').innerHTML = v.html_content || '<i>Empty Page</i>';
-                
                 // Load current live block HTML
                 const activeBlock = getActiveBlock() || editorEl.querySelector(`.page-block[data-page-id="${currentPageId}"]`);
                 const currentHtml = activeBlock ? activeBlock.querySelector('.page-block-content')?.innerHTML : '';
-                document.getElementById('diff-live-content').innerHTML = currentHtml || '<i>Empty Editor</i>';
+                
+                // Compute highlighted difference markup
+                const diff = computeDiffHTML(v.html_content || '', currentHtml || '');
+
+                // Load historical HTML with deletions highlighted
+                document.getElementById('diff-historical-content').innerHTML = diff.historical || '<i>Empty Page</i>';
+                
+                // Load current live block HTML with additions highlighted
+                document.getElementById('diff-live-content').innerHTML = diff.live || '<i>Empty Editor</i>';
                 
                 // Show diff modal
                 document.getElementById('diff-modal').style.display = 'flex';
