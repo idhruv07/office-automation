@@ -1014,21 +1014,24 @@
                         wfPageSelectorWrap.style.display = 'none';
                     }
 
-                    // Check if user is higher rank and can take over ownership
-                    const roleRanks = { 'AUDITOR': 8, 'AAO': 6, 'SAO': 5, 'GO': 4, 'ADDN_CDA': 3 };
-                    const currentOwnerRank = roleRanks[currentWfState.current_owner_role] || 99;
-                    const requesterRank = roleRanks[currentUserInfo.role] || 99;
-                    const canTakeOver = requesterRank < currentOwnerRank;
-                    
-                    if (!isOwner && canTakeOver) {
+                    // Anyone who is not the current owner can initiate a takeover
+                    if (!isOwner) {
                         wfBtnTakeover.style.display = 'block';
+                        
+                        const roleRanks = { 'AUDITOR': 8, 'AAO': 6, 'SAO': 5, 'GO': 4, 'ADDN_CDA': 3 };
+                        const currentOwnerRank = roleRanks[currentWfState.current_owner_role] || 99;
+                        const requesterRank = roleRanks[currentUserInfo.role] || 99;
+                        const isLowerRank = requesterRank > currentOwnerRank;
                         
                         // Active page edit locks warnings
                         const activeLocks = data.active_locks || [];
                         wfBtnTakeover.onclick = async () => {
                             let msg = "Are you sure you want to take over ownership of this document? This will transfer all editing and routing control to you.";
+                            if (isLowerRank) {
+                                msg = `Warning: You are taking over ownership of this document from a higher authority (${currentWfState.current_owner_role}). Are you sure you want to proceed?`;
+                            }
                             if (activeLocks.length > 0) {
-                                msg = `Warning: This document has active page edit locks held by: ${activeLocks.map(l => l.holder_name).join(', ')}. Taking over will force-release these locks and transfer control to you. Proceed?`;
+                                msg += `\n\nAdditionally, this document has active page edit locks held by: ${activeLocks.map(l => l.holder_name).join(', ')}. Taking over will force-release these locks.`;
                             }
                             if (!confirm(msg)) return;
                             
@@ -1737,6 +1740,12 @@
                             const page = allPages.find(p => p.id == pageId);
                             if (page) page._version = editingVersion;
                             if (!silent) {
+                                // Release lock on manual save
+                                await fetch(`/api/repo/locks/${pageId}`, {
+                                    method: 'DELETE',
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                
                                 // finish editing
                                 if (blockContent) blockContent.contentEditable = 'false';
                                 toolbarEl.style.display = 'none';
@@ -2715,6 +2724,19 @@
                     globalResults.innerHTML = `<div style="padding:12px;color:#ef4444;">${err.message}</div>`;
                 }
             }
+
+            // Release lock when navigating away, closing the window, or reloading
+            window.addEventListener('beforeunload', () => {
+                const activeBlock = getActiveBlock();
+                if (activeBlock) {
+                    const pageId = activeBlock.closest('.page-block').dataset.pageId;
+                    fetch(`/api/repo/locks/${pageId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        keepalive: true
+                    });
+                }
+            });
         });
     </script>
 </body>

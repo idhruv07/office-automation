@@ -553,7 +553,7 @@ router.get('/documents/:id/workflow', authenticateToken, async (req, res) => {
         const locksRes = await db.query(
             `SELECT l.*, u.name as holder_name, u.username as holder_username 
              FROM page_edit_locks l 
-             JOIN users u ON l.user_id = u.id 
+             JOIN users u ON l.held_by = u.id 
              WHERE l.page_id IN (SELECT id FROM document_pages WHERE document_id = $1)`,
             [docId]
         );
@@ -662,14 +662,6 @@ router.post('/documents/:id/workflow/action', authenticateToken, async (req, res
             newStatus = rule.targetStatus;
             newOwnerRole = userRole;
         } else if (action === 'takeover') {
-            const roleRanks = { 'AUDITOR': 8, 'AAO': 6, 'SAO': 5, 'GO': 4, 'ADDN_CDA': 3 };
-            const currentOwnerRank = roleRanks[wf.current_owner_role] || 99;
-            const requesterRank = roleRanks[userRole] || 99;
-            
-            if (requesterRank >= currentOwnerRank) {
-                return res.status(400).json({ message: 'Only a higher authority can take over this document.' });
-            }
-            
             newStatus = `Draft (Taken over by ${userRole === 'AUDITOR' ? 'Auditor' : userRole})`;
             newOwnerRole = userRole;
             
