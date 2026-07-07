@@ -290,33 +290,66 @@ router.put('/page/:id', authenticateToken, async (req, res) => {
             });
         }
 
-        // Success Path (No conflict OR Requester Wins conflict)
+        let isSameSession = false;
+        let finalVersion = currentVersion + 1;
 
-        // a) Archive the current DB state before overwriting
-        await client.query(
-            `INSERT INTO document_page_versions (page_id, version, html_content, edited_by, diff_summary)
-             VALUES ($1, $2, $3, $4, $5)`,
-            [
-                pageId,
-                currentVersion,
-                currentPage.html_content,
-                req.user.id,
-                isConflict ? `[OVERWRITTEN] Rank ${requesterRank} prevailed in conflict` : `Standard update`
-            ]
-        );
+        if (!isConflict) {
+            // Check if the last version was saved by the same user within 5 minutes (300 seconds)
+            const lastVerRes = await client.query(
+                `SELECT id, edited_by, edited_at FROM document_page_versions 
+                 WHERE page_id = $1 
+                 ORDER BY version DESC, edited_at DESC LIMIT 1`,
+                [pageId]
+            );
+            if (lastVerRes.rows.length > 0) {
+                const lastVer = lastVerRes.rows[0];
+                const timeDiffSec = (Date.now() - new Date(lastVer.edited_at).getTime()) / 1000;
+                if (lastVer.edited_by === req.user.id && timeDiffSec < 300) {
+                    isSameSession = true;
+                    finalVersion = currentVersion; // keep version number the same
+                }
+            }
+        }
 
-        // b) Update page
-        const nextVersion = currentVersion + 1;
-        await client.query(
-            'UPDATE document_pages SET html_content=$1, version=$2 WHERE id=$3',
-            [html_content, nextVersion, pageId]
-        );
+        if (isSameSession) {
+            // Update page content only, do not increment version, and push the sliding session window forward
+            await client.query(
+                'UPDATE document_pages SET html_content=$1 WHERE id=$2',
+                [html_content, pageId]
+            );
+            const lastVerRes = await client.query(
+                `SELECT id FROM document_page_versions WHERE page_id = $1 ORDER BY version DESC, edited_at DESC LIMIT 1`,
+                [pageId]
+            );
+            if (lastVerRes.rows.length > 0) {
+                await client.query('UPDATE document_page_versions SET edited_at=NOW() WHERE id=$1', [lastVerRes.rows[0].id]);
+            }
+        } else {
+            // a) Archive the current DB state before overwriting
+            await client.query(
+                `INSERT INTO document_page_versions (page_id, version, html_content, edited_by, diff_summary)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [
+                    pageId,
+                    currentVersion,
+                    currentPage.html_content,
+                    req.user.id,
+                    isConflict ? `[OVERWRITTEN] Rank ${requesterRank} prevailed in conflict` : `Standard update`
+                ]
+            );
+
+            // b) Update page and increment version
+            await client.query(
+                'UPDATE document_pages SET html_content=$1, version=$2 WHERE id=$3',
+                [html_content, finalVersion, pageId]
+            );
+        }
 
         // c) Release lock
         await client.query('DELETE FROM page_edit_locks WHERE page_id=$1', [pageId]);
 
         await client.query('COMMIT');
-        res.json({ message: 'Page saved successfully', new_version: nextVersion });
+        res.json({ message: 'Page saved successfully', new_version: finalVersion });
 
         // e) Background task: Generate and store pgvector/array embedding via Ollama
         (async () => {
