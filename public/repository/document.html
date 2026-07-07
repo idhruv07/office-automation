@@ -792,9 +792,17 @@
                 
                 <button id="wf-btn-pullback" class="btn-primary" style="width: 100%; padding: 8px 12px; font-size: 12px; background: #f59e0b; display: none;">Pull Back (Retrieve)</button>
                 
-                <!-- Return target selector -->
-                <div id="wf-return-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
-                    <label style="font-size: 10px; color: #94a3b8;">Select Return Target Rank:</label>
+                <!-- Forward target selector -->
+                 <div id="wf-forward-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
+                     <label style="font-size: 10px; color: #94a3b8;">Select Forward Officer:</label>
+                     <select id="wf-forward-target" style="width:100%; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 6px; font-size: 12px;">
+                         <!-- Dynamically populated -->
+                     </select>
+                 </div>
+
+                 <!-- Return target selector -->
+                 <div id="wf-return-selector-wrap" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
+                     <label style="font-size: 10px; color: #94a3b8;">Select Return Target Rank:</label>
                     <select id="wf-return-target" style="width:100%; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 6px; font-size: 12px;">
                         <!-- Dynamically populated -->
                     </select>
@@ -926,6 +934,8 @@
             const wfBtnPullback = document.getElementById('wf-btn-pullback');
             const wfReturnSelectorWrap = document.getElementById('wf-return-selector-wrap');
             const wfReturnTarget = document.getElementById('wf-return-target');
+            const wfForwardSelectorWrap = document.getElementById('wf-forward-selector-wrap');
+            const wfForwardTarget = document.getElementById('wf-forward-target');
 
             let currentUserInfo = null;
             let currentWfState = null;
@@ -955,6 +965,13 @@
                         wfBtnSubmit.style.display = 'block';
                         wfBtnSubmit.innerText = currentUserInfo.role === 'ADDN_CDA' ? 'Approve' : 'Forward';
                         
+                        if (currentUserInfo.role !== 'ADDN_CDA') {
+                            wfForwardSelectorWrap.style.display = 'flex';
+                            populateForwardTargets(currentUserInfo.role);
+                        } else {
+                            wfForwardSelectorWrap.style.display = 'none';
+                        }
+                        
                         if (currentWfState.current_owner_role !== 'AUDITOR') {
                             wfBtnRollback.style.display = 'block';
                             wfReturnSelectorWrap.style.display = 'flex';
@@ -967,6 +984,7 @@
                         wfBtnSubmit.style.display = 'none';
                         wfBtnRollback.style.display = 'none';
                         wfReturnSelectorWrap.style.display = 'none';
+                        wfForwardSelectorWrap.style.display = 'none';
                     }
 
                     // Pull back button visibility logic
@@ -1034,6 +1052,45 @@
                 }
             }
 
+            async function populateForwardTargets(currentRole) {
+                const roles = ['AUDITOR', 'AAO', 'SAO', 'GO', 'ADDN_CDA'];
+                const currentIndex = roles.indexOf(currentRole);
+                if (currentIndex === -1 || currentIndex >= roles.length - 1) {
+                    wfForwardSelectorWrap.style.display = 'none';
+                    return;
+                }
+                const nextRole = roles[currentIndex + 1];
+                wfForwardSelectorWrap.style.display = 'flex';
+                wfForwardTarget.innerHTML = '<option value="">Loading officers...</option>';
+                
+                try {
+                    const res = await fetch(`/api/repo/users/role/${nextRole}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    
+                    wfForwardTarget.innerHTML = '';
+                    if (!data.users || data.users.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.innerText = `No active ${nextRole === 'ADDN_CDA' ? 'Addl CDA' : nextRole} officers found`;
+                        wfForwardTarget.appendChild(opt);
+                        return;
+                    }
+                    
+                    data.users.forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value = `${u.name} (${u.designation || nextRole})`;
+                        opt.innerText = `${u.name} (${u.designation || nextRole})`;
+                        wfForwardTarget.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.error('Failed to load forward targets:', err);
+                    wfForwardTarget.innerHTML = '<option value="">Failed to load officers</option>';
+                }
+            }
+
             function renderAuditLog(comments) {
                 wfCommentsFeed.innerHTML = '';
                 if (!comments || comments.length === 0) {
@@ -1096,7 +1153,17 @@
                 }
             }
 
-            wfBtnSubmit.onclick = () => submitWorkflowAction('submit');
+            wfBtnSubmit.onclick = () => {
+                let target_user_name = '';
+                if (currentUserInfo && currentUserInfo.role !== 'ADDN_CDA') {
+                    target_user_name = wfForwardTarget.value;
+                    if (!target_user_name) {
+                        alert('Please select a forward officer recipient.');
+                        return;
+                    }
+                }
+                submitWorkflowAction('submit', { target_user_name });
+            };
             wfBtnRollback.onclick = () => {
                 const target = wfReturnTarget.value;
                 if (!target) return;

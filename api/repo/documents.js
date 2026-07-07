@@ -497,6 +497,33 @@ async function getUserRoleAndRank(userId, dbClient) {
     return res.rows[0];
 }
 
+// GET /api/repo/users/role/:role - Get active users matching a specific role code
+router.get('/users/role/:role', authenticateToken, async (req, res) => {
+    try {
+        if (!await isOfficeAdminHierarchy(req.user.id, db)) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+        const { role } = req.params;
+        let rolesFilter = [role];
+        if (role === 'AUDITOR') {
+            rolesFilter = ['AUDITOR', 'SR_AUD'];
+        }
+        
+        const result = await db.query(
+            `SELECT u.id, u.name, u.designation, r.code as role_code 
+             FROM users u 
+             JOIN roles r ON u.role_id = r.id 
+             WHERE r.code = ANY($1) AND u.is_active = true 
+             ORDER BY u.name`,
+            [rolesFilter]
+        );
+        res.json({ users: result.rows });
+    } catch (err) {
+        console.error('GET /api/repo/users/role error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // GET /api/repo/documents/:id/workflow - Get document workflow details
 router.get('/documents/:id/workflow', authenticateToken, async (req, res) => {
     try {
@@ -547,7 +574,7 @@ router.post('/documents/:id/workflow/action', authenticateToken, async (req, res
             return res.status(403).json({ message: 'Forbidden' });
         }
         const docId = parseInt(req.params.id);
-        const { action, comments, target_role } = req.body;
+        const { action, comments, target_role, target_user_name } = req.body;
         
         const userInfo = await getUserRoleAndRank(req.user.id, db);
         const userRole = userInfo.role_code === 'SR_AUD' ? 'AUDITOR' : userInfo.role_code;
@@ -631,7 +658,7 @@ router.post('/documents/:id/workflow/action', authenticateToken, async (req, res
         const commentObj = {
             role: userRole,
             user: userName,
-            action: action === 'submit' ? (userRole === 'ADDN_CDA' ? 'Approve' : 'Forward') : (action === 'rollback' ? 'Return' : 'Pull Back'),
+            action: action === 'submit' ? (userRole === 'ADDN_CDA' ? 'Approve' : (target_user_name ? `Forward to ${target_user_name}` : 'Forward')) : (action === 'rollback' ? 'Return' : 'Pull Back'),
             text: comments || '',
             date: new Date().toISOString()
         };
