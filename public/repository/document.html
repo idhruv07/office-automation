@@ -6,6 +6,23 @@
     <title>Document Viewer - Office Automation</title>
     <link rel="stylesheet" href="/assets/style.css">
     <style>
+        /* Table Layout and Wrapping Rules */
+        .page-block-content table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            table-layout: fixed !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            white-space: normal !important;
+        }
+        .page-block-content table td, .page-block-content table th {
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            vertical-align: top !important;
+        }
+
         #action-buttons button {
             padding: 8px 16px !important;
             height: 38px !important;
@@ -664,6 +681,27 @@
                     <!-- Table & Spacing -->
                     <button onclick="insertTable()" title="Insert Table"><span class="material-symbols-outlined">table_chart</span></button>
                     <button onclick="toggleBorders()" title="Toggle Table Borders"><span class="material-symbols-outlined">border_outer</span></button>
+                    
+                    <!-- Table Actions Select Dropdown -->
+                    <select id="table-actions-select" onchange="executeTableAction(this.value)" title="Table Controls" class="toolbar-select" style="width: 130px; display: none;">
+                        <option value="" disabled selected>Table Controls</option>
+                        <option value="mergeCenter">Merge &amp; Center</option>
+                        <option value="toggleWrap">Toggle Wrap Text</option>
+                        <option value="insertRowAbove">Insert Row Above</option>
+                        <option value="insertRowBelow">Insert Row Below</option>
+                        <option value="insertColLeft">Insert Column Left</option>
+                        <option value="insertColRight">Insert Column Right</option>
+                        <option value="deleteRow">Delete Row</option>
+                        <option value="deleteCol">Delete Column</option>
+                        <option value="alignLeft">Align Cell Left</option>
+                        <option value="alignCenter">Align Cell Center</option>
+                        <option value="alignRight">Align Cell Right</option>
+                        <option value="shadeGray">Shading: Gray</option>
+                        <option value="shadeLightBlue">Shading: Ice Blue</option>
+                        <option value="shadeLightGreen">Shading: Sage</option>
+                        <option value="shadeNone">Clear Shading</option>
+                    </select>
+
                     <button onclick="insertPageBreak()" title="Insert Page Break"><span class="material-symbols-outlined">insert_page_break</span></button>
                     <span class="toolbar-separator"></span>
                     <select id="line-spacing-select" onchange="applyLineSpacing(this.value)" title="Line Spacing" class="toolbar-select" style="width: 120px;">
@@ -1922,6 +1960,146 @@
                 }
             };
 
+            window.executeTableAction = function(action) {
+                const selectEl = document.getElementById('table-actions-select');
+                if (!selectEl) return;
+                
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+                let node = sel.getRangeAt(0).startContainer;
+                const cell = node.closest ? node.closest('td, th') : (node.parentNode && node.parentNode.closest ? node.parentNode.closest('td, th') : null);
+                if (!cell) {
+                    alert("Please place your cursor inside a table cell first.");
+                    selectEl.value = "";
+                    return;
+                }
+                
+                const row = cell.closest('tr');
+                const table = cell.closest('table');
+                if (!table || !row) return;
+
+                if (action === 'mergeCenter') {
+                    const nextCell = cell.nextElementSibling;
+                    if (nextCell) {
+                        cell.innerHTML = cell.innerHTML.trim() + " " + nextCell.innerHTML.trim();
+                        const cellColspan = parseInt(cell.getAttribute('colspan') || '1');
+                        const nextColspan = parseInt(nextCell.getAttribute('colspan') || '1');
+                        cell.setAttribute('colspan', cellColspan + nextColspan);
+                        nextCell.remove();
+                        cell.style.textAlign = 'center';
+                    } else {
+                        const prevCell = cell.previousElementSibling;
+                        if (prevCell) {
+                            prevCell.innerHTML = prevCell.innerHTML.trim() + " " + cell.innerHTML.trim();
+                            const prevColspan = parseInt(prevCell.getAttribute('colspan') || '1');
+                            const cellColspan = parseInt(cell.getAttribute('colspan') || '1');
+                            prevCell.setAttribute('colspan', prevColspan + cellColspan);
+                            cell.remove();
+                            prevCell.style.textAlign = 'center';
+                        }
+                    }
+                } else if (action === 'toggleWrap') {
+                    const isNowrap = cell.style.whiteSpace === 'nowrap';
+                    cell.style.whiteSpace = isNowrap ? 'normal' : 'nowrap';
+                } else if (action === 'insertRowAbove') {
+                    const newRow = document.createElement('tr');
+                    Array.from(row.cells).forEach(c => {
+                        const newCell = document.createElement('td');
+                        newCell.style.border = c.style.border || '1px solid #ccc';
+                        newCell.style.padding = c.style.padding || '8px';
+                        newCell.innerHTML = '&nbsp;';
+                        newRow.appendChild(newCell);
+                    });
+                    row.parentNode.insertBefore(newRow, row);
+                } else if (action === 'insertRowBelow') {
+                    const newRow = document.createElement('tr');
+                    Array.from(row.cells).forEach(c => {
+                        const newCell = document.createElement('td');
+                        newCell.style.border = c.style.border || '1px solid #ccc';
+                        newCell.style.padding = c.style.padding || '8px';
+                        newCell.innerHTML = '&nbsp;';
+                        newRow.appendChild(newCell);
+                    });
+                    row.parentNode.insertBefore(newRow, row.nextSibling);
+                } else if (action === 'insertColLeft') {
+                    const cellIndex = cell.cellIndex;
+                    Array.from(table.rows).forEach(r => {
+                        const newCell = document.createElement(r.cells[cellIndex].tagName);
+                        newCell.style.border = r.cells[cellIndex].style.border || '1px solid #ccc';
+                        newCell.style.padding = r.cells[cellIndex].style.padding || '8px';
+                        newCell.innerHTML = '&nbsp;';
+                        r.insertBefore(newCell, r.cells[cellIndex]);
+                    });
+                } else if (action === 'insertColRight') {
+                    const cellIndex = cell.cellIndex;
+                    const insertIndex = cellIndex + 1;
+                    Array.from(table.rows).forEach(r => {
+                        const newCell = document.createElement(r.cells[cellIndex].tagName);
+                        newCell.style.border = r.cells[cellIndex].style.border || '1px solid #ccc';
+                        newCell.style.padding = r.cells[cellIndex].style.padding || '8px';
+                        newCell.innerHTML = '&nbsp;';
+                        if (insertIndex >= r.cells.length) {
+                            r.appendChild(newCell);
+                        } else {
+                            r.insertBefore(newCell, r.cells[insertIndex]);
+                        }
+                    });
+                } else if (action === 'deleteRow') {
+                    row.remove();
+                } else if (action === 'deleteCol') {
+                    const cellIndex = cell.cellIndex;
+                    Array.from(table.rows).forEach(r => {
+                        if (r.cells[cellIndex]) r.cells[cellIndex].remove();
+                    });
+                } else if (action === 'alignLeft') {
+                    cell.style.textAlign = 'left';
+                } else if (action === 'alignCenter') {
+                    cell.style.textAlign = 'center';
+                } else if (action === 'alignRight') {
+                    cell.style.textAlign = 'right';
+                } else if (action === 'shadeGray') {
+                    cell.style.backgroundColor = '#f1f5f9';
+                } else if (action === 'shadeLightBlue') {
+                    cell.style.backgroundColor = '#e0f2fe';
+                } else if (action === 'shadeLightGreen') {
+                    cell.style.backgroundColor = '#dcfce7';
+                } else if (action === 'shadeNone') {
+                    cell.style.backgroundColor = '';
+                }
+                
+                // Reset select dropdown value
+                selectEl.value = "";
+            };
+
+            document.addEventListener('selectionchange', () => {
+                const selectEl = document.getElementById('table-actions-select');
+                if (!selectEl) return;
+                
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) {
+                    selectEl.style.display = 'none';
+                    return;
+                }
+                
+                const sel = window.getSelection();
+                if (!sel.rangeCount) {
+                    selectEl.style.display = 'none';
+                    return;
+                }
+                
+                let node = sel.getRangeAt(0).startContainer;
+                let insideTable = false;
+                while (node && node !== activeBlock) {
+                    if (node.nodeName === 'TABLE') {
+                        insideTable = true;
+                        break;
+                    }
+                    node = node.parentNode;
+                }
+                
+                selectEl.style.display = insideTable ? 'inline-block' : 'none';
+            });
+
             function isSelectionAtStart(container) {
                 try {
                     const sel = window.getSelection();
@@ -2076,6 +2254,12 @@
                             margin: 0 !important;
                             max-width: 100% !important;
                             min-height: 0 !important;
+                            color: #000000 !important;
+                            background: #ffffff !important;
+                        }
+                        .page-block-content * {
+                            color: #000000 !important;
+                            background-color: transparent !important;
                         }
                     }
                     
