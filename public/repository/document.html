@@ -562,7 +562,7 @@
                         <span class="material-symbols-outlined" style="font-size:18px;">save</span> Save Changes
                     </button>
                     <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">
-                        <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel Edit
+                        <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel
                     </button>
                     <button id="btn-workflow-toggle" onclick="const p = document.getElementById('workflow-panel'); const isHidden = (p.style.display === 'none' || p.style.display === ''); if (isHidden) { p.style.display = 'flex'; p.offsetHeight; p.style.transform = 'translateX(0%)'; if (typeof window.markWorkflowCommentsAsSeen === 'function') window.markWorkflowCommentsAsSeen(); } else { p.style.transform = 'translateX(100%)'; setTimeout(() => { if (p.style.transform === 'translateX(100%)') p.style.display = 'none'; }, 300); } event.stopPropagation();" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px; position:relative; z-index:1001;">
                         <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span> Workflow <span id="wf-badge-count" style="display:none; background:#ef4444; color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:4px; font-weight:bold; line-height:1;">0</span>
