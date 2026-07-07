@@ -508,7 +508,7 @@
                 display: block !important;
                 height: auto !important;
             }
-            #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #toolbar, .toolbar-modern, #search-bar, #lock-banner, .page-divider, .doc-header-wrapper {
+            #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #toolbar, .toolbar-modern, #search-bar, #lock-banner, .page-divider, .doc-header-wrapper, #workflow-panel, .workflow-sidebar, .modal-overlay, .modal-content, #global-search-results {
                 display: none !important;
             }
             #editor-content {
@@ -1720,6 +1720,7 @@
                 // Ctrl + Enter to trigger page break
                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                     e.preventDefault();
+                    e.stopPropagation();
                     window.insertPageBreak();
                     return;
                 }
@@ -2260,7 +2261,8 @@
                         /* Hide all screen-only UI elements completely */
                         #sidebar, #sidebar-toggle, .no-print, .claim-action-bar, button, .btn, .theme-selector, aside,
                         #toolbar, .toolbar, .toolbar-modern, .page-sidebar, #page-list, .page-divider, #lock-banner, .doc-header-wrapper,
-                        .main-top-bar, #footer, .breadcrumb-container, .repo-search-container {
+                        .main-top-bar, #footer, .breadcrumb-container, .repo-search-container, #workflow-panel, .workflow-sidebar,
+                        .modal-overlay, .modal-content, #global-search-results {
                             display: none !important;
                             width: 0 !important;
                             height: 0 !important;
