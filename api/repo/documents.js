@@ -549,12 +549,22 @@ router.get('/documents/:id/workflow', authenticateToken, async (req, res) => {
             );
         }
         
+        // Fetch active page edit locks for the document pages
+        const locksRes = await db.query(
+            `SELECT l.*, u.name as holder_name, u.username as holder_username 
+             FROM page_edit_locks l 
+             JOIN users u ON l.user_id = u.id 
+             WHERE l.page_id IN (SELECT id FROM document_pages WHERE document_id = $1)`,
+            [docId]
+        );
+        
         // Also fetch user role to check permissions client-side
         const userInfo = await getUserRoleAndRank(req.user.id, db);
         const userRole = userInfo.role_code === 'SR_AUD' ? 'AUDITOR' : userInfo.role_code;
 
         res.json({
             workflow: wfResult.rows[0],
+            active_locks: locksRes.rows,
             user: {
                 name: userInfo.name,
                 role: userRole,
@@ -651,6 +661,24 @@ router.post('/documents/:id/workflow/action', authenticateToken, async (req, res
             
             newStatus = rule.targetStatus;
             newOwnerRole = userRole;
+        } else if (action === 'takeover') {
+            const roleRanks = { 'AUDITOR': 8, 'AAO': 6, 'SAO': 5, 'GO': 4, 'ADDN_CDA': 3 };
+            const currentOwnerRank = roleRanks[wf.current_owner_role] || 99;
+            const requesterRank = roleRanks[userRole] || 99;
+            
+            if (requesterRank >= currentOwnerRank) {
+                return res.status(400).json({ message: 'Only a higher authority can take over this document.' });
+            }
+            
+            newStatus = `Draft (Taken over by ${userRole === 'AUDITOR' ? 'Auditor' : userRole})`;
+            newOwnerRole = userRole;
+            
+            // Release any active page edit locks on this document pages immediately
+            await db.query(
+                `DELETE FROM page_edit_locks 
+                 WHERE page_id IN (SELECT id FROM document_pages WHERE document_id = $1)`,
+                [docId]
+            );
         } else {
             return res.status(400).json({ message: 'Invalid action.' });
         }
