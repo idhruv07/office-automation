@@ -1220,7 +1220,7 @@
                     // Automatically prepend empty Page 1 with header and page break if no page breaks exist yet
                     if (!blockContent.querySelector('.pb-break')) {
                         const letterheadHtml = `
-                            <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
+                            <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0 0 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
                                 <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/emblem.png" alt="Emblem" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
                                 <div class="fwd-lh-center" style="text-align: center; flex: 1; line-height: 1.25;">
                                     <div class="fwd-lh-title" style="font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">OFFICE OF THE CDA ( IT &amp; SDC )</div>
@@ -1236,6 +1236,19 @@
                     }
 
                     blockContent.focus();
+                    
+                    // Focus on the first paragraph below the prepended header (Page 1 body line)
+                    const pNode = blockContent.querySelector('.fwd-letterhead + p');
+                    if (pNode) {
+                        try {
+                            const range = document.createRange();
+                            const sel = window.getSelection();
+                            range.selectNodeContents(pNode);
+                            range.collapse(true);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        } catch (err) { console.error('Failed to focus on Page 1 body', err); }
+                    }
                     toolbarEl.style.display = 'flex';
                     // Scroll to editing block
                     block.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1760,7 +1773,7 @@
                 const blockContent = activeBlock;
                 
                 const letterheadHtml = `
-                    <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
+                    <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0 0 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
                         <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/emblem.png" alt="Emblem" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
                         <div class="fwd-lh-center" style="text-align: center; flex: 1; line-height: 1.25;">
                             <div class="fwd-lh-title" style="font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">OFFICE OF THE CDA ( IT &amp; SDC )</div>
