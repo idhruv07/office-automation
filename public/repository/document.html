@@ -1517,6 +1517,13 @@
                 const activeBlock = getActiveBlock();
                 if (!activeBlock) return;
 
+                // Ctrl + Enter to trigger page break
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    window.insertPageBreak();
+                    return;
+                }
+
                 // Tab handler
                 if (e.key === 'Tab') {
                     e.preventDefault();
