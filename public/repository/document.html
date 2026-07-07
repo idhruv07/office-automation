@@ -1721,12 +1721,27 @@
                 }
             };
 
+            function isSelectionAtStart(container) {
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return false;
+                const range = sel.getRangeAt(0);
+                
+                const preRange = document.createRange();
+                preRange.selectNodeContents(container);
+                preRange.setEnd(range.startContainer, range.startOffset);
+                
+                const text = preRange.toString().trim();
+                const hasElements = preRange.cloneContents().childElementCount > 0;
+                return text.length === 0 && !hasElements;
+            }
+
             window.insertPageBreak = function() {
                 const activeBlock = getActiveBlock();
                 if (!activeBlock) return;
+                const blockContent = activeBlock.querySelector('.page-block-content');
+                if (!blockContent) return;
                 
                 const letterheadHtml = `
-                    <hr class="pb-break" />
                     <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
                         <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/emblem.png" alt="Emblem" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
                         <div class="fwd-lh-center" style="text-align: center; flex: 1; line-height: 1.25;">
@@ -1738,9 +1753,15 @@
                         </div>
                         <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/azadi.png" alt="Logo Right" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
                     </div>
-                    <p><br></p>
                 `;
-                document.execCommand('insertHTML', false, letterheadHtml);
+
+                if (isSelectionAtStart(blockContent)) {
+                    const fullHtml = letterheadHtml + `<p><br></p><hr class="pb-break" />` + blockContent.innerHTML;
+                    blockContent.innerHTML = fullHtml;
+                } else {
+                    const insertHtml = `<hr class="pb-break" />` + letterheadHtml + `<p><br></p>`;
+                    document.execCommand('insertHTML', false, insertHtml);
+                }
             };
 
             window.applyLineSpacing = function(spacingValue) {
