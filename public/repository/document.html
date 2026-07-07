@@ -2311,13 +2311,19 @@
                         }
 
                         /* Guarantee Heading 1-6 tags display block and print visibility (overriding display: none on h1 in style.css) */
-                        h1, h2, h3, h4, h5, h6, p, span, td, th, div, a {
+                        .page-block-content h1,
+                        .page-block-content h2,
+                        .page-block-content h3,
+                        .page-block-content h4,
+                        .page-block-content h5,
+                        .page-block-content h6 {
                             display: block !important;
                             color: #000000 !important;
                             background-color: transparent !important;
                         }
                         
-                        /* Inline styles override */
+                        /* Force black ink for all content elements without breaking their layout displays (tables, inline elements, etc.) */
+                        .page-block-content,
                         .page-block-content * {
                             color: #000000 !important;
                             background-color: transparent !important;
