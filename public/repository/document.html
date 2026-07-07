@@ -1290,7 +1290,6 @@
             
             // Slide out drawer toggle bindings are handled via inline onclick attributes in HTML to avoid timing conflicts.
 
-            loadDocumentWorkflow();
 
             // Table column resizer helper
             function initTableResizer(editor) {
@@ -1413,7 +1412,7 @@
                 rebuildPageNavigation();
                 initTableResizer(editorEl);
                 setupScrollSpy();
-
+                await loadDocumentWorkflow();
             } catch (err) {
                 console.error(err);
                 pageListEl.innerHTML = '<span style="color:red">Error loading</span>';
