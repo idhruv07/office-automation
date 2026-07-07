@@ -477,7 +477,7 @@
                 display: block !important;
                 height: auto !important;
             }
-            #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #search-bar, #lock-banner, .page-divider, .doc-header-wrapper {
+            #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #toolbar, .toolbar-modern, #search-bar, #lock-banner, .page-divider, .doc-header-wrapper {
                 display: none !important;
             }
             #editor-content {
@@ -1773,17 +1773,22 @@
             };
 
             function isSelectionAtStart(container) {
-                const sel = window.getSelection();
-                if (!sel.rangeCount) return false;
-                const range = sel.getRangeAt(0);
-                
-                const preRange = document.createRange();
-                preRange.selectNodeContents(container);
-                preRange.setEnd(range.startContainer, range.startOffset);
-                
-                const text = preRange.toString().trim();
-                const hasElements = preRange.cloneContents().childElementCount > 0;
-                return text.length === 0 && !hasElements;
+                try {
+                    const sel = window.getSelection();
+                    if (!sel.rangeCount) return false;
+                    const range = sel.getRangeAt(0);
+                    
+                    const preRange = document.createRange();
+                    preRange.selectNodeContents(container);
+                    preRange.setEnd(range.startContainer, range.startOffset);
+                    
+                    const text = preRange.toString().trim();
+                    const hasElements = preRange.cloneContents().childElementCount > 0;
+                    return text.length === 0 && !hasElements;
+                } catch (e) {
+                    console.warn('isSelectionAtStart check failed, fallback to false', e);
+                    return false;
+                }
             }
 
             window.insertPageBreak = function() {
@@ -1889,6 +1894,15 @@
                     searchInput.select();
                 }
                 if (e.key === 'Escape') closeSearch();
+
+                // Ctrl + Enter to trigger page break (document-level fallback)
+                if ((e.key === 'Enter' || e.keyCode === 13 || e.code === 'Enter') && (e.ctrlKey || e.metaKey)) {
+                    const activeBlock = getActiveBlock();
+                    if (activeBlock) {
+                        e.preventDefault();
+                        window.insertPageBreak();
+                    }
+                }
             });
 
             searchInput.addEventListener('input', () => {
