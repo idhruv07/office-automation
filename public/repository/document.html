@@ -654,6 +654,18 @@
                         <option value="6">18pt</option>
                         <option value="7">24pt</option>
                     </select>
+
+                    <!-- Font Color Select -->
+                    <select id="font-color-select" onchange="document.execCommand('foreColor', false, this.value); this.value='';" title="Font Color" class="toolbar-select" style="width: 100px;">
+                        <option value="" disabled selected>Font Color</option>
+                        <option value="#000000">Black</option>
+                        <option value="#ef4444">Red</option>
+                        <option value="#3b82f6">Blue</option>
+                        <option value="#10b981">Green</option>
+                        <option value="#8b5cf6">Purple</option>
+                        <option value="#f59e0b">Orange</option>
+                        <option value="#64748b">Slate Gray</option>
+                    </select>
                     
                     <span class="toolbar-separator"></span>
 
@@ -2244,9 +2256,45 @@
                             size: ${size} ${orientation} !important;
                             margin: 15mm !important;
                         }
-                        #editor-content {
-                            width: 100% !important;
+                        
+                        /* Hide all screen-only UI elements completely */
+                        #sidebar, #sidebar-toggle, .no-print, .claim-action-bar, button, .btn, .theme-selector, aside,
+                        #toolbar, .toolbar, .toolbar-modern, .page-sidebar, #page-list, .page-divider, #lock-banner, .doc-header-wrapper,
+                        .main-top-bar, #footer, .breadcrumb-container, .repo-search-container {
+                            display: none !important;
+                            width: 0 !important;
+                            height: 0 !important;
+                            opacity: 0 !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
                         }
+
+                        /* Clear parent layout space, padding, and margins */
+                        body, html, #app-container, .main-content, main, .doc-layout, #page-viewer, .page-content-area, #editor-content {
+                            background: white !important;
+                            background-color: white !important;
+                            color: black !important;
+                            padding: 0 !important;
+                            margin: 0 !important;
+                            border: none !important;
+                            box-shadow: none !important;
+                            width: 100% !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                        }
+
+                        .page-block {
+                            border: none !important;
+                            box-shadow: none !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            background: transparent !important;
+                            page-break-after: always !important;
+                        }
+                        .page-block:last-child {
+                            page-break-after: avoid !important;
+                        }
+
                         .page-block-content {
                             border: none !important;
                             box-shadow: none !important;
@@ -2255,8 +2303,17 @@
                             max-width: 100% !important;
                             min-height: 0 !important;
                             color: #000000 !important;
-                            background: #ffffff !important;
+                            background: transparent !important;
                         }
+
+                        /* Guarantee Heading 1-6 tags display block and print visibility (overriding display: none on h1 in style.css) */
+                        h1, h2, h3, h4, h5, h6, p, span, td, th, div, a {
+                            display: block !important;
+                            color: #000000 !important;
+                            background-color: transparent !important;
+                        }
+                        
+                        /* Inline styles override */
                         .page-block-content * {
                             color: #000000 !important;
                             background-color: transparent !important;
