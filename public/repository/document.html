@@ -1157,30 +1157,47 @@
                     wfForwardSelectorWrap.style.display = 'none';
                     return;
                 }
-                const nextRole = roles[currentIndex + 1];
+                
+                const rolesAbove = roles.slice(currentIndex + 1);
                 wfForwardSelectorWrap.style.display = 'flex';
                 wfForwardTarget.innerHTML = '<option value="">Loading officers...</option>';
                 
                 try {
-                    const res = await fetch(`/api/repo/users/role/${nextRole}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                    const promises = rolesAbove.map(role => 
+                        fetch(`/api/repo/users/role/${role}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        }).then(r => r.ok ? r.json() : { users: [] })
+                    );
+                    const results = await Promise.all(promises);
+                    
+                    let allUsers = [];
+                    results.forEach((res, idx) => {
+                        const roleName = rolesAbove[idx];
+                        if (res.users && res.users.length > 0) {
+                            res.users.forEach(u => {
+                                allUsers.push({
+                                    id: u.id,
+                                    name: u.name,
+                                    designation: u.designation || roleName,
+                                    role: roleName
+                                });
+                            });
+                        }
                     });
-                    if (!res.ok) throw new Error();
-                    const data = await res.json();
                     
                     wfForwardTarget.innerHTML = '';
-                    if (!data.users || data.users.length === 0) {
+                    if (allUsers.length === 0) {
                         const opt = document.createElement('option');
                         opt.value = '';
-                        opt.innerText = `No active ${nextRole === 'ADDN_CDA' ? 'Addl CDA' : nextRole} officers found`;
+                        opt.innerText = `No active officers found ranked above ${currentRole}`;
                         wfForwardTarget.appendChild(opt);
                         return;
                     }
                     
-                    data.users.forEach(u => {
+                    allUsers.forEach(u => {
                         const opt = document.createElement('option');
-                        opt.value = `${u.name} (${u.designation || nextRole})`;
-                        opt.innerText = `${u.name} (${u.designation || nextRole})`;
+                        opt.value = `${u.name} (${u.designation})`;
+                        opt.innerText = `${u.name} (${u.designation})`;
                         wfForwardTarget.appendChild(opt);
                     });
                 } catch (err) {
