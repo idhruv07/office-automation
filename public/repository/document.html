@@ -712,6 +712,18 @@
                     </select>
 
                     <button onclick="insertPageBreak()" title="Insert Page Break"><span class="material-symbols-outlined">insert_page_break</span></button>
+                    <select id="shape-insert-select" onchange="insertDocShape(this.value); this.value='';" title="Insert Line or Shape" class="toolbar-select" style="width: 140px;">
+                        <option value="" disabled selected>Lines &amp; Shapes</option>
+                        <option value="solid-line">─── Solid Line</option>
+                        <option value="dashed-line">- - - Dashed Line</option>
+                        <option value="double-line">=== Double Line</option>
+                        <option value="arrow-right">➔ Arrow Right</option>
+                        <option value="arrow-left">L Arrow Left</option>
+                        <option value="rect">█ Rectangle</option>
+                        <option value="circle">● Circle</option>
+                        <option value="check">✔ Checkmark</option>
+                        <option value="cross">✘ Cross</option>
+                    </select>
                     <span class="toolbar-separator"></span>
                     <select id="line-spacing-select" onchange="applyLineSpacing(this.value)" title="Line Spacing" class="toolbar-select" style="width: 120px;">
                         <option value="" disabled selected>Line Spacing</option>
@@ -2478,6 +2490,39 @@
                 }
             };
 
+            window.insertDocShape = function(type) {
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) {
+                    alert('Please click inside the editor to select a page before inserting a shape.');
+                    return;
+                }
+                
+                let html = '';
+                if (type === 'solid-line') {
+                    html = '<hr style="border: none; border-top: 2px solid #000000; margin: 16px 0; width: 100%; display: block;" />';
+                } else if (type === 'dashed-line') {
+                    html = '<hr style="border: none; border-top: 2px dashed #000000; margin: 16px 0; width: 100%; display: block;" />';
+                } else if (type === 'double-line') {
+                    html = '<hr style="border: none; border-top: 3px double #000000; margin: 16px 0; width: 100%; display: block;" />';
+                } else if (type === 'arrow-right') {
+                    html = '<span class="doc-shape-wrapper" style="display: inline-block; vertical-align: middle; margin: 4px;" contenteditable="false"><svg width="48" height="16" viewBox="0 0 48 16" style="display: block;"><path d="M 0 8 L 44 8 M 38 2 L 46 8 L 38 14" stroke="#000000" stroke-width="2.5" fill="none"/></svg></span>';
+                } else if (type === 'arrow-left') {
+                    html = '<span class="doc-shape-wrapper" style="display: inline-block; vertical-align: middle; margin: 4px;" contenteditable="false"><svg width="48" height="16" viewBox="0 0 48 16" style="display: block;"><path d="M 48 8 L 4 8 M 10 2 L 2 8 L 10 14" stroke="#000000" stroke-width="2.5" fill="none"/></svg></span>';
+                } else if (type === 'rect') {
+                    html = '<span class="doc-shape-wrapper" style="display: inline-block; vertical-align: middle; margin: 4px;" contenteditable="false"><svg width="80" height="40" viewBox="0 0 80 40" style="display: block;"><rect x="2" y="2" width="76" height="36" stroke="#000000" stroke-width="2.5" fill="none"/></svg></span>';
+                } else if (type === 'circle') {
+                    html = '<span class="doc-shape-wrapper" style="display: inline-block; vertical-align: middle; margin: 4px;" contenteditable="false"><svg width="40" height="40" viewBox="0 0 40 40" style="display: block;"><circle cx="20" cy="20" r="18" stroke="#000000" stroke-width="2.5" fill="none"/></svg></span>';
+                } else if (type === 'check') {
+                    html = '<span class="doc-shape-wrapper" style="display: inline-block; vertical-align: middle; margin: 4px;" contenteditable="false"><svg width="24" height="24" viewBox="0 0 24 24" style="display: block;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#000000"/></svg></span>';
+                } else if (type === 'cross') {
+                    html = '<span class="doc-shape-wrapper" style="display: inline-block; vertical-align: middle; margin: 4px;" contenteditable="false"><svg width="24" height="24" viewBox="0 0 24 24" style="display: block;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#000000"/></svg></span>';
+                }
+
+                if (html) {
+                    document.execCommand('insertHTML', false, html);
+                }
+            };
+
             window.applyLineSpacing = function(spacingValue) {
                 const activeBlock = getActiveBlock();
                 if (!activeBlock) return;
@@ -3564,7 +3609,63 @@
                     });
                 }
             });
+
+            // Click handler for shape resize popover
+            let selectedShapeWrapper = null;
+            
+            document.addEventListener('click', (e) => {
+                const wrapper = e.target.closest('.doc-shape-wrapper');
+                const popover = document.getElementById('shape-resize-popover');
+                if (!popover) return;
+                
+                if (wrapper) {
+                    selectedShapeWrapper = wrapper;
+                    // Show popover near the shape
+                    const rect = wrapper.getBoundingClientRect();
+                    popover.style.display = 'flex';
+                    popover.style.left = `${rect.left + window.scrollX + (rect.width/2) - 50}px`;
+                    popover.style.top = `${rect.top + window.scrollY - 40}px`;
+                    e.stopPropagation();
+                } else if (!e.target.closest('#shape-resize-popover')) {
+                    popover.style.display = 'none';
+                    selectedShapeWrapper = null;
+                }
+            });
+
+            window.resizeSelectedShape = function(factor) {
+                if (!selectedShapeWrapper) return;
+                const svg = selectedShapeWrapper.querySelector('svg');
+                if (svg) {
+                    const currentWidth = parseFloat(svg.getAttribute('width') || svg.style.width || 40);
+                    const currentHeight = parseFloat(svg.getAttribute('height') || svg.style.height || 40);
+                    
+                    const newWidth = Math.round(currentWidth * factor);
+                    const newHeight = Math.round(currentHeight * factor);
+                    
+                    svg.setAttribute('width', newWidth);
+                    svg.setAttribute('height', newHeight);
+                    
+                    // Reposition popover
+                    const rect = selectedShapeWrapper.getBoundingClientRect();
+                    const popover = document.getElementById('shape-resize-popover');
+                    popover.style.left = `${rect.left + window.scrollX + (rect.width/2) - 50}px`;
+                    popover.style.top = `${rect.top + window.scrollY - 40}px`;
+                }
+            };
+            
+            window.deleteSelectedShape = function() {
+                if (!selectedShapeWrapper) return;
+                selectedShapeWrapper.remove();
+                document.getElementById('shape-resize-popover').style.display = 'none';
+                selectedShapeWrapper = null;
+            };
         });
     </script>
+    <div id="shape-resize-popover" style="display:none; position:absolute; background:#1e293b; border:1px solid #475569; border-radius:6px; padding:4px 8px; gap:8px; z-index:9999; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+        <span style="color:white; font-size:10px; font-weight:bold; text-transform:uppercase;">Size:</span>
+        <button onclick="resizeSelectedShape(1.15)" style="background:#38bdf8; color:#0b1329; border:none; border-radius:3px; padding:2px 8px; cursor:pointer; font-weight:bold; font-size:12px;">+</button>
+        <button onclick="resizeSelectedShape(0.85)" style="background:#e2e8f0; color:#0b1329; border:none; border-radius:3px; padding:2px 8px; cursor:pointer; font-weight:bold; font-size:12px;">-</button>
+        <button onclick="deleteSelectedShape()" style="background:#ef4444; color:white; border:none; border-radius:3px; padding:2px 8px; cursor:pointer; font-weight:bold; font-size:12px;">✕</button>
+    </div>
 </body>
 </html>
