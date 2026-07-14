@@ -2303,6 +2303,36 @@
                 }
             };
 
+            function getSelectedRowsCount(table) {
+                const sel = window.getSelection();
+                if (!sel.rangeCount || sel.isCollapsed) return 1;
+                let count = 0;
+                Array.from(table.rows).forEach(row => {
+                    let isRowSelected = false;
+                    Array.from(row.cells).forEach(cell => {
+                        if (sel.containsNode(cell, true)) {
+                            isRowSelected = true;
+                        }
+                    });
+                    if (isRowSelected) count++;
+                });
+                return count > 0 ? count : 1;
+            }
+
+            function getSelectedColsCount(table) {
+                const sel = window.getSelection();
+                if (!sel.rangeCount || sel.isCollapsed) return 1;
+                const selectedCols = new Set();
+                Array.from(table.rows).forEach(row => {
+                    Array.from(row.cells).forEach((cell, cellIndex) => {
+                        if (sel.containsNode(cell, true)) {
+                            selectedCols.add(cellIndex);
+                        }
+                    });
+                });
+                return selectedCols.size > 0 ? selectedCols.size : 1;
+            }
+
             window.executeTableAction = function(action) {
                 const selectEl = document.getElementById('table-actions-select');
                 if (!selectEl) return;
@@ -2345,46 +2375,63 @@
                     const isNowrap = cell.style.whiteSpace === 'nowrap';
                     cell.style.whiteSpace = isNowrap ? 'normal' : 'nowrap';
                 } else if (action === 'insertRowAbove') {
-                    const newRow = document.createElement('tr');
-                    Array.from(row.cells).forEach(c => {
-                        const newCell = document.createElement('td');
-                        newCell.style.border = c.style.border || '1px solid #ccc';
-                        newCell.style.padding = c.style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        newRow.appendChild(newCell);
-                    });
-                    row.parentNode.insertBefore(newRow, row);
+                    const count = getSelectedRowsCount(table);
+                    for (let i = 0; i < count; i++) {
+                        const newRow = document.createElement('tr');
+                        Array.from(row.cells).forEach(c => {
+                            const newCell = document.createElement('td');
+                            newCell.style.border = c.style.border || '1px solid #ccc';
+                            newCell.style.padding = c.style.padding || '8px';
+                            newCell.innerHTML = '&nbsp;';
+                            newRow.appendChild(newCell);
+                        });
+                        row.parentNode.insertBefore(newRow, row);
+                    }
                 } else if (action === 'insertRowBelow') {
-                    const newRow = document.createElement('tr');
-                    Array.from(row.cells).forEach(c => {
-                        const newCell = document.createElement('td');
-                        newCell.style.border = c.style.border || '1px solid #ccc';
-                        newCell.style.padding = c.style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        newRow.appendChild(newCell);
-                    });
-                    row.parentNode.insertBefore(newRow, row.nextSibling);
+                    const count = getSelectedRowsCount(table);
+                    let referenceNode = row;
+                    for (let i = 0; i < count; i++) {
+                        const newRow = document.createElement('tr');
+                        Array.from(row.cells).forEach(c => {
+                            const newCell = document.createElement('td');
+                            newCell.style.border = c.style.border || '1px solid #ccc';
+                            newCell.style.padding = c.style.padding || '8px';
+                            newCell.innerHTML = '&nbsp;';
+                            newRow.appendChild(newCell);
+                        });
+                        row.parentNode.insertBefore(newRow, referenceNode.nextSibling);
+                        referenceNode = newRow;
+                    }
                 } else if (action === 'insertColLeft') {
+                    const count = getSelectedColsCount(table);
                     const cellIndex = cell.cellIndex;
                     Array.from(table.rows).forEach(r => {
-                        const newCell = document.createElement(r.cells[cellIndex].tagName);
-                        newCell.style.border = r.cells[cellIndex].style.border || '1px solid #ccc';
-                        newCell.style.padding = r.cells[cellIndex].style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        r.insertBefore(newCell, r.cells[cellIndex]);
+                        const targetCell = r.cells[cellIndex];
+                        if (targetCell) {
+                            for (let i = 0; i < count; i++) {
+                                const newCell = document.createElement(targetCell.tagName);
+                                newCell.style.border = targetCell.style.border || '1px solid #ccc';
+                                newCell.style.padding = targetCell.style.padding || '8px';
+                                newCell.innerHTML = '&nbsp;';
+                                r.insertBefore(newCell, targetCell);
+                            }
+                        }
                     });
                 } else if (action === 'insertColRight') {
+                    const count = getSelectedColsCount(table);
                     const cellIndex = cell.cellIndex;
-                    const insertIndex = cellIndex + 1;
                     Array.from(table.rows).forEach(r => {
-                        const newCell = document.createElement(r.cells[cellIndex].tagName);
-                        newCell.style.border = r.cells[cellIndex].style.border || '1px solid #ccc';
-                        newCell.style.padding = r.cells[cellIndex].style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        if (insertIndex >= r.cells.length) {
-                            r.appendChild(newCell);
-                        } else {
-                            r.insertBefore(newCell, r.cells[insertIndex]);
+                        const targetCell = r.cells[cellIndex];
+                        if (targetCell) {
+                            let referenceNode = targetCell;
+                            for (let i = 0; i < count; i++) {
+                                const newCell = document.createElement(targetCell.tagName);
+                                newCell.style.border = targetCell.style.border || '1px solid #ccc';
+                                newCell.style.padding = targetCell.style.padding || '8px';
+                                newCell.innerHTML = '&nbsp;';
+                                r.insertBefore(newCell, referenceNode.nextSibling);
+                                referenceNode = newCell;
+                            }
                         }
                     });
                 } else if (action === 'deleteRow') {
@@ -3516,46 +3563,63 @@
                 const activeBlock = cell.closest('.page-block-content');
 
                 if (action === 'insertRowAbove') {
-                    const newRow = document.createElement('tr');
-                    Array.from(row.cells).forEach(c => {
-                        const newCell = document.createElement('td');
-                        newCell.style.border = c.style.border || '1px solid #ccc';
-                        newCell.style.padding = c.style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        newRow.appendChild(newCell);
-                    });
-                    row.parentNode.insertBefore(newRow, row);
+                    const count = getSelectedRowsCount(table);
+                    for (let i = 0; i < count; i++) {
+                        const newRow = document.createElement('tr');
+                        Array.from(row.cells).forEach(c => {
+                            const newCell = document.createElement('td');
+                            newCell.style.border = c.style.border || '1px solid #ccc';
+                            newCell.style.padding = c.style.padding || '8px';
+                            newCell.innerHTML = '&nbsp;';
+                            newRow.appendChild(newCell);
+                        });
+                        row.parentNode.insertBefore(newRow, row);
+                    }
                 } else if (action === 'insertRowBelow') {
-                    const newRow = document.createElement('tr');
-                    Array.from(row.cells).forEach(c => {
-                        const newCell = document.createElement('td');
-                        newCell.style.border = c.style.border || '1px solid #ccc';
-                        newCell.style.padding = c.style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        newRow.appendChild(newCell);
-                    });
-                    row.parentNode.insertBefore(newRow, row.nextSibling);
+                    const count = getSelectedRowsCount(table);
+                    let referenceNode = row;
+                    for (let i = 0; i < count; i++) {
+                        const newRow = document.createElement('tr');
+                        Array.from(row.cells).forEach(c => {
+                            const newCell = document.createElement('td');
+                            newCell.style.border = c.style.border || '1px solid #ccc';
+                            newCell.style.padding = c.style.padding || '8px';
+                            newCell.innerHTML = '&nbsp;';
+                            newRow.appendChild(newCell);
+                        });
+                        row.parentNode.insertBefore(newRow, referenceNode.nextSibling);
+                        referenceNode = newRow;
+                    }
                 } else if (action === 'insertColLeft') {
+                    const count = getSelectedColsCount(table);
                     const cellIndex = cell.cellIndex;
                     Array.from(table.rows).forEach(r => {
-                        const newCell = document.createElement(r.cells[cellIndex].tagName);
-                        newCell.style.border = r.cells[cellIndex].style.border || '1px solid #ccc';
-                        newCell.style.padding = r.cells[cellIndex].style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        r.insertBefore(newCell, r.cells[cellIndex]);
+                        const targetCell = r.cells[cellIndex];
+                        if (targetCell) {
+                            for (let i = 0; i < count; i++) {
+                                const newCell = document.createElement(targetCell.tagName);
+                                newCell.style.border = targetCell.style.border || '1px solid #ccc';
+                                newCell.style.padding = targetCell.style.padding || '8px';
+                                newCell.innerHTML = '&nbsp;';
+                                r.insertBefore(newCell, targetCell);
+                            }
+                        }
                     });
                 } else if (action === 'insertColRight') {
+                    const count = getSelectedColsCount(table);
                     const cellIndex = cell.cellIndex;
-                    const insertIndex = cellIndex + 1;
                     Array.from(table.rows).forEach(r => {
-                        const newCell = document.createElement(r.cells[cellIndex].tagName);
-                        newCell.style.border = r.cells[cellIndex].style.border || '1px solid #ccc';
-                        newCell.style.padding = r.cells[cellIndex].style.padding || '8px';
-                        newCell.innerHTML = '&nbsp;';
-                        if (insertIndex >= r.cells.length) {
-                            r.appendChild(newCell);
-                        } else {
-                            r.insertBefore(newCell, r.cells[insertIndex]);
+                        const targetCell = r.cells[cellIndex];
+                        if (targetCell) {
+                            let referenceNode = targetCell;
+                            for (let i = 0; i < count; i++) {
+                                const newCell = document.createElement(targetCell.tagName);
+                                newCell.style.border = targetCell.style.border || '1px solid #ccc';
+                                newCell.style.padding = targetCell.style.padding || '8px';
+                                newCell.innerHTML = '&nbsp;';
+                                r.insertBefore(newCell, referenceNode.nextSibling);
+                                referenceNode = newCell;
+                            }
                         }
                     });
                 } else if (action === 'deleteRow') {
