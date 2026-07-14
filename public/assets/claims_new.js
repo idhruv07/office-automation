@@ -635,19 +635,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                             if (rowTotal) rowTotal.value = (fare * pers) > 0 ? (fare * pers).toFixed(2) : '';
                         }
 
-                        // Daily expense: Days × Rate
+                        // Daily expense: Days × Rate (Skip calculation if the user edited the total field directly)
                         const inputName = e.target.name || e.target.getAttribute('name');
                         if (inputName && inputName.startsWith('td_')) {
                             const lastUnderscore = inputName.lastIndexOf('_');
                             if (lastUnderscore !== -1) {
+                                const suffix = inputName.substring(lastUnderscore + 1);
                                 const prefix = inputName.substring(0, lastUnderscore);
-                                const daysInp = tr.querySelector(`input[name="${prefix}_days"]`);
-                                const rateInp = tr.querySelector(`input[name="${prefix}_rate"]`);
-                                const totalInp = tr.querySelector(`input[name="${prefix}_total"]`);
-                                if (daysInp && rateInp && totalInp) {
-                                    const days = parseFloat(daysInp.value) || 0;
-                                    const rate = parseFloat(rateInp.value) || 0;
-                                    totalInp.value = (days * rate) > 0 ? (days * rate).toFixed(2) : '';
+                                if (suffix !== 'total') {
+                                    const daysInp = tr.querySelector(`input[name="${prefix}_days"]`);
+                                    const rateInp = tr.querySelector(`input[name="${prefix}_rate"]`);
+                                    const totalInp = tr.querySelector(`input[name="${prefix}_total"]`);
+                                    if (daysInp && rateInp && totalInp) {
+                                        const days = parseFloat(daysInp.value) || 0;
+                                        const rate = parseFloat(rateInp.value) || 0;
+                                        totalInp.value = (days * rate) > 0 ? (days * rate).toFixed(2) : '';
+                                    }
                                 }
                             }
                         }

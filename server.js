@@ -28,9 +28,12 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs-extra');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -40,7 +43,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Dynamic healing middleware for missing claim HTML snapshots (e.g. after database-only restoration)
 const cheerio = require('cheerio');
 const db = require('./config/db');
-const fs = require('fs-extra');
 
 app.get(/^\/storage\/([^\/]+)\/claims\/(.+)$/, async (req, res, next) => {
     const username = req.params[0];

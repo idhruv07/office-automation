@@ -20,6 +20,10 @@ function createWindow() {
     }
   });
 
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+      console.log(`[Browser Console] ${message} (at ${sourceId}:${line})`);
+  });
+
   // Load the local express server
   const PORT = process.env.PORT || 3000;
   mainWindow.loadURL(`http://localhost:${PORT}`);

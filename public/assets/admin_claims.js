@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('result-count').textContent = `${claims.length} Results`;
 
             if (claims.length === 0) {
-                contentDiv.innerHTML = `<p style="padding: 1rem; color: #64748b;">No claims found for ${selectedYear || 'the last 6 months'}.</p>`;
+                contentDiv.innerHTML = `<p style="padding: 1rem; color: #64748b;">No claims found for the selected period.</p>`;
                 return;
             }
 

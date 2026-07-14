@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const snippet = r.snippet.replace(new RegExp(escapedQuery, 'gi'), m => `<span class="search-snippet-match">${m}</span>`);
                 html += `
-                    <div class="search-result-item" onclick="window.location.href='/repository/document.html?id=${r.document_id}'">
+                    <div class="search-result-item" onclick="window.location.href='${r.redirect_url}'">
                         <div class="search-result-title">${r.doc_title}</div>
                         <div class="search-result-path">
                             <span style="font-size: 10px;">📁</span> ${r.folder_path || 'Repository'}

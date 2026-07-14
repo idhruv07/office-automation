@@ -386,10 +386,27 @@ router.get('/users/:id/avatar', authenticateToken, authorizeRole('Admin'), async
 
 // ── OFFICE CONFIG ──────────────────────────────────────────────────────────────
 
-// GET current office config (used by fwd_note.js on every page load — any authenticated user)
+// GET current office config (supports date-awareness for historical configs)
 router.get('/office-config', authenticateToken, async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM office_config ORDER BY id DESC LIMIT 1');
+        const { date } = req.query;
+        let result;
+        if (date) {
+            // Retrieve config active on specified date (updated_at <= requested date)
+            result = await db.query(
+                `SELECT * FROM office_config 
+                 WHERE updated_at::date <= $1::date 
+                 ORDER BY updated_at DESC, id DESC LIMIT 1`,
+                [date]
+            );
+            // Fall back to oldest record if no config exists before that date
+            if (result.rows.length === 0) {
+                result = await db.query('SELECT * FROM office_config ORDER BY updated_at ASC, id ASC LIMIT 1');
+            }
+        } else {
+            // Default behavior: get latest config
+            result = await db.query('SELECT * FROM office_config ORDER BY id DESC LIMIT 1');
+        }
         res.json(result.rows[0] || {});
     } catch (err) {
         console.error('GET office-config error:', err);
