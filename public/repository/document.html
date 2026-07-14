@@ -1869,14 +1869,30 @@
                         return;
                     }
 
-                    let html = '';
+                    // Consolidate versions by day (YYYY-MM-DD)
+                    const consolidatedMap = new Map();
                     versions.forEach(v => {
-                        const date = v.edited_at ? new Date(v.edited_at).toLocaleString() : 'Initial Seed';
+                        const date = v.edited_at ? new Date(v.edited_at) : new Date();
+                        const dateKey = date.toISOString().split('T')[0];
+                        if (!consolidatedMap.has(dateKey)) {
+                            consolidatedMap.set(dateKey, v);
+                        } else {
+                            const existing = consolidatedMap.get(dateKey);
+                            if (v.version > existing.version) {
+                                consolidatedMap.set(dateKey, v);
+                            }
+                        }
+                    });
+                    const consolidatedVersions = Array.from(consolidatedMap.values());
+
+                    let html = '';
+                    consolidatedVersions.forEach(v => {
+                        const date = v.edited_at ? new Date(v.edited_at).toLocaleDateString() : 'Initial Seed';
                         html += `
                             <div class="version-row">
                                 <div>
                                     <strong style="color:var(--primary-color)">v${v.version}</strong> • ${date}<br>
-                                    <span style="font-size:12px; color:#cbd5e1">By ${v.editor_name || 'System'}</span><br>
+                                    <span style="font-size:12px; color:#cbd5e1">Last edit by ${v.editor_name || 'System'}</span><br>
                                     <span style="font-size:12px; color:#10b981">${v.diff_summary || ''}</span>
                                 </div>
                                 <button style="background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: bold; cursor: pointer;" onclick="viewRawVersion(${v.id})">View & Compare</button>
