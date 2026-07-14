@@ -185,16 +185,42 @@ try {
    JWT_SECRET=your_jwt_secret_key
    ```
 
-3. Run migrations sequentially from `db/migrations/` using:
+3. Enable local AI vector embeddings and instruct capabilities:
+   - Install **Ollama** on your local machine (from [ollama.com](https://ollama.com)).
+   - Download the model dependencies used by the system:
+     ```bash
+     ollama pull nomic-embed-text
+     ollama pull qwen2.5:1.5b-instruct
+     ```
+   - Ensure the `pgvector` extension is enabled on your PostgreSQL instance (included in migrations):
+     ```sql
+     CREATE EXTENSION IF NOT EXISTS vector;
+     ```
+
+4. Run migrations sequentially from `db/migrations/` using:
    ```bash
    node db/migrate.js
    ```
 
-4. Start the application:
+5. Start the application:
    ```bash
    npm start
    ```
-   The application runs locally on `http://localhost:3000`.
+   The web application runs locally on `http://localhost:3000`.
+
+### 7. Repository Directory & Vector Data Sync Pipeline
+
+To populate the file repository and index contents into vector embeddings:
+1. Ensure the Express server is running.
+2. Run the directory sync script to scan `D:\Admin_Sharing` differentially and enqueue document conversion jobs:
+   ```bash
+   node scripts/directory_sync.js
+   ```
+3. The background worker queue (managed by `pg-boss` inside `server.js`) will pick up the enqueued `.docx`, `.doc`, and `.odt` files, convert them to PDF, run OCR/text extraction, invoke Ollama to generate 768-dimensional text embeddings, and insert them into the `page_embeddings` database table.
+4. Monitor the background import queue and check progress:
+   ```bash
+   node scripts/check_status.js
+   ```
 
 ### Testing
 
