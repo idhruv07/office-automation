@@ -1,0 +1,33 @@
+========================================================================
+OFFICE AUTOMATION - UBUNTU 24.04 LTS DEPLOYMENT PACKAGE
+========================================================================
+
+Everything required to deploy this application on an Ubuntu 24.04 LTS
+system has been compiled into the 'deploy/' directory.
+
+Folder Contents:
+----------------
+1. deploy/install.sh           <- Automated installation bash script
+2. deploy/db_upgrade_ubuntu.sql <- Idempotent schema upgrade for office_automation
+3. deploy/repo_setup_ubuntu.sql <- Database schema setup for repo_db
+4. deploy/walkthrough_deploy.md <- Detailed step-by-step instructions
+
+Quick Deployment Steps:
+-----------------------
+1. Compress the codebase on Windows (exclude 'node_modules'):
+   In PowerShell:
+   Compress-Archive -Path "d:\Office Automation\*" -DestinationPath "office-automation.zip" -Force
+
+2. Transfer the zip file to your Ubuntu server:
+   scp office-automation.zip user@your-ubuntu-ip:/home/user/
+
+3. SSH into the Ubuntu server, extract the file, and run the installer:
+   ssh user@your-ubuntu-ip
+   unzip office-automation.zip -d office-automation
+   cd office-automation/deploy
+   chmod +x install.sh
+   sudo ./install.sh
+
+Refer to 'deploy/walkthrough_deploy.md' for detailed configuration,
+systemd service management commands, and troubleshooting guides.
+========================================================================
