@@ -1891,18 +1891,42 @@
             };
 
             function computeDiffHTML(oldStr, newStr) {
-                const oldDiv = document.createElement('div');
-                oldDiv.innerHTML = oldStr;
-                const oldWords = oldDiv.innerText.split(/\s+/).filter(Boolean);
+                const entireLiveText = Array.from(editorEl.querySelectorAll('.page-block-content'))
+                    .map(el => el.innerText)
+                    .join('\n')
+                    .toLowerCase();
 
-                const newDiv = document.createElement('div');
-                newDiv.innerHTML = newStr;
-                const newWords = newDiv.innerText.split(/\s+/).filter(Boolean);
+                function getParagraphs(html) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html;
+                    temp.querySelectorAll('.pb-break, hr, .fwd-letterhead').forEach(el => el.remove());
+                    
+                    const blocks = [];
+                    Array.from(temp.childNodes).forEach(node => {
+                        if (node.nodeType === 1) {
+                            blocks.push({
+                                html: node.outerHTML,
+                                text: node.innerText.trim(),
+                                tag: node.nodeName.toLowerCase()
+                            });
+                        } else if (node.nodeType === 3 && node.textContent.trim().length > 0) {
+                            blocks.push({
+                                html: `<p>${node.textContent}</p>`,
+                                text: node.textContent.trim(),
+                                tag: 'p'
+                            });
+                        }
+                    });
+                    return blocks.filter(b => b.text.length > 0);
+                }
 
-                const dp = Array(oldWords.length + 1).fill(null).map(() => Array(newWords.length + 1).fill(0));
-                for (let i = 1; i <= oldWords.length; i++) {
-                    for (let j = 1; j <= newWords.length; j++) {
-                        if (oldWords[i-1] === newWords[j-1]) {
+                const oldBlocks = getParagraphs(oldStr);
+                const newBlocks = getParagraphs(newStr);
+
+                const dp = Array(oldBlocks.length + 1).fill(null).map(() => Array(newBlocks.length + 1).fill(0));
+                for (let i = 1; i <= oldBlocks.length; i++) {
+                    for (let j = 1; j <= newBlocks.length; j++) {
+                        if (oldBlocks[i-1].text.toLowerCase() === newBlocks[j-1].text.toLowerCase()) {
                             dp[i][j] = dp[i-1][j-1] + 1;
                         } else {
                             dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
@@ -1910,29 +1934,76 @@
                     }
                 }
 
-                let i = oldWords.length;
-                let j = newWords.length;
-                const diffOld = [];
-                const diffNew = [];
+                let i = oldBlocks.length;
+                let j = newBlocks.length;
+                
+                const oldActions = []; 
+                const newActions = []; 
 
                 while (i > 0 || j > 0) {
-                    if (i > 0 && j > 0 && oldWords[i-1] === newWords[j-1]) {
-                        diffOld.unshift(oldWords[i-1]);
-                        diffNew.unshift(newWords[j-1]);
+                    if (i > 0 && j > 0 && oldBlocks[i-1].text.toLowerCase() === newBlocks[j-1].text.toLowerCase()) {
+                        oldActions.unshift({ block: oldBlocks[i-1], status: 'unchanged' });
+                        newActions.unshift({ block: newBlocks[j-1], status: 'unchanged' });
                         i--;
                         j--;
                     } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
-                        diffNew.unshift(`<mark style="background:#bbf7d0; color:#15803d; border-radius:3px; padding:0 3px; font-weight:bold;">${newWords[j-1]}</mark>`);
+                        newActions.unshift({ block: newBlocks[j-1], status: 'added' });
                         j--;
                     } else if (i > 0 && (j === 0 || dp[i-1][j] > dp[i][j-1])) {
-                        diffOld.unshift(`<mark style="background:#fecaca; color:#b91c1c; border-radius:3px; padding:0 3px; text-decoration:line-through;">${oldWords[i-1]}</mark>`);
+                        const isMoved = entireLiveText.includes(oldBlocks[i-1].text.toLowerCase());
+                        oldActions.unshift({ 
+                            block: oldBlocks[i-1], 
+                            status: isMoved ? 'moved' : 'deleted' 
+                        });
                         i--;
                     }
                 }
 
+                let oldHtml = '';
+                let lastOldWasSpacer = false;
+                
+                oldActions.forEach((item, index) => {
+                    if (item.status === 'deleted') {
+                        oldHtml += `<div style="background:#fef2f2; border-left: 4px solid #ef4444; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
+                            <span style="font-size:10px; font-weight:bold; color:#b91c1c; text-transform:uppercase; display:block; margin-bottom:4px;">Deleted Paragraph:</span>
+                            ${item.block.html}
+                        </div>`;
+                        lastOldWasSpacer = false;
+                    } else {
+                        if (!lastOldWasSpacer) {
+                            oldHtml += `<div style="text-align: center; color: #94a3b8; font-size: 11px; margin: 12px 0; border-top: 1px dashed #cbd5e1; padding-top: 8px;">... [ Unchanged Content ] ...</div>`;
+                            lastOldWasSpacer = true;
+                        }
+                    }
+                });
+                if (oldHtml === '' || oldHtml === `<div style="text-align: center; color: #94a3b8; font-size: 11px; margin: 12px 0; border-top: 1px dashed #cbd5e1; padding-top: 8px;">... [ Unchanged Content ] ...</div>`) {
+                    oldHtml = '<div style="text-align:center; padding: 20px; color:#64748b; font-style:italic;">No deletions or changes in this version.</div>';
+                }
+
+                let newHtml = '';
+                let lastNewWasSpacer = false;
+                
+                newActions.forEach((item, index) => {
+                    if (item.status === 'added') {
+                        newHtml += `<div style="background:#f0fdf4; border-left: 4px solid #22c55e; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
+                            <span style="font-size:10px; font-weight:bold; color:#15803d; text-transform:uppercase; display:block; margin-bottom:4px;">Added Paragraph:</span>
+                            ${item.block.html}
+                        </div>`;
+                        lastNewWasSpacer = false;
+                    } else {
+                        if (!lastNewWasSpacer) {
+                            newHtml += `<div style="text-align: center; color: #94a3b8; font-size: 11px; margin: 12px 0; border-top: 1px dashed #cbd5e1; padding-top: 8px;">... [ Unchanged Content ] ...</div>`;
+                            lastNewWasSpacer = true;
+                        }
+                    }
+                });
+                if (newHtml === '' || newHtml === `<div style="text-align: center; color: #94a3b8; font-size: 11px; margin: 12px 0; border-top: 1px dashed #cbd5e1; padding-top: 8px;">... [ Unchanged Content ] ...</div>`) {
+                    newHtml = '<div style="text-align:center; padding: 20px; color:#64748b; font-style:italic;">No additions or changes in this version.</div>';
+                }
+
                 return {
-                    historical: diffOld.join(' '),
-                    live: diffNew.join(' ')
+                    historical: oldHtml,
+                    live: newHtml
                 };
             }
 
