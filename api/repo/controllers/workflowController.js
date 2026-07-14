@@ -73,12 +73,22 @@ async function getDocumentWorkflow(req, res) {
             [docId]
         );
         
+        const docResult = await db.query(
+            `SELECT d.title, f.name as folder_name 
+             FROM documents d 
+             LEFT JOIN folder_nodes f ON d.folder_id = f.id 
+             WHERE d.id = $1`,
+            [docId]
+        );
+        const folderName = docResult.rows[0]?.folder_name || 'Root';
+
         const userInfo = await getUserRoleAndRank(req.user.id, db);
         const userRole = userInfo.role_code === 'SR_AUD' ? 'AUDITOR' : userInfo.role_code;
 
         res.json({
             workflow: wfResult.rows[0],
             active_locks: locksRes.rows,
+            folder_name: folderName,
             user: {
                 name: userInfo.name,
                 role: userRole,

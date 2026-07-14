@@ -563,7 +563,7 @@
                 <h2 style="margin:0; display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <a href="/repository/index.html" style="color:#94a3b8; text-decoration:none;">Repository</a>
                     <span style="color:#64748b;">/</span>
-                    <span style="color:#f8fafc;">Document View</span>
+                    <span id="breadcrumb-current-folder" style="color:var(--text-main, #f8fafc);">Document View</span>
                     <span style="font-size:10px; color:#64748b; padding-left:4px;">▼</span>
                 </h2>
                 <div class="breadcrumb-dropdown">
@@ -985,6 +985,11 @@
                     
                     currentUserInfo = data.user;
                     currentWfState = data.workflow;
+                    
+                    const folderSpan = document.getElementById('breadcrumb-current-folder');
+                    if (folderSpan && data.folder_name) {
+                        folderSpan.innerText = data.folder_name;
+                    }
                     
                     // Render status and owner
                     wfStatusVal.innerText = currentWfState.status;
@@ -1850,6 +1855,30 @@
                 }
             }
 
+            function getParagraphs(html) {
+                const temp = document.createElement('div');
+                temp.innerHTML = html;
+                temp.querySelectorAll('.pb-break, hr, .fwd-letterhead').forEach(el => el.remove());
+                
+                const blocks = [];
+                Array.from(temp.childNodes).forEach(node => {
+                    if (node.nodeType === 1) {
+                        blocks.push({
+                            html: node.outerHTML,
+                            text: node.innerText.trim(),
+                            tag: node.nodeName.toLowerCase()
+                        });
+                    } else if (node.nodeType === 3 && node.textContent.trim().length > 0) {
+                        blocks.push({
+                            html: `<p>${node.textContent}</p>`,
+                            text: node.textContent.trim(),
+                            tag: 'p'
+                        });
+                    }
+                });
+                return blocks.filter(b => b.text.length > 0);
+            }
+
             // History & Diff
             btnHistory.onclick = async () => {
                 document.getElementById('history-modal').style.display = 'flex';
@@ -1869,6 +1898,12 @@
                         return;
                     }
 
+                    // Get current live content
+                    const activeBlockWrapper = editorEl.querySelector(`.page-block[data-page-id="${currentPageId}"]`);
+                    const blockContent = activeBlockWrapper ? activeBlockWrapper.querySelector('.page-block-content') : null;
+                    const currentHtml = blockContent ? blockContent.innerHTML : '';
+                    const liveParagraphs = getParagraphs(currentHtml || '');
+
                     // Consolidate versions by day (YYYY-MM-DD)
                     const consolidatedMap = new Map();
                     versions.forEach(v => {
@@ -1883,7 +1918,23 @@
                             }
                         }
                     });
-                    const consolidatedVersions = Array.from(consolidatedMap.values());
+                    
+                    // Filter out versions that are identical to the current live content (No changes)
+                    const consolidatedVersions = Array.from(consolidatedMap.values()).filter(v => {
+                        const versionParagraphs = getParagraphs(v.html_content || '');
+                        if (versionParagraphs.length !== liveParagraphs.length) return true;
+                        for (let k = 0; k < versionParagraphs.length; k++) {
+                            if (versionParagraphs[k].text.toLowerCase() !== liveParagraphs[k].text.toLowerCase()) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
+
+                    if (consolidatedVersions.length === 0) {
+                        histList.innerHTML = '<div>No edits or changes found in historical versions compared to current live content.</div>';
+                        return;
+                    }
 
                     let html = '';
                     consolidatedVersions.forEach(v => {
@@ -1911,30 +1962,6 @@
                     .map(el => el.innerText)
                     .join('\n')
                     .toLowerCase();
-
-                function getParagraphs(html) {
-                    const temp = document.createElement('div');
-                    temp.innerHTML = html;
-                    temp.querySelectorAll('.pb-break, hr, .fwd-letterhead').forEach(el => el.remove());
-                    
-                    const blocks = [];
-                    Array.from(temp.childNodes).forEach(node => {
-                        if (node.nodeType === 1) {
-                            blocks.push({
-                                html: node.outerHTML,
-                                text: node.innerText.trim(),
-                                tag: node.nodeName.toLowerCase()
-                            });
-                        } else if (node.nodeType === 3 && node.textContent.trim().length > 0) {
-                            blocks.push({
-                                html: `<p>${node.textContent}</p>`,
-                                text: node.textContent.trim(),
-                                tag: 'p'
-                            });
-                        }
-                    });
-                    return blocks.filter(b => b.text.length > 0);
-                }
 
                 const oldBlocks = getParagraphs(oldStr);
                 const newBlocks = getParagraphs(newStr);
