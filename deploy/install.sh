@@ -41,6 +41,18 @@ apt-get install -y libreoffice postgresql-client build-essential
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
+# If package.json is not found in PROJECT_ROOT, check if it's in a sibling folder (common when deploy is run standalone)
+if [ ! -f "$PROJECT_ROOT/package.json" ]; then
+  if [ -f "$PROJECT_ROOT/Office Automation/package.json" ]; then
+    PROJECT_ROOT="$PROJECT_ROOT/Office Automation"
+  elif [ -f "$PROJECT_ROOT/office-automation/package.json" ]; then
+    PROJECT_ROOT="$PROJECT_ROOT/office-automation"
+  else
+    echo "Error: Could not find package.json in '$PROJECT_ROOT' or its subfolders."
+    exit 1
+  fi
+fi
+
 INSTALL_DIR="/opt/office-automation"
 BACKUP_DIR="/opt/office-automation_backup_$(date +%Y%m%d_%H%M%S)"
 
