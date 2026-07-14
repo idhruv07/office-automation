@@ -80,18 +80,22 @@
             background: rgba(255, 255, 255, 0.1) !important;
             color: white !important;
         }
+        .main-top-bar, .theme-separator-line {
+            display: none !important;
+        }
         .doc-layout {
             display: flex;
-            height: calc(100vh - 120px);
+            height: calc(100vh - 80px);
             gap: 20px;
         }
         .page-sidebar {
             flex: 0 0 250px;
-            background: rgba(255,255,255,0.03);
-            border-right: 1px solid rgba(255,255,255,0.1);
+            background: var(--bg-sidebar, #0f172a) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
             overflow-y: auto;
             border-radius: 12px;
             padding: 16px;
+            box-shadow: var(--shadow-md);
         }
         .page-content-area {
             flex: 1;
@@ -114,10 +118,10 @@
             background: rgba(255,255,255,0.1);
         }
         .page-item.active {
-            background: #38bdf8 !important;
-            color: #0b1329 !important;
+            background: var(--primary-color, #38bdf8) !important;
+            color: var(--text-on-dark, #ffffff) !important;
             font-weight: 700 !important;
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
         }
         .page-item-sub {
             padding-left: 28px !important;
@@ -128,9 +132,9 @@
             margin-left: 10px;
         }
         .page-item-sub.active {
-            border-left-color: #38bdf8 !important;
-            background: rgba(56, 189, 248, 0.15) !important;
-            color: #38bdf8 !important;
+            border-left-color: var(--primary-color, #38bdf8) !important;
+            background: var(--bg-ambient-1, rgba(56, 189, 248, 0.15)) !important;
+            color: var(--primary-color, #38bdf8) !important;
             font-weight: 700 !important;
             box-shadow: none !important;
         }
@@ -245,7 +249,7 @@
             align-items: center;
             gap: 12px;
             margin: 32px 0 24px 0;
-            color: #94a3b8;
+            color: var(--text-muted, #475569) !important;
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.08em;
@@ -254,13 +258,9 @@
         .page-divider::before, .page-divider::after {
             content: '';
             flex: 1;
-            border-top: 2px dashed #334155;
+            border-top: 2px dashed var(--border-color, #cbd5e1);
         }
         .page-divider:first-child { margin-top: 0; }
-        .page-item.active {
-            background: var(--primary-color);
-            color: white;
-        }
         .page-item.in-view {
             background: rgba(255,255,255,0.12);
             border-left: 3px solid var(--primary-color, #3b82f6);
@@ -1623,7 +1623,7 @@
                     if (isFirstPage) {
                         // Fetch live date-aware office configuration dynamically
                         let officeConfig = null;
-                        const pageDateStr = page._pageDate || new Date().toISOString().split('T')[0];
+                        const pageDateStr = pageObj._pageDate || new Date().toISOString().split('T')[0];
                         try {
                             const configRes = await fetch(`/api/admin/office-config?date=${pageDateStr}`, {
                                 headers: { 'Authorization': `Bearer ${token}` }

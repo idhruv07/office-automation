@@ -164,37 +164,42 @@ fs.ensureDirSync(fwdTemplatesDir);
 
 // Auto-heal PG FDW configuration for dynamic host IP changes
 (async () => {
-    const os = require('os');
     const repoDb = require('./config/repo_db');
+    const port = process.env.DB_PORT || 5432;
+    const dbname = process.env.DB_NAME || 'office_automation';
+    const user = process.env.DB_USER || 'postgres';
+    const password = process.env.DB_PASSWORD || 'postgres';
+
+    let targetHost = '127.0.0.1';
     
-    const interfaces = os.networkInterfaces();
-    let localIp = '127.0.0.1';
-    for (const name of Object.keys(interfaces)) {
-        const lowerName = name.toLowerCase();
-        const isVirtual = lowerName.includes('virtual') || lowerName.includes('vethernet') || lowerName.includes('wsl') || lowerName.includes('hyper-v') || lowerName.includes('docker') || lowerName.includes('loopback');
-        if (!isVirtual && (lowerName.includes('wi-fi') || lowerName.includes('ethernet') || lowerName.includes('wireless') || lowerName.includes('wlan'))) {
-            for (const iface of interfaces[name]) {
-                if (iface.family === 'IPv4' && !iface.internal) {
-                    localIp = iface.address;
-                    break;
-                }
-            }
-        }
-    }
-    if (localIp === '127.0.0.1') {
-        for (const name of Object.keys(interfaces)) {
-            for (const iface of interfaces[name]) {
-                if (iface.family === 'IPv4' && !iface.internal) {
-                    localIp = iface.address;
-                    break;
-                }
-            }
+    // Test if 127.0.0.1 works
+    try {
+        await repoDb.query('CREATE EXTENSION IF NOT EXISTS dblink');
+        await repoDb.query(`
+            SELECT * FROM dblink('host=127.0.0.1 port=${port} dbname=${dbname} user=${user} password=${password}', 'SELECT 1') 
+            AS t(a int)
+        `);
+        targetHost = '127.0.0.1';
+        console.log('[Auto-Heal] FDW connection test succeeded using 127.0.0.1');
+    } catch (err) {
+        console.log('[Auto-Heal] FDW connection test failed using 127.0.0.1. Trying host.docker.internal...');
+        // Test if host.docker.internal works
+        try {
+            await repoDb.query(`
+                SELECT * FROM dblink('host=host.docker.internal port=${port} dbname=${dbname} user=${user} password=${password}', 'SELECT 1') 
+                AS t(a int)
+            `);
+            targetHost = 'host.docker.internal';
+            console.log('[Auto-Heal] FDW connection test succeeded using host.docker.internal');
+        } catch (err2) {
+            console.error('[Auto-Heal] Both 127.0.0.1 and host.docker.internal FDW tests failed. Defaulting to 127.0.0.1');
+            targetHost = '127.0.0.1';
         }
     }
 
     try {
-        await repoDb.query(`ALTER SERVER core_db OPTIONS (SET host '${localIp}')`);
-        console.log(`[Auto-Heal] Successfully updated core_db foreign server host to ${localIp}`);
+        await repoDb.query(`ALTER SERVER core_db OPTIONS (SET host '${targetHost}')`);
+        console.log(`[Auto-Heal] Successfully updated core_db foreign server host to ${targetHost}`);
     } catch (e) {
         console.error('[Auto-Heal] Failed to update core_db foreign server host:', e.message);
     }
