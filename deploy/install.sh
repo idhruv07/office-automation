@@ -32,9 +32,9 @@ else
   echo "Node.js is already installed ($(node -v))."
 fi
 
-# 3. Install LibreOffice (for docx conversion) & Postgres client
-echo "[2/6] Installing system dependencies (LibreOffice & PostgreSQL client)..."
-apt-get install -y libreoffice postgresql-client build-essential
+# 3. Install LibreOffice (for docx conversion) & Postgres client / vector extension
+echo "[2/6] Installing system dependencies (LibreOffice, PostgreSQL client & pgvector)..."
+apt-get install -y libreoffice postgresql-client postgresql-18-pgvector build-essential
 
 # 4. Copy project files and install dependencies
 # Dynamically determine the directory of this script to find the correct project root
