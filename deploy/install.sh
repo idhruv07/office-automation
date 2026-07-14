@@ -32,9 +32,35 @@ else
   echo "Node.js is already installed ($(node -v))."
 fi
 
-# 3. Install LibreOffice (for docx conversion) & Postgres client
+# 3. Install LibreOffice (for docx conversion), Postgres client, and pgvector
 echo "[2/6] Installing system dependencies (LibreOffice & PostgreSQL client)..."
 apt-get install -y libreoffice postgresql-client build-essential
+
+# Dynamically detect installed PostgreSQL version and install pgvector package
+PG_VERSION=$(psql --version 2>/dev/null | grep -oE '[0-9]+' | head -n1 || echo "")
+if [ -n "$PG_VERSION" ]; then
+  echo "Detected PostgreSQL version $PG_VERSION. Installing pgvector package..."
+  apt-get install -y "postgresql-$PG_VERSION-pgvector" || echo "Warning: Could not install postgresql-$PG_VERSION-pgvector automatically. Ensure it is installed manually."
+else
+  # Default fallback to postgresql-16-pgvector (default for Ubuntu 24.04)
+  echo "Installing default pgvector extension package..."
+  apt-get install -y postgresql-16-pgvector || echo "Warning: Could not install postgresql-16-pgvector automatically."
+fi
+
+# Install Ollama (AI backend) and pull model
+echo "Checking Ollama installation..."
+if ! command -v ollama &> /dev/null; then
+  echo "Ollama is not installed. Installing Ollama..."
+  curl -fsSL https://ollama.com/install.sh | sh
+else
+  echo "Ollama is already installed."
+fi
+
+# Start Ollama service and download Qwen model
+echo "Ensuring Ollama service is running..."
+systemctl start ollama || true
+echo "Downloading Qwen instruct model (qwen2.5:1.5b-instruct)..."
+ollama pull qwen2.5:1.5b-instruct || echo "Warning: Could not pull qwen model automatically. You can pull it manually later using 'ollama pull qwen2.5:1.5b-instruct'."
 
 # 4. Copy project files and install dependencies
 # Dynamically determine the directory of this script to find the correct project root

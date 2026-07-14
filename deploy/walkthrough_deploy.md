@@ -53,10 +53,12 @@ sudo ./install.sh
 
 ## 4. What the Installer Automates:
 1. **Installs System Packages:** Installs Node.js v20, npm, LibreOffice (for Word-to-PDF generation), and PostgreSQL client utilities.
-2. **Natively Installs npm Modules:** Installs all production dependencies (`npm install --production`) natively on your Ubuntu processor architecture.
-3. **Database Upgrades:** Automatically runs [db_upgrade_ubuntu.sql](file:///d:/Office%20Automation/deploy/db_upgrade_ubuntu.sql) to add new tables/columns (such as GPF details, ward entitlement rules, settings) to your existing `office_automation` database.
-4. **Initializes Secondary DB:** Creates the repository database `repo_db` and loads its vector schemas ([repo_setup_ubuntu.sql](file:///d:/Office%20Automation/deploy/repo_setup_ubuntu.sql)).
-5. **Registers Background Services:** Creates a systemd service file at `/etc/systemd/system/office-automation.service` so that the server starts automatically on boot and auto-restarts on crashes.
+2. **PostgreSQL pgvector Package:** Detects the installed PostgreSQL version (e.g. Postgres 15 or 16) and installs the corresponding OS extension package (`postgresql-16-pgvector` or similar) so the database can compile vectors.
+3. **Setup Ollama AI Backend:** Automatically installs Ollama, launches the background service, and pulls the required model (`qwen2.5:1.5b-instruct`).
+4. **Natively Installs npm Modules:** Installs all production dependencies (`npm install --production`) natively on your Ubuntu processor architecture.
+5. **Database Upgrades:** Automatically runs [db_upgrade_ubuntu.sql](file:///d:/Office%20Automation/deploy/db_upgrade_ubuntu.sql) to add new tables/columns (such as GPF details, ward entitlement rules, settings) to your existing `office_automation` database.
+6. **Initializes Secondary DB:** Creates the repository database `repo_db` and loads its vector schemas ([repo_setup_ubuntu.sql](file:///d:/Office%20Automation/deploy/repo_setup_ubuntu.sql)), initializing FDW and pgvector tables.
+7. **Registers Background Services:** Creates a systemd service file at `/etc/systemd/system/office-automation.service` so that the server starts automatically on boot and auto-restarts on crashes.
 
 ---
 
@@ -80,3 +82,24 @@ Once installed, use standard systemd commands to control the backend:
   ```bash
   sudo systemctl stop office-automation.service
   ```
+
+---
+
+## 6. Verifying pgvector and Ollama Setup
+
+After installation, verify that the AI vector databases and models are running:
+
+* **Verify pgvector in PostgreSQL:**
+  Connect to PostgreSQL and confirm the extension is active:
+  ```bash
+  sudo -u postgres psql -d repo_db -c "\dx"
+  ```
+  *(You should see `vector` listed in the installed extensions).*
+
+* **Verify Ollama Model:**
+  Check that Ollama is running and has the Qwen model:
+  ```bash
+  ollama list
+  ```
+  *(You should see `qwen2.5:1.5b-instruct` in the list).*
+
