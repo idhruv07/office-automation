@@ -197,18 +197,42 @@ try {
      CREATE EXTENSION IF NOT EXISTS vector;
      ```
 
-4. Run migrations sequentially from `db/migrations/` using:
+ 4. Run migrations sequentially from `db/migrations/` using:
    ```bash
    node db/migrate.js
    ```
+   *Alternatively, if you are setting up the live server with the complete database dump (including all pages, logs, and vector embeddings) and folder structure, run:*
+   ```bash
+   node install.js
+   ```
 
-5. Start the application:
+ 5. Start the application:
    ```bash
    npm start
    ```
    The web application runs locally on `http://localhost:3000`.
 
-### 7. Repository Directory & Vector Data Sync Pipeline
+### 7. Database & Storage Backup & Restore Suite
+
+For migrating the system to a live server, we have included helper utilities to backup and restore the database schema, row data (including vector embeddings), and file structures:
+
+* **To generate a backup:**
+  Ensure the PostgreSQL database (or Docker container) is active, then run:
+  ```bash
+  node backup.js
+  ```
+  This creates two files:
+  1. `repo_db_complete_backup.sql.gz` - Compressed database dump (schema, roles, user accounts, audit logs, and page embeddings).
+  2. `storage_backup.zip` - Archive of `/server/storage` and `/public/storage` folders.
+
+* **To restore on a live server:**
+  Pull the latest files from GitHub, configure your `.env` variables, and execute:
+  ```bash
+  node install.js
+  ```
+  This automatically unzips the database dump, restores it into your PostgreSQL server, and extracts the storage/documents directory structure back into the workspace.
+
+### 8. Repository Directory & Vector Data Sync Pipeline
 
 To populate the file repository and index contents into vector embeddings:
 1. Ensure the Express server is running.
