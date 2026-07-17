@@ -527,6 +527,14 @@
                 color: black !important;
                 display: block !important;
             }
+            .page-block, .page-block-content {
+                border: none !important;
+                box-shadow: none !important;
+                outline: none !important;
+                background: transparent !important;
+                background-color: transparent !important;
+                background-image: none !important;
+            }
             .page-block {
                 page-break-after: always;
                 page-break-inside: avoid;
@@ -2977,50 +2985,52 @@
                         }
                     }
                     
-                    /* Visual page guide inside editor for selected layout */
-                    .page-block-content {
-                        max-width: ${widthMm}mm !important;
-                        min-height: ${heightMm}mm !important;
-                        margin-left: auto !important;
-                        margin-right: auto !important;
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
-                        background-color: white !important;
-                        background-image: repeating-linear-gradient(
-                            to bottom,
-                            transparent 0px,
-                            transparent calc(${heightMm}mm - 2px),
-                            #f43f5e calc(${heightMm}mm - 2px),
-                            #f43f5e ${heightMm}mm
-                        ) !important;
-                        background-size: 100% ${heightMm}mm !important;
-                        background-repeat: repeat-y !important;
-                        border: 1px solid #cbd5e1 !important;
-                        padding: 20mm !important;
-                        box-sizing: border-box !important;
-                        position: relative !important;
-                        margin-bottom: 30px !important;
-                    }
-                    
-                    /* Explicitly force page break visibility when layout guides are active */
-                    .page-block-content .pb-break {
-                        display: block !important;
-                        border: none !important;
-                        border-top: 2px solid #f43f5e !important;
-                        margin: 24px 0 !important;
-                        position: relative !important;
-                        height: 1px !important;
-                        clear: both !important;
-                        visibility: visible !important;
-                    }
-                    
-                    .page-content-area {
-                        background: #f1f5f9 !important;
-                        padding: 40px 20px !important;
-                    }
-                    
-                    #editor-content {
-                        max-width: ${widthMm + 20}mm !important;
-                        margin: 0 auto !important;
+                    @media screen {
+                        /* Visual page guide inside editor for selected layout */
+                        .page-block-content {
+                            max-width: ${widthMm}mm !important;
+                            min-height: ${heightMm}mm !important;
+                            margin-left: auto !important;
+                            margin-right: auto !important;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+                            background-color: white !important;
+                            background-image: repeating-linear-gradient(
+                                to bottom,
+                                transparent 0px,
+                                transparent calc(${heightMm}mm - 2px),
+                                #f43f5e calc(${heightMm}mm - 2px),
+                                #f43f5e ${heightMm}mm
+                            ) !important;
+                            background-size: 100% ${heightMm}mm !important;
+                            background-repeat: repeat-y !important;
+                            border: 1px solid #cbd5e1 !important;
+                            padding: 20mm !important;
+                            box-sizing: border-box !important;
+                            position: relative !important;
+                            margin-bottom: 30px !important;
+                        }
+                        
+                        /* Explicitly force page break visibility when layout guides are active */
+                        .page-block-content .pb-break {
+                            display: block !important;
+                            border: none !important;
+                            border-top: 2px solid #f43f5e !important;
+                            margin: 24px 0 !important;
+                            position: relative !important;
+                            height: 1px !important;
+                            clear: both !important;
+                            visibility: visible !important;
+                        }
+                        
+                        .page-content-area {
+                            background: #f1f5f9 !important;
+                            padding: 40px 20px !important;
+                        }
+                        
+                        #editor-content {
+                            max-width: ${widthMm + 20}mm !important;
+                            margin: 0 auto !important;
+                        }
                     }
                 `;
                 
