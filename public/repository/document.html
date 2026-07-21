@@ -505,6 +505,12 @@
         }
 
         /* Print Media Styles */
+        @page {
+            margin: 10mm;
+            /* Removes browser-generated header/footer (timestamp, URL, title) */
+            size: auto;
+        }
+
         @media print {
             body, #app-container, #main-content, #content, #repo-app, .doc-layout, #page-viewer {
                 background: white !important;
@@ -513,11 +519,24 @@
                 margin: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
+                border-radius: 0 !important;
                 display: block !important;
                 height: auto !important;
+                width: 100% !important;
             }
             #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #toolbar, .toolbar-modern, #search-bar, #lock-banner, .page-divider, .doc-header-wrapper, #workflow-panel, .workflow-sidebar, .modal-overlay, .modal-content, #global-search-results {
                 display: none !important;
+            }
+            /* Strip all borders/shadows/radius from the content wrapper */
+            .page-content-area {
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                outline: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+                overflow: visible !important;
             }
             #editor-content {
                 width: 100% !important;
