@@ -130,7 +130,7 @@ echo "[4/6] Configuring databases..."
 if [ ! -f .env ]; then
   echo "Creating default .env config..."
   cat <<EOT > .env
-PORT=3001
+PORT=3000
 DB_USER=postgres
 DB_HOST=127.0.0.1
 DB_NAME=office_automation

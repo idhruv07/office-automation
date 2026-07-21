@@ -13,6 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const { exec } = require('child_process');
+const { Transform } = require('stream');
+const { StringDecoder } = require('string_decoder');
 
 // Load environment variables if .env file exists
 if (fs.existsSync('.env')) {
@@ -68,10 +70,19 @@ async function main() {
     if (fs.existsSync(zipOutputPath)) {
         console.log('Step 3: Restoring user storage files and documents...');
         try {
-            const AdmZip = require('adm-zip');
-            const zip = new AdmZip(zipOutputPath);
-            zip.extractAllTo(__dirname, true);
-            console.log('Storage files successfully restored!\n');
+            const { execSync } = require('child_process');
+            try {
+                console.log('Attempting extraction via system unzip command...');
+                execSync(`unzip -o "${zipOutputPath}" -d "${__dirname}"`, { stdio: 'ignore' });
+                console.log('Storage files successfully restored!\n');
+            } catch (unzipErr) {
+                console.log('System unzip failed or not found. Installing adm-zip dynamically...');
+                execSync('npm install adm-zip', { stdio: 'inherit' });
+                const AdmZip = require('adm-zip');
+                const zip = new AdmZip(zipOutputPath);
+                zip.extractAllTo(__dirname, true);
+                console.log('Storage files successfully restored!\n');
+            }
         } catch (err) {
             console.error('Failed to extract storage files:', err);
             cleanupTempFile();
@@ -90,23 +101,124 @@ async function main() {
     console.log('====================================================');
 }
 
+class RecoveryTransform extends Transform {
+    constructor() {
+        super();
+        this.decoder = new StringDecoder('utf8');
+    }
+
+    _transform(chunk, encoding, callback) {
+        const str = this.decoder.write(chunk);
+        if (str.length > 0) {
+            const outBuf = Buffer.alloc(str.length * 2);
+            for (let i = 0; i < str.length; i++) {
+                outBuf.writeUInt16LE(str.charCodeAt(i), i * 2);
+            }
+            this.push(outBuf);
+        }
+        callback();
+    }
+
+    _flush(callback) {
+        const str = this.decoder.end();
+        if (str.length > 0) {
+            const outBuf = Buffer.alloc(str.length * 2);
+            for (let i = 0; i < str.length; i++) {
+                outBuf.writeUInt16LE(str.charCodeAt(i), i * 2);
+            }
+            this.push(outBuf);
+        }
+        callback();
+    }
+}
+
 function decompressFile(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
+        const tempOutputPath = outputPath + '.tmp';
         const gzip = zlib.createGunzip();
         const source = fs.createReadStream(inputPath);
-        const destination = fs.createWriteStream(outputPath);
+        const destination = fs.createWriteStream(tempOutputPath);
 
         source.pipe(gzip).pipe(destination);
-        destination.on('finish', resolve);
-        destination.on('error', reject);
-        gzip.on('error', reject);
-        source.on('error', reject);
+        
+        destination.on('finish', () => {
+            try {
+                const fd = fs.openSync(tempOutputPath, 'r');
+                const buffer = Buffer.alloc(6);
+                const bytesRead = fs.readSync(fd, buffer, 0, 6, 0);
+                fs.closeSync(fd);
+
+                const isDoubleEncoded = 
+                    bytesRead >= 6 &&
+                    buffer[0] === 0xe2 && buffer[1] === 0xb4 && buffer[2] === 0xad &&
+                    buffer[3] === 0xe2 && buffer[4] === 0xb4 && buffer[5] === 0x8a;
+
+                const isUtf16Le = !isDoubleEncoded && ((buffer[0] === 0xff && buffer[1] === 0xfe) || (buffer[1] === 0x00 && buffer[0] !== 0x00));
+                const isUtf16Be = !isDoubleEncoded && (buffer[0] === 0xfe && buffer[1] === 0xff);
+
+                if (isDoubleEncoded) {
+                    console.log('Detected double-encoded backup file. Recovering original SQL...');
+                    const readStream = fs.createReadStream(tempOutputPath);
+                    const recovery = new RecoveryTransform();
+                    const writeStream = fs.createWriteStream(outputPath);
+
+                    readStream.pipe(recovery).pipe(writeStream);
+                    writeStream.on('finish', () => {
+                        try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+                        resolve();
+                    });
+                    writeStream.on('error', (err) => {
+                        try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+                        reject(err);
+                    });
+                } else if (isUtf16Le || isUtf16Be) {
+                    const encoding = isUtf16Le ? 'utf16le' : 'utf-16be';
+                    console.log(`Detected ${encoding.toUpperCase()} encoding in backup. Converting to UTF-8...`);
+                    
+                    const readStream = fs.createReadStream(tempOutputPath, { encoding });
+                    const writeStream = fs.createWriteStream(outputPath, { encoding: 'utf8' });
+
+                    readStream.pipe(writeStream);
+                    writeStream.on('finish', () => {
+                        try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+                        resolve();
+                    });
+                    writeStream.on('error', (err) => {
+                        try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+                        reject(err);
+                    });
+                } else {
+                    fs.renameSync(tempOutputPath, outputPath);
+                    resolve();
+                }
+            } catch (err) {
+                try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+                reject(err);
+            }
+        });
+
+        destination.on('error', (err) => {
+            try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+            reject(err);
+        });
+        gzip.on('error', (err) => {
+            try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+            reject(err);
+        });
+        source.on('error', (err) => {
+            try { fs.unlinkSync(tempOutputPath); } catch (e) {}
+            reject(err);
+        });
     });
 }
 
 function cleanupTempFile() {
     if (fs.existsSync(decompressedPath)) {
         fs.unlinkSync(decompressedPath);
+    }
+    const tempPath = decompressedPath + '.tmp';
+    if (fs.existsSync(tempPath)) {
+        try { fs.unlinkSync(tempPath); } catch (e) {}
     }
 }
 
