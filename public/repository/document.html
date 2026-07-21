@@ -506,13 +506,23 @@
 
         /* Print Media Styles */
         @page {
-            margin: 10mm;
-            /* Removes browser-generated header/footer (timestamp, URL, title) */
+            /* margin: 0 eliminates the browser's built-in header/footer area
+               (date, title, URL, page numbers). Content margin is handled by body padding below. */
+            margin: 0;
             size: auto;
         }
 
         @media print {
-            body, #app-container, #main-content, #content, #repo-app, .doc-layout, #page-viewer {
+            body {
+                /* Provide content margins since @page margin is 0 */
+                padding: 12mm !important;
+                margin: 0 !important;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            #app-container, #main-content, #content, #repo-app, .doc-layout, #page-viewer {
                 background: white !important;
                 color: black !important;
                 padding: 0 !important;
@@ -537,6 +547,11 @@
                 margin: 0 !important;
                 background: white !important;
                 overflow: visible !important;
+            }
+            /* Override the inline style padding:20px on #repo-app */
+            #repo-app {
+                padding: 0 !important;
+                max-width: none !important;
             }
             #editor-content {
                 width: 100% !important;
