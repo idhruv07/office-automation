@@ -327,7 +327,7 @@
             margin: -40px -40px 10px -40px;
         }
         #search-bar.visible { display: flex; }
-        #search-input {
+        #search-input, #replace-input {
             flex: 1;
             padding: 4px 8px;
             border: 1px solid #475569;
@@ -595,6 +595,48 @@
             height: 1px !important;
             clear: both !important;
         }
+
+        /* Auto-hiding menu rules in editing mode */
+        body.editing-active #sidebar {
+            display: none !important;
+        }
+        body.editing-active .doc-header-wrapper {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            margin: 0 !important;
+            padding: 12px 24px !important;
+            z-index: 99999 !important;
+            transform: translateY(-100%) !important;
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+            background: rgba(15, 23, 42, 0.96) !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        /* Hover trigger overlay at the top of viewport */
+        #top-menu-hover-trigger {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 12px;
+            z-index: 99998;
+            background: transparent;
+        }
+        body.editing-active #top-menu-hover-trigger {
+            display: block;
+        }
+        /* Show the header wrapper when trigger or wrapper is hovered */
+        body.editing-active #top-menu-hover-trigger:hover ~ #app-container .doc-header-wrapper,
+        body.editing-active #top-menu-hover-trigger:hover ~ #repo-app .doc-header-wrapper,
+        body.editing-active .doc-header-wrapper:hover {
+            transform: translateY(0) !important;
+        }
     </style>
 </head>
 <body>
@@ -655,12 +697,22 @@
             <div class="page-content-area" id="page-viewer">
                 <div id="lock-banner" class="lock-banner"></div>
                 <!-- In-page Search Bar (Ctrl+F) -->
-                <div id="search-bar">
-                    <input id="search-input" type="text" placeholder="Search in document... (Ctrl+F)" autocomplete="off">
-                    <span id="search-count">0 / 0</span>
-                    <button onclick="searchNav(-1)">▲</button>
-                    <button onclick="searchNav(1)">▼</button>
-                    <button onclick="closeSearch()">✕</button>
+                <!-- In-page Find & Replace Bar (Ctrl+F) -->
+                <div id="search-bar" style="display: none; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                        <span class="material-symbols-outlined" style="font-size:18px; color:#94a3b8;">search</span>
+                        <input id="search-input" type="text" placeholder="Find text... (Ctrl+F)" autocomplete="off">
+                        <span id="search-count">0 / 0</span>
+                        <button onclick="searchNav(-1)" title="Previous Match">▲</button>
+                        <button onclick="searchNav(1)" title="Next Match">▼</button>
+                    </div>
+                    <div id="replace-controls" style="display: flex; align-items: center; gap: 8px; width: 100%; border-top: 1px solid #334155; padding-top: 6px; margin-top: 4px;">
+                        <span class="material-symbols-outlined" style="font-size:18px; color:#94a3b8;">find_replace</span>
+                        <input id="replace-input" type="text" placeholder="Replace with..." autocomplete="off">
+                        <button onclick="executeReplace()" title="Replace current match" style="background:#10b981; border:none; color:white; font-weight:bold;">Replace</button>
+                        <button onclick="executeReplaceAll()" title="Replace all matches" style="background:#0284c7; border:none; color:white; font-weight:bold;">Replace All</button>
+                        <button onclick="closeSearch()" title="Close search panel">✕</button>
+                    </div>
                 </div>
                 <div id="toolbar" class="toolbar-modern">
                     <!-- History actions -->
@@ -709,6 +761,8 @@
                     <button onmousedown="event.preventDefault()" onclick="document.execCommand('bold')" title="Bold"><span class="material-symbols-outlined" style="font-weight: bold;">format_bold</span></button>
                     <button onmousedown="event.preventDefault()" onclick="document.execCommand('italic')" title="Italic"><span class="material-symbols-outlined">format_italic</span></button>
                     <button onmousedown="event.preventDefault()" onclick="document.execCommand('underline')" title="Underline"><span class="material-symbols-outlined">format_underlined</span></button>
+                    <button id="btn-format-painter" onmousedown="event.preventDefault()" onclick="toggleFormatPainter()" title="Format Painter"><span class="material-symbols-outlined">format_paint</span></button>
+                    <button onmousedown="event.preventDefault()" onclick="document.execCommand('removeFormat')" title="Clear Formatting"><span class="material-symbols-outlined">format_clear</span></button>
                     
                     <span class="toolbar-separator"></span>
 
@@ -790,6 +844,15 @@
                         <option value="portrait" selected>Portrait</option>
                         <option value="landscape">Landscape</option>
                     </select>
+
+                    <!-- Page Margins Select -->
+                    <select id="select-page-margins" onchange="updatePageLayout()" title="Page Margins" class="toolbar-select" style="width: 105px;">
+                        <option value="normal" selected>Normal Margin</option>
+                        <option value="narrow">Narrow Margin</option>
+                        <option value="wide">Wide Margin</option>
+                    </select>
+
+                    <button id="btn-toggle-ruler" onclick="toggleRuler()" title="Toggle Ruler"><span class="material-symbols-outlined">straighten</span></button>
                     
                     <span class="toolbar-separator"></span>
 
@@ -801,6 +864,12 @@
                     <!-- Auto-save / Version -->
                     <span id="auto-save-indicator" class="auto-save-text">Saved</span>
                     <span id="version-badge" class="version-text"></span>
+                </div>
+                <!-- Document ruler container -->
+                <div id="editor-ruler" style="display: none; width: 100%; max-width: 800px; height: 35px; background: #f8fafc; border: 1px solid #cbd5e1; border-bottom: none; margin: 0 auto; position: relative; box-sizing: border-box; font-family: monospace; font-size: 9px; color: #64748b; user-select: none; border-radius: 6px 6px 0 0; z-index: 10;">
+                    <div id="ruler-ticks" style="position: absolute; inset: 0; display: flex; align-items: flex-end; padding-bottom: 4px;"></div>
+                    <div id="ruler-margin-left" style="position: absolute; top: 0; bottom: 0; left: 0; background: rgba(148, 163, 184, 0.12); border-right: 1px dashed #64748b; pointer-events: none;"></div>
+                    <div id="ruler-margin-right" style="position: absolute; top: 0; bottom: 0; right: 0; background: rgba(148, 163, 184, 0.12); border-left: 1px dashed #64748b; pointer-events: none;"></div>
                 </div>
                 <div id="editor-content">
                     <div style="color: #94a3b8; text-align:center; padding-top: 40px;">Select a page from the left to view.</div>
@@ -1798,6 +1867,7 @@
                             sel.addRange(range);
                         } catch (err) { console.error('Failed to focus on Page 1 body', err); }
                     }
+                    document.body.classList.add('editing-active');
                     toolbarEl.style.display = 'flex';
                     // Scroll to editing block
                     block.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1822,6 +1892,10 @@
                         btnCancel.style.display = 'none';
                         btnEdit.style.display = 'block';
                         btnEdit.onclick = () => acquireLockAndEdit(pageId, pageObj);
+                        
+                        document.body.classList.remove('editing-active');
+                        const header = document.querySelector('.doc-header-wrapper');
+                        if (header) header.style.transform = '';
                     };
 
                     btnSave.onclick = async () => { await savePage(pageId, blockContent, false); };
@@ -1891,6 +1965,9 @@
                         toolbarEl.style.display = 'none';
                         btnSave.style.display = 'none';
                         btnCancel.style.display = 'none';
+                        document.body.classList.remove('editing-active');
+                        const header = document.querySelector('.doc-header-wrapper');
+                        if (header) header.style.transform = '';
                     } else if (res.ok) {
                         if (silent) {
                             editingVersion = data.new_version || (version + 1);
@@ -1919,6 +1996,10 @@
                                 indicator.innerText = 'Saved ✓';
                                 indicator.style.display = 'inline';
                                 setTimeout(() => { indicator.style.display='none'; }, 3000);
+                                
+                                document.body.classList.remove('editing-active');
+                                const header = document.querySelector('.doc-header-wrapper');
+                                if (header) header.style.transform = '';
                             }
                         }
                         rebuildPageNavigation();
@@ -2926,9 +3007,11 @@
             window.updatePageLayout = function() {
                 const selectSize = document.getElementById('select-page-size');
                 const selectOrientation = document.getElementById('select-page-orientation');
+                const selectMargins = document.getElementById('select-page-margins');
                 
                 const size = selectSize ? selectSize.value : 'a4';
                 const orientation = selectOrientation ? selectOrientation.value : 'portrait';
+                const margin = selectMargins ? selectMargins.value : 'normal';
                 
                 let styleEl = document.getElementById('dynamic-print-style');
                 if (!styleEl) {
@@ -2954,6 +3037,10 @@
                     widthMm = heightMm;
                     heightMm = temp;
                 }
+
+                let marginMm = 20;
+                if (margin === 'narrow') marginMm = 10;
+                else if (margin === 'wide') marginMm = 30;
                 
                 // Update print page size rule and visual page guide inside editor
                 styleEl.innerHTML = `
@@ -3016,7 +3103,7 @@
                             width: ${widthMm}mm !important;
                             max-width: ${widthMm}mm !important;
                             min-height: ${heightMm}mm !important;
-                            padding: 20mm !important; /* Matches screen guide padding for true WYSIWYG preview */
+                            padding: ${marginMm}mm !important; /* Matches screen guide padding for true WYSIWYG preview */
                             margin: 0 auto !important;
                             border: none !important;
                             box-shadow: none !important;
@@ -3065,7 +3152,7 @@
                             background-size: 100% ${heightMm}mm !important;
                             background-repeat: repeat-y !important;
                             border: 1px solid #cbd5e1 !important;
-                            padding: 20mm !important;
+                            padding: ${marginMm}mm !important;
                             box-sizing: border-box !important;
                             position: relative !important;
                             margin-bottom: 30px !important;
@@ -3098,18 +3185,31 @@
                 // Save layout preferences to localStorage
                 localStorage.setItem('doc_page_size', size);
                 localStorage.setItem('doc_page_orientation', orientation);
+                localStorage.setItem('doc_page_margins', margin);
+
+                // Update ruler size and re-render if it is visible
+                const ruler = document.getElementById('editor-ruler');
+                if (ruler) {
+                    ruler.style.maxWidth = `${widthMm}mm`;
+                    if (ruler.style.display === 'block') {
+                        window.renderRuler();
+                    }
+                }
             };
 
             // Initialize page layout preferences on load
             setTimeout(() => {
                 const savedSize = localStorage.getItem('doc_page_size') || 'a4';
                 const savedOrientation = localStorage.getItem('doc_page_orientation') || 'portrait';
+                const savedMargins = localStorage.getItem('doc_page_margins') || 'normal';
                 
                 const selectSize = document.getElementById('select-page-size');
                 const selectOrientation = document.getElementById('select-page-orientation');
+                const selectMargins = document.getElementById('select-page-margins');
                 
                 if (selectSize) selectSize.value = savedSize;
                 if (selectOrientation) selectOrientation.value = savedOrientation;
+                if (selectMargins) selectMargins.value = savedMargins;
                 
                 window.updatePageLayout();
             }, 100);
@@ -3217,8 +3317,254 @@
                 editorEl.normalize();
                 searchMatches = [];
                 searchInput.value = '';
+                const replaceInput = document.getElementById('replace-input');
+                if (replaceInput) replaceInput.value = '';
                 searchCount.innerText = '0 / 0';
             };
+
+            // Find & Replace actions
+            window.executeReplace = function() {
+                const replaceInput = document.getElementById('replace-input');
+                const replaceVal = replaceInput ? replaceInput.value : '';
+                if (searchCurrent >= 0 && searchMatches[searchCurrent]) {
+                    const mark = searchMatches[searchCurrent];
+                    mark.textContent = replaceVal;
+                    
+                    const parent = mark.parentNode;
+                    if (parent) {
+                        mark.outerHTML = mark.innerHTML;
+                        parent.normalize();
+                    }
+                    
+                    const activeBlock = getActiveBlock();
+                    if (activeBlock) {
+                        activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    doSearch(searchInput.value);
+                }
+            };
+
+            window.executeReplaceAll = function() {
+                const replaceInput = document.getElementById('replace-input');
+                const replaceVal = replaceInput ? replaceInput.value : '';
+                const query = searchInput.value;
+                if (!query || query.length < 2) return;
+                
+                const editableBlocks = editorEl.querySelectorAll('.page-block-content[contenteditable="true"]');
+                if (editableBlocks.length === 0) {
+                    alert('You must be in Edit Mode on a page to replace text.');
+                    return;
+                }
+                
+                let totalReplaced = 0;
+                editableBlocks.forEach(block => {
+                    function replaceInTextNodes(node, regex, replacement) {
+                        if (node.nodeType === 3) {
+                            const orig = node.textContent;
+                            const replaced = orig.replace(regex, replacement);
+                            if (orig !== replaced) {
+                                node.textContent = replaced;
+                                totalReplaced++;
+                            }
+                        } else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                            Array.from(node.childNodes).forEach(child => replaceInTextNodes(child, regex, replacement));
+                        }
+                    }
+                    
+                    const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                    replaceInTextNodes(block, regex, replaceVal);
+                    block.normalize();
+                });
+                
+                if (totalReplaced > 0) {
+                    editableBlocks.forEach(block => {
+                        block.dispatchEvent(new Event('input', { bubbles: true }));
+                    });
+                    alert(`Replaced ${totalReplaced} occurrence(s).`);
+                    doSearch(query);
+                } else {
+                    alert('No matches found to replace.');
+                }
+            };
+
+            // Premium Format Painter logic
+            let painterActive = false;
+            let copiedStyles = null;
+            let formatPainterMouseUpHandler = null;
+            
+            window.toggleFormatPainter = function() {
+                const btn = document.getElementById('btn-format-painter');
+                const editorEl = document.getElementById('editor-content');
+                if (!editorEl) return;
+                
+                if (!painterActive) {
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        let el = range.startContainer;
+                        if (el.nodeType === 3) {
+                            el = el.parentNode;
+                        }
+                        const comp = window.getComputedStyle(el);
+                        copiedStyles = {
+                            fontWeight: comp.fontWeight,
+                            fontStyle: comp.fontStyle,
+                            textDecoration: comp.textDecoration,
+                            color: comp.color,
+                            fontSize: comp.fontSize,
+                            fontFamily: comp.fontFamily
+                        };
+                        painterActive = true;
+                        btn.style.background = '#38bdf8';
+                        btn.style.color = '#0f172a';
+                        editorEl.style.cursor = 'copy';
+                        
+                        // Setup the mouseup apply listener
+                        formatPainterMouseUpHandler = function() {
+                            setTimeout(() => {
+                                applyFormatStyles(copiedStyles);
+                                // Auto-turn off format painter after applying
+                                painterActive = false;
+                                btn.style.background = '';
+                                btn.style.color = '';
+                                editorEl.style.cursor = '';
+                                editorEl.removeEventListener('mouseup', formatPainterMouseUpHandler);
+                                formatPainterMouseUpHandler = null;
+                            }, 50);
+                        };
+                        editorEl.addEventListener('mouseup', formatPainterMouseUpHandler);
+                    }
+                } else {
+                    // Turn off
+                    painterActive = false;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    editorEl.style.cursor = '';
+                    if (formatPainterMouseUpHandler) {
+                        editorEl.removeEventListener('mouseup', formatPainterMouseUpHandler);
+                        formatPainterMouseUpHandler = null;
+                    }
+                }
+            };
+            
+            function applyFormatStyles(styles) {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    if (range.toString().length === 0) return;
+                    
+                    const span = document.createElement('span');
+                    span.style.fontWeight = styles.fontWeight;
+                    span.style.fontStyle = styles.fontStyle;
+                    span.style.textDecoration = styles.textDecoration;
+                    span.style.color = styles.color;
+                    span.style.fontSize = styles.fontSize;
+                    span.style.fontFamily = styles.fontFamily;
+                    
+                    try {
+                        range.surroundContents(span);
+                    } catch (e) {
+                        document.execCommand('fontName', false, styles.fontFamily);
+                        document.execCommand('foreColor', false, styles.color);
+                    }
+                    
+                    const activeBlock = getActiveBlock();
+                    if (activeBlock) {
+                        activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            }
+
+            // Ruler rendering logic
+            window.toggleRuler = function() {
+                const ruler = document.getElementById('editor-ruler');
+                const btn = document.getElementById('btn-toggle-ruler');
+                if (!ruler || !btn) return;
+                
+                if (ruler.style.display === 'none') {
+                    ruler.style.display = 'block';
+                    btn.style.background = '#38bdf8';
+                    btn.style.color = '#0f172a';
+                    window.renderRuler();
+                } else {
+                    ruler.style.display = 'none';
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }
+            };
+
+            window.renderRuler = function() {
+                const ruler = document.getElementById('editor-ruler');
+                const ticksContainer = document.getElementById('ruler-ticks');
+                const marginLeftIndicator = document.getElementById('ruler-margin-left');
+                const marginRightIndicator = document.getElementById('ruler-margin-right');
+                if (!ruler || !ticksContainer) return;
+                
+                const selectSize = document.getElementById('select-page-size');
+                const selectMargins = document.getElementById('select-page-margins');
+                const selectOrientation = document.getElementById('select-page-orientation');
+                
+                const size = selectSize ? selectSize.value : 'a4';
+                const orientation = selectOrientation ? selectOrientation.value : 'portrait';
+                const margin = selectMargins ? selectMargins.value : 'normal';
+                
+                let widthMm = 210;
+                if (size === 'letter') widthMm = 215.9;
+                else if (size === 'legal') widthMm = 215.9;
+                
+                if (orientation === 'landscape') {
+                    let heightMm = 297;
+                    if (size === 'letter') heightMm = 279.4;
+                    else if (size === 'legal') heightMm = 355.6;
+                    widthMm = heightMm;
+                }
+                
+                let marginMm = 20;
+                if (margin === 'narrow') marginMm = 10;
+                else if (margin === 'wide') marginMm = 30;
+                
+                ticksContainer.innerHTML = '';
+                const totalCm = Math.floor(widthMm / 10);
+                
+                const leftPct = (marginMm / widthMm) * 100;
+                marginLeftIndicator.style.width = `${leftPct}%`;
+                marginRightIndicator.style.width = `${leftPct}%`;
+                
+                for (let i = 0; i <= totalCm; i++) {
+                    const tick = document.createElement('div');
+                    const posPct = ((i * 10) / widthMm) * 100;
+                    tick.style.cssText = `position: absolute; left: ${posPct}%; display: flex; flex-direction: column; align-items: center; width: 20px; margin-left: -10px;`;
+                    
+                    tick.innerHTML = `
+                        <span style="font-size: 8px;">${i}</span>
+                        <div style="width: 1px; height: 8px; background: #94a3b8; margin-top: 2px;"></div>
+                    `;
+                    ticksContainer.appendChild(tick);
+                }
+            };
+
+            // Top hover triggers setup
+            document.addEventListener('DOMContentLoaded', () => {
+                const trigger = document.createElement('div');
+                trigger.id = 'top-menu-hover-trigger';
+                document.body.appendChild(trigger);
+                
+                trigger.addEventListener('mouseenter', () => {
+                    if (document.body.classList.contains('editing-active')) {
+                        const header = document.querySelector('.doc-header-wrapper');
+                        if (header) header.style.transform = 'translateY(0)';
+                    }
+                });
+                
+                const header = document.querySelector('.doc-header-wrapper');
+                if (header) {
+                    header.addEventListener('mouseleave', () => {
+                        if (document.body.classList.contains('editing-active')) {
+                            header.style.transform = 'translateY(-100%)';
+                        }
+                    });
+                }
+            });
 
             // ============================================================
             // GLOBAL REPOSITORY SEARCH (search bar in header)
