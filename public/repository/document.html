@@ -140,17 +140,17 @@
         }
         .toolbar-modern {
             background: #f8fafc;
-            padding: 6px 12px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border: 1px solid #cbd5e1;
             display: none;
             align-items: center;
             gap: 6px;
-            margin: -40px -40px 20px -40px;
-            border-radius: 12px 12px 0 0;
+            margin: 0 0 16px 0;
+            border-radius: 10px;
             position: sticky;
-            top: -40px;
-            z-index: 10;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
             flex-wrap: wrap;
         }
         .toolbar-modern button {
@@ -3508,6 +3508,11 @@
                             background-image: none !important;
                         }
 
+                        .page-block-content::after {
+                            display: none !important;
+                            content: none !important;
+                        }
+
                         /* Reduce vacant space at top of Page 1 in print */
                         .page-block:first-child .page-block-content {
                             padding-top: 6mm !important;
@@ -3540,17 +3545,32 @@
                             min-height: ${heightMm}mm !important;
                             margin: 0 auto !important;
                             background-color: white !important;
-                            border: none !important;
-                            border-bottom: 1px dashed #cbd5e1 !important;
-                            box-shadow: none !important;
+                            border: 1px solid #cbd5e1 !important;
+                            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
                             padding: ${marginMm}mm !important;
                             box-sizing: border-box !important;
                             position: relative !important;
                         }
 
+                        /* VISIBLE MARGIN BOUNDARY GUIDE LINES ON SCREEN */
+                        .page-block-content::after {
+                            content: '' !important;
+                            position: absolute !important;
+                            top: ${marginMm}mm !important;
+                            bottom: ${marginMm}mm !important;
+                            left: ${marginMm}mm !important;
+                            right: ${marginMm}mm !important;
+                            border: 1px dashed rgba(59, 130, 246, 0.4) !important;
+                            pointer-events: none !important;
+                            z-index: 1 !important;
+                        }
+
                         /* Reduce vacant top margin space on Page 1 */
                         .page-block:first-child .page-block-content {
                             padding-top: 6mm !important;
+                        }
+                        .page-block:first-child .page-block-content::after {
+                            top: 6mm !important;
                         }
                         .page-block:first-child .fwd-letterhead {
                             margin-bottom: 12px !important;
@@ -3973,36 +3993,6 @@
                     ticksContainer.appendChild(tick);
                 }
             };
-
-            // Top hover triggers setup
-            document.addEventListener('DOMContentLoaded', () => {
-                const trigger = document.createElement('div');
-                trigger.id = 'top-menu-hover-trigger';
-                const mainContent = document.getElementById('main-content') || document.body;
-                mainContent.prepend(trigger);
-                
-                const header = document.querySelector('.doc-header-wrapper');
-                
-                trigger.addEventListener('mouseenter', () => {
-                    if (document.body.classList.contains('editing-active')) {
-                        if (header) header.style.transform = 'translateY(0)';
-                    }
-                });
-                
-                if (header) {
-                    header.addEventListener('mouseenter', () => {
-                        if (document.body.classList.contains('editing-active')) {
-                            header.style.transform = 'translateY(0)';
-                        }
-                    });
-                    
-                    header.addEventListener('mouseleave', () => {
-                        if (document.body.classList.contains('editing-active')) {
-                            header.style.transform = 'translateY(-100%)';
-                        }
-                    });
-                }
-            });
 
             // ============================================================
             // GLOBAL REPOSITORY SEARCH (search bar in header)
