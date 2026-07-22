@@ -71,12 +71,15 @@ window.initializeDocumentViewer = async function() {
     setTimeout(() => {
         const savedSize = localStorage.getItem('doc_page_size') || 'a4';
         const savedOrientation = localStorage.getItem('doc_page_orientation') || 'portrait';
+        const savedMargins = localStorage.getItem('doc_page_margins') || 'narrow';
         
         const selectSize = document.getElementById('select-page-size');
         const selectOrientation = document.getElementById('select-page-orientation');
+        const selectMargins = document.getElementById('select-page-margins');
         
         if (selectSize) selectSize.value = savedSize;
         if (selectOrientation) selectOrientation.value = savedOrientation;
+        if (selectMargins) selectMargins.value = savedMargins;
         
         window.updatePageLayout();
     }, 100);
@@ -141,10 +144,10 @@ function highlightSidebarPage(pageId) {
     // Show edit/history buttons for active page
     const page = allPages.find(p => p.id == pageId);
     if (page) {
-        btnHistory.style.display = 'block';
+        btnHistory.style.display = 'none';
         editingVersion = page._version;
         if (page._isEditable && editorEl.querySelector('.page-block-content[contenteditable="true"]') === null) {
-            btnEdit.style.display = 'block';
+            btnEdit.style.display = 'inline-flex';
             btnEdit.onclick = () => window.acquireLockAndEdit(pageId, page);
         }
         if (page._lock) {
@@ -203,7 +206,7 @@ function setupScrollSpy() {
             // Update edit button for this page
             if (editorEl.querySelector('.page-block-content[contenteditable="true"]') === null) {
                 const page = allPages.find(p => p.id == bestPageId);
-                btnEdit.style.display = page?._isEditable ? 'block' : 'none';
+                btnEdit.style.display = page?._isEditable ? 'inline-flex' : 'none';
                 btnEdit.onclick = () => window.acquireLockAndEdit(bestPageId, page);
                 editingVersion = page?._version;
                 if (page?._lock) {
@@ -275,9 +278,11 @@ window.highlightSidebarPageItem = function(selectedEl) {
 window.updatePageLayout = function() {
     const selectSize = document.getElementById('select-page-size');
     const selectOrientation = document.getElementById('select-page-orientation');
+    const selectMargins = document.getElementById('select-page-margins');
     
     const size = selectSize ? selectSize.value : 'a4';
     const orientation = selectOrientation ? selectOrientation.value : 'portrait';
+    const margin = selectMargins ? selectMargins.value : 'narrow';
     
     let styleEl = document.getElementById('dynamic-print-style');
     if (!styleEl) {
@@ -302,14 +307,27 @@ window.updatePageLayout = function() {
         widthMm = heightMm;
         heightMm = temp;
     }
+
+    let marginMm = 10; // Narrow margin by default (10mm)
+    if (margin === 'none') marginMm = 0;
+    else if (margin === 'compact') marginMm = 5;
+    else if (margin === 'narrow') marginMm = 10;
+    else if (margin === 'moderate') marginMm = 15;
+    else if (margin === 'normal') marginMm = 20;
+    else if (margin === 'wide') marginMm = 25;
+    else if (margin === 'extra-wide') marginMm = 30;
     
     styleEl.innerHTML = `
         @media print {
             @page {
-                size: ${size} ${orientation} !important;
-                margin: 0 !important;
+                size: ${size} ${orientation};
+                margin: 0mm !important;
             }
             
+            body:not(.print-all-pages) .page-block:not(:first-child) {
+                display: none !important;
+            }
+
             #sidebar, #sidebar-toggle, .no-print, .claim-action-bar, button, .btn, .theme-selector, aside,
             #toolbar, .toolbar, .toolbar-modern, .page-sidebar, #page-list, .page-divider, #lock-banner, .doc-header-wrapper,
             .main-top-bar, #footer, .breadcrumb-container, .repo-search-container, #workflow-panel, .workflow-sidebar,
@@ -351,13 +369,23 @@ window.updatePageLayout = function() {
                 width: ${widthMm}mm !important;
                 max-width: ${widthMm}mm !important;
                 min-height: ${heightMm}mm !important;
-                padding: 10mm !important;
+                padding: ${marginMm}mm !important;
                 margin: 0 auto !important;
                 border: none !important;
                 box-shadow: none !important;
                 box-sizing: border-box !important;
                 color: #000000 !important;
                 background: transparent !important;
+                background-image: none !important;
+            }
+
+            .page-block-content::after {
+                display: none !important;
+                content: none !important;
+            }
+
+            .page-block:first-child .page-block-content {
+                padding-top: 6mm !important;
             }
 
             .page-block-content h1,
@@ -378,31 +406,45 @@ window.updatePageLayout = function() {
             }
         }
         
-        .page-block-content {
-            max-width: ${widthMm}mm !important;
-            min-height: ${heightMm}mm !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
-            background: white !important;
-            border: 1px solid #cbd5e1 !important;
-            padding: 20mm !important;
-            box-sizing: border-box !important;
-            position: relative !important;
-            margin-bottom: 30px !important;
-        }
-        
-        .page-content-area {
-            background: #f1f5f9 !important;
-            padding: 40px 20px !important;
-        }
-        
-        #editor-content {
-            max-width: ${widthMm + 20}mm !important;
-            margin: 0 auto !important;
+        @media screen {
+            .page-block-content {
+                max-width: 100% !important;
+                width: 100% !important;
+                min-height: ${heightMm}mm !important;
+                margin: 0 auto !important;
+                background-color: white !important;
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+                padding: ${marginMm}mm !important;
+                box-sizing: border-box !important;
+                position: relative !important;
+            }
+
+            .page-block-content::after {
+                content: '' !important;
+                position: absolute !important;
+                top: ${marginMm}mm !important;
+                bottom: ${marginMm}mm !important;
+                left: ${marginMm}mm !important;
+                right: ${marginMm}mm !important;
+                border: 1px dashed rgba(59, 130, 246, 0.4) !important;
+                pointer-events: none !important;
+                z-index: 1 !important;
+            }
+
+            .page-block:first-child .page-block-content {
+                padding-top: 6mm !important;
+            }
+            .page-block:first-child .page-block-content::after {
+                top: 6mm !important;
+            }
+            .page-block:first-child .fwd-letterhead {
+                margin-bottom: 12px !important;
+            }
         }
     `;
     
     localStorage.setItem('doc_page_size', size);
     localStorage.setItem('doc_page_orientation', orientation);
+    localStorage.setItem('doc_page_margins', margin);
 };
