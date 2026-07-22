@@ -3250,8 +3250,8 @@
                 styleEl.innerHTML = `
                     @media print {
                         @page {
-                            size: ${size} ${orientation} !important;
-                            margin: 0 !important; /* Borderless page to allow exact dimensions match */
+                            size: ${size} ${orientation};
+                            margin: 0; /* Borderless page to allow exact dimensions match */
                         }
                         
                         /* Hide all screen-only UI elements completely */
