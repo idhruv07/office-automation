@@ -246,10 +246,40 @@ To populate the file repository and index contents into vector embeddings:
    node scripts/check_status.js
    ```
 
-### Testing
+### 9. Testing
 
 The test suite covers authentication, RBAC, isolation, dynamic ward entitlements, and claim lifecycles.
 To run the full suite (85+ integration tests):
 ```bash
 node tests/run_tests.js
 ```
+
+---
+
+## 10. Recent Updates & System Fixes (July 2026)
+
+The following core updates, tooling enhancements, and system corrections have been successfully integrated:
+
+### Port & Network Migration
+- **Port Shift**: Shifted default server port configuration from `3001` to `3000` inside `.env`, `deploy/install.sh`, and local verification scripts.
+- **Static IP Assignment**: Configured static IP address `192.168.0.233` for primary interface `enp1s0`.
+- **Service Cleanup**: Stopped and disabled redundant user-level `office-automation.service` to resolve port collisions. The system-wide service is active on port `3000`.
+
+### Backup & Restore Enhancements
+- **SQL Recovery Transformation**: Upgraded `install.js` decompression pipeline to detect UTF-16LE/BE and double-encoded backup files automatically, avoiding data corruption during db restores.
+- **Unzip System Fallback**: Added native system `unzip` command check and execution in `install.js` to bypass JavaScript decompression limits and reduce dependency installations.
+
+### Document Viewer & Print Optimization
+- **Browser Print Header Suppression**: Integrated `@page { margin: 0; }` configuration into both static and dynamic stylesheets, which suppresses browser-generated print metadata headers (date, page title, URL, page counters) that normally print in margins.
+- **Print Spacing & Layout**: Added compensation margins (`body { padding: 12mm; }`) to restore layout boundaries when printing, and eliminated pink/red visual page break lines (`.pb-break`) from rendering on printed sheets.
+
+### Paging & Advanced Editor Tooling
+- **Precise Container Scrolling**: Replaced native `scrollIntoView()` with a relative scroll calculation (`scrollToElement`) inside the `#page-viewer` panel, stopping unintended body/window scrolling side-effects.
+- **Scrollspy Overlap Check**: Refactored the scroll spy engine to calculate active pages chronologically based on a threshold overlap coordinate, resolving sidebar menu highlight glitches.
+- **Menu Hover Hide/Reveal**: Configured the navigation bar to auto-hide in editor mode, sliding down into view when hover triggers at the top edge of the viewport.
+- **Format & Page Margin Actions**: Integrated controls for Page Margins, Premium Format Painter, Clear Formatting, Top Ruler guide, and a complete Find & Replace panel within the editor view.
+- **Word File Direct Pasting**: Integrated direct clipboard format capture to support copying from Microsoft Word (`.docx`) files with rich text styling preserved.
+
+### UI & Styling Corrections
+- **Login Field Visibility**: Fixed typed credential visibility inside username and password fields on the secure login portal by increasing input element styling specificity (`.login-page-body .profile-edit-field input`) to override colliding profile rules.
+
