@@ -739,7 +739,7 @@
                     <span class="toolbar-separator"></span>
                     
                     <!-- Font Family Select -->
-                    <select id="font-family-select" onchange="applyFontFamily(this.value)" title="Font Family" class="toolbar-select">
+                    <select id="font-family-select" onchange="applyFontFamily(this.value)" title="Font Family" class="toolbar-select" style="width: 140px;">
                         <option value="Times New Roman" selected>Times New Roman</option>
                         <option value="Arial">Arial</option>
                         <option value="Calibri">Calibri</option>
@@ -770,6 +770,17 @@
                         <option value="#8b5cf6">Purple</option>
                         <option value="#f59e0b">Orange</option>
                         <option value="#64748b">Slate Gray</option>
+                    </select>
+                    
+                    <!-- Highlight Color Select -->
+                    <select id="text-highlight-select" onchange="document.execCommand('backColor', false, this.value); this.value='';" title="Highlight Color" class="toolbar-select" style="width: 100px;">
+                        <option value="" disabled selected>Highlight</option>
+                        <option value="#fef08a">Yellow</option>
+                        <option value="#bbf7d0">Green</option>
+                        <option value="#bfdbfe">Blue</option>
+                        <option value="#fbcfe8">Pink</option>
+                        <option value="#fcd34d">Amber</option>
+                        <option value="transparent">Clear</option>
                     </select>
                     
                     <span class="toolbar-separator"></span>
@@ -824,6 +835,7 @@
                     </select>
 
                     <button onclick="insertPageBreak()" title="Insert Page Break"><span class="material-symbols-outlined">insert_page_break</span></button>
+                    <button onclick="triggerImageInsert()" title="Insert Image"><span class="material-symbols-outlined">image</span></button>
                     <select id="shape-insert-select" onchange="insertDocShape(this.value); this.value='';" title="Insert Line or Shape" class="toolbar-select" style="width: 140px;">
                         <option value="" disabled selected>Lines &amp; Shapes</option>
                         <option value="draw-canvas">✍ Freehand Draw</option>
@@ -2554,6 +2566,16 @@
             // (Per-block autosave is handled inside acquireLockAndEdit when the block becomes editable)
             // The old editorEl-level autosave is removed since editing is now per page block.
 
+            window.triggerImageInsert = function() {
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) return;
+                const url = prompt("Enter Image URL (e.g. /storage/assets/... or /admin/images/emblem.png):");
+                if (url) {
+                    const imgHtml = `<img src="${url}" style="max-width: 100%; height: auto; display: block; margin: 10px auto;" />`;
+                    document.execCommand('insertHTML', false, imgHtml);
+                }
+            };
+
             window.insertTable = function() {
                 const activeBlock = getActiveBlock();
                 if (!activeBlock) return;
@@ -3202,6 +3224,19 @@
                         #editor-content {
                             max-width: 100% !important;
                             margin: 0 !important;
+                        }
+                        
+                        #toolbar {
+                            margin: 0 !important;
+                            position: static !important;
+                            border-radius: 8px 8px 0 0 !important;
+                            border: 1px solid #cbd5e1 !important;
+                            border-bottom: none !important;
+                            width: 100% !important;
+                            box-sizing: border-box !important;
+                            display: flex !important;
+                            flex-wrap: wrap !important;
+                            background: #f8fafc !important;
                         }
                     }
                 `;
