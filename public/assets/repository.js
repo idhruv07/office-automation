@@ -27,7 +27,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (!res.ok) throw new Error('Failed to load tree');
             currentTree = await res.json();
-            renderTree(currentTree, treeContainer);
+            
+            // Render root "Recent Documents" node
+            treeContainer.innerHTML = '';
+            const recentNode = document.createElement('div');
+            recentNode.className = 'tree-node';
+            recentNode.innerHTML = `
+                <div class="tree-node-content selected" id="recent-docs-tree-node">
+                    <span class="tree-icon-container">
+                        <svg class="tree-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M12 8V12L15 15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2"/>
+                        </svg>
+                    </span>
+                    <span>Recent Documents</span>
+                </div>
+            `;
+            recentNode.querySelector('.tree-node-content').addEventListener('click', () => {
+                document.querySelectorAll('.tree-node-content').forEach(el => {
+                    el.classList.remove('selected');
+                    const iconSpan = el.querySelector('.tree-icon-container');
+                    if (iconSpan && el.id !== 'recent-docs-tree-node') {
+                        iconSpan.innerHTML = getFolderIconSvg(false);
+                    }
+                });
+                const contentEl = recentNode.querySelector('.tree-node-content');
+                contentEl.classList.add('selected');
+                contentEl.querySelector('.tree-icon-container').innerHTML = `
+                    <svg class="tree-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                        <path d="M12 8V12L15 15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2"/>
+                    </svg>
+                `;
+                loadRecentDocuments();
+            });
+            treeContainer.appendChild(recentNode);
+            
+            const treeRoot = document.createElement('div');
+            treeContainer.appendChild(treeRoot);
+            renderTree(currentTree, treeRoot);
 
             // Auto-select folder if folderId query parameter is present in URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -35,8 +73,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (folderId) {
                 const targetNode = treeContainer.querySelector(`.tree-node-content[data-id="${folderId}"]`);
                 if (targetNode) {
+                    recentNode.querySelector('.tree-node-content').classList.remove('selected');
+                    recentNode.querySelector('.tree-icon-container').innerHTML = `
+                        <svg class="tree-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M12 8V12L15 15" stroke="var(--primary-color, #38bdf8)" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="12" r="9" stroke="var(--primary-color, #38bdf8)" stroke-width="2"/>
+                        </svg>
+                    `;
                     targetNode.click();
                 }
+            } else {
+                loadRecentDocuments();
             }
         } catch (err) {
             console.error(err);
@@ -110,7 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.tree-node-content').forEach(el => {
                     el.classList.remove('selected');
                     const iconSpan = el.querySelector('.tree-icon-container');
-                    if (iconSpan) iconSpan.innerHTML = getFolderIconSvg(false);
+                    if (iconSpan) {
+                        if (el.id === 'recent-docs-tree-node') {
+                            iconSpan.innerHTML = `
+                                <svg class="tree-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                                    <path d="M12 8V12L15 15" stroke="var(--primary-color, #38bdf8)" stroke-width="2" stroke-linecap="round"/>
+                                    <circle cx="12" cy="12" r="9" stroke="var(--primary-color, #38bdf8)" stroke-width="2"/>
+                                </svg>
+                            `;
+                        } else {
+                            iconSpan.innerHTML = getFolderIconSvg(false);
+                        }
+                    }
                 });
                 contentEl.classList.add('selected');
                 const activeIconSpan = contentEl.querySelector('.tree-icon-container');
@@ -239,6 +297,71 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error(err);
             docContainer.innerHTML = '<span style="color:#ef4444">Error loading documents</span>';
+        }
+    }
+
+    async function loadRecentDocuments() {
+        docContainer.innerHTML = '<div style="color: #94a3b8; text-align:center; margin-top:40px;">Loading recent documents...</div>';
+        try {
+            const res = await fetch('/api/repo/documents/recent', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Failed to load recent documents');
+            const docs = await res.json();
+            
+            if (docs.length === 0) {
+                docContainer.innerHTML = `
+                    <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 18px; margin-bottom: 24px;">
+                        <h3 style="color:white; margin:0; font-size: 18px; font-weight: 800; letter-spacing: -0.02em;">Recent Documents</h3>
+                    </div>
+                    <div style="color: #94a3b8; text-align:center; margin-top:40px;">No recent documents found.</div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 18px; margin-bottom: 24px;">
+                    <h3 style="color:white; margin:0; font-size: 18px; font-weight: 800; letter-spacing: -0.02em;">Recent Documents</h3>
+                </div>
+                <div class="modern-file-grid">
+            `;
+            
+            docs.forEach(doc => {
+                const dateStr = doc.created_at ? new Date(doc.created_at).toLocaleDateString() : 'Unknown';
+                html += `
+                    <div class="file-card" onclick="viewDocument(${doc.id})">
+                        <div class="file-card-top">
+                            <div class="file-icon-wrapper">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" 
+                                          stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="file-badge">${doc.page_count} pgs</div>
+                        </div>
+                        <div class="file-card-info">
+                            <h4 class="file-title" title="${doc.title}">${doc.title}</h4>
+                            <div class="file-meta">
+                                <span class="meta-label">Ref/Subject:</span>
+                                <span class="meta-value" title="${doc.reference_no || '—'}">${doc.reference_no || '—'}</span>
+                            </div>
+                            <div class="file-card-footer">
+                                <span class="file-date">📁 ${doc.folder_name || 'Root'}</span>
+                                <span class="file-date">📅 ${dateStr}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            docContainer.innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            docContainer.innerHTML = '<span style="color:#ef4444">Error loading recent documents</span>';
         }
     }
 

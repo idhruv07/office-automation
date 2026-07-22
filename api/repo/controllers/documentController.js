@@ -431,11 +431,40 @@ async function searchRepository(req, res) {
     }
 }
 
+async function getRecentDocuments(req, res) {
+    try {
+        console.log('[API getRecentDocuments] User:', req.user?.id);
+        if (!await isOfficeAdminHierarchy(req.user.id, db)) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        const result = await db.query(
+            `SELECT d.*, fn.name as folder_name,
+                    COUNT(dp.id)::int as page_count,
+                    MAX(dp.page_date) as latest_page_date
+             FROM documents d
+             LEFT JOIN folder_nodes fn ON d.folder_id = fn.id
+             LEFT JOIN document_pages dp ON dp.document_id = d.id
+             WHERE (d.owner_office_id = (SELECT office_id FROM users WHERE id = $1) OR d.owner_office_id IS NULL)
+               AND d.status = 'active'
+             GROUP BY d.id, fn.name
+             ORDER BY d.created_at DESC, d.id DESC
+             LIMIT 10`,
+            [req.user.id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('GET /api/repo/documents/recent error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
 module.exports = {
     getDocuments,
     getDocumentPages,
     getPage,
     updatePage,
     getPageVersions,
-    searchRepository
+    searchRepository,
+    getRecentDocuments
 };

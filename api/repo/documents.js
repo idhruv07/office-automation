@@ -12,6 +12,7 @@ const wfController = require('./controllers/workflowController');
 const transController = require('./controllers/transferController');
 
 // Document & Page retrieval / editing routes
+router.get('/documents/recent', authenticateToken, docController.getRecentDocuments);
 router.get('/documents', authenticateToken, docController.getDocuments);
 router.get('/document/:id/pages', authenticateToken, docController.getDocumentPages);
 router.get('/page/:id', authenticateToken, docController.getPage);
