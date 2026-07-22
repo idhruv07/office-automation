@@ -759,9 +759,14 @@
                     <div id="global-search-results" class="repo-search-results"></div>
                 </div>
                 <div id="action-buttons" style="display: flex; gap: 8px; align-items: center;">
-                    <button id="btn-print" class="header-btn" style="background:#0284c7;" onclick="window.triggerPrint()">
-                        <span class="material-symbols-outlined" style="font-size:18px;">print</span> Print
-                    </button>
+                    <div style="position: relative; display: inline-flex;">
+                        <button id="btn-print" class="header-btn" style="background:#0284c7; border-radius: 8px 0 0 8px;" onclick="window.triggerPrint(false)" title="Print First Page Only (Default)">
+                            <span class="material-symbols-outlined" style="font-size:18px;">print</span> Print Page 1
+                        </button>
+                        <button class="header-btn" style="background:#0369a1; border-radius: 0 8px 8px 0; padding: 0 8px; border-left: 1px solid rgba(255,255,255,0.2);" onclick="window.triggerPrint(true)" title="Print All Pages">
+                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                        </button>
+                    </div>
                     <button id="btn-history" class="header-btn" style="background:#475569; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">history</span> History
                     </button>
@@ -974,10 +979,14 @@
                     </select>
 
                     <!-- Page Margins Select -->
-                    <select id="select-page-margins" onchange="updatePageLayout()" title="Page Margins" class="toolbar-select" style="width: 105px;">
-                        <option value="normal" selected>Normal Margin</option>
-                        <option value="narrow">Narrow Margin</option>
-                        <option value="wide">Wide Margin</option>
+                    <select id="select-page-margins" onchange="updatePageLayout()" title="Page Margins" class="toolbar-select" style="width: 125px;">
+                        <option value="none">None (0mm)</option>
+                        <option value="compact">Compact (5mm)</option>
+                        <option value="narrow" selected>Narrow (10mm)</option>
+                        <option value="moderate">Moderate (15mm)</option>
+                        <option value="normal">Normal (20mm)</option>
+                        <option value="wide">Wide (25mm)</option>
+                        <option value="extra-wide">Extra Wide (30mm)</option>
                     </select>
 
                     <button id="btn-toggle-ruler" onclick="toggleRuler()" title="Toggle Ruler"><span class="material-symbols-outlined">straighten</span></button>
@@ -2827,7 +2836,13 @@
             // The old editorEl-level autosave is removed since editing is now per page block.
 
             // Smart print: flush unsaved changes before opening print dialog
-            window.triggerPrint = async function() {
+            window.triggerPrint = async function(printAll = false) {
+                if (printAll) {
+                    document.body.classList.add('print-all-pages');
+                } else {
+                    document.body.classList.remove('print-all-pages');
+                }
+
                 const activeBlock = getActiveBlock();
                 if (activeBlock) {
                     // There is an active edit session — save silently first
@@ -2839,9 +2854,13 @@
                         await savePage(editingPageIdNow, activeBlockWrapper, true);
                     }
                     // Small delay to let the DOM finish updating
-                    setTimeout(() => window.print(), 300);
+                    setTimeout(() => {
+                        window.print();
+                        setTimeout(() => document.body.classList.remove('print-all-pages'), 1000);
+                    }, 300);
                 } else {
                     window.print();
+                    setTimeout(() => document.body.classList.remove('print-all-pages'), 1000);
                 }
             };
 
@@ -3406,18 +3425,28 @@
                     heightMm = temp;
                 }
 
-                let marginMm = 20;
-                if (margin === 'narrow') marginMm = 10;
-                else if (margin === 'wide') marginMm = 30;
+                let marginMm = 10; // Narrow margin by default (10mm)
+                if (margin === 'none') marginMm = 0;
+                else if (margin === 'compact') marginMm = 5;
+                else if (margin === 'narrow') marginMm = 10;
+                else if (margin === 'moderate') marginMm = 15;
+                else if (margin === 'normal') marginMm = 20;
+                else if (margin === 'wide') marginMm = 25;
+                else if (margin === 'extra-wide') marginMm = 30;
                 
                 // Update print page size rule and visual page guide inside editor
                 styleEl.innerHTML = `
                     @media print {
                         @page {
                             size: ${size} ${orientation};
-                            margin: 0; /* Borderless page to allow exact dimensions match */
+                            margin: 0mm !important; /* Removes browser default headers/footers (date, title, URL, page count) */
                         }
                         
+                        /* By default, only show the first page in print / print preview */
+                        body:not(.print-all-pages) .page-block:not(:first-child) {
+                            display: none !important;
+                        }
+
                         /* Hide all screen-only UI elements completely */
                         #sidebar, #sidebar-toggle, .no-print, .claim-action-bar, button, .btn, .theme-selector, aside,
                         #toolbar, .toolbar, .toolbar-modern, .page-sidebar, #page-list, .page-divider, #lock-banner, .doc-header-wrapper,
@@ -3471,7 +3500,7 @@
                             width: ${widthMm}mm !important;
                             max-width: ${widthMm}mm !important;
                             min-height: ${heightMm}mm !important;
-                            padding: ${marginMm}mm !important; /* Matches screen guide padding for true WYSIWYG preview */
+                            padding: ${marginMm}mm !important;
                             margin: 0 auto !important;
                             border: none !important;
                             box-shadow: none !important;
@@ -3481,7 +3510,12 @@
                             background-image: none !important;
                         }
 
-                        /* Guarantee Heading 1-6 tags display block and print visibility (overriding display: none on h1 in style.css) */
+                        /* Reduce vacant space at top of Page 1 in print */
+                        .page-block:first-child .page-block-content {
+                            padding-top: 6mm !important;
+                        }
+
+                        /* Guarantee Heading 1-6 tags display block and print visibility */
                         .page-block-content h1,
                         .page-block-content h2,
                         .page-block-content h3,
@@ -3493,7 +3527,6 @@
                             background-color: transparent !important;
                         }
                         
-                        /* Force black ink for all content elements without breaking their layout displays (tables, inline elements, etc.) */
                         .page-block-content,
                         .page-block-content * {
                             color: #000000 !important;
@@ -3512,10 +3545,20 @@
                             border: none !important;
                             border-bottom: 1px dashed #cbd5e1 !important;
                             box-shadow: none !important;
-                            padding: 10mm ${marginMm}mm ${marginMm}mm ${marginMm}mm !important;
+                            padding: ${marginMm}mm !important;
                             box-sizing: border-box !important;
                             position: relative !important;
                         }
+
+                        /* Reduce vacant top margin space on Page 1 */
+                        .page-block:first-child .page-block-content {
+                            padding-top: 6mm !important;
+                        }
+                        .page-block:first-child .fwd-letterhead {
+                            margin-bottom: 12px !important;
+                        }
+                    }
+                `;
                         
                         /* Explicitly force page break visibility when layout guides are active */
                         .page-block-content .pb-break {
