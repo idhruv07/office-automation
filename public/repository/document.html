@@ -589,11 +589,26 @@
 
         .pb-break {
             border: none !important;
-            border-top: 2px solid #f43f5e !important;
-            margin: 24px 0 !important;
+            border-top: 1px dashed #94a3b8 !important;
+            margin: 32px 0 !important;
             position: relative !important;
             height: 1px !important;
             clear: both !important;
+        }
+        .pb-break::after {
+            content: 'PAGE BREAK';
+            position: absolute;
+            right: 0;
+            top: -10px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            letter-spacing: 0.5px;
+            z-index: 5;
         }
 
         /* Auto-hiding menu rules in editing mode */
@@ -3142,15 +3157,6 @@
                             margin-right: auto !important;
                             box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
                             background-color: white !important;
-                            background-image: repeating-linear-gradient(
-                                to bottom,
-                                transparent 0px,
-                                transparent calc(${heightMm}mm - 2px),
-                                #f43f5e calc(${heightMm}mm - 2px),
-                                #f43f5e ${heightMm}mm
-                            ) !important;
-                            background-size: 100% ${heightMm}mm !important;
-                            background-repeat: repeat-y !important;
                             border: 1px solid #cbd5e1 !important;
                             padding: ${marginMm}mm !important;
                             box-sizing: border-box !important;
@@ -3162,12 +3168,28 @@
                         .page-block-content .pb-break {
                             display: block !important;
                             border: none !important;
-                            border-top: 2px solid #f43f5e !important;
-                            margin: 24px 0 !important;
+                            border-top: 1px dashed #94a3b8 !important;
+                            margin: 32px 0 !important;
                             position: relative !important;
                             height: 1px !important;
                             clear: both !important;
                             visibility: visible !important;
+                        }
+                        
+                        .page-block-content .pb-break::after {
+                            content: 'PAGE BREAK';
+                            position: absolute;
+                            right: 0;
+                            top: -10px;
+                            background: #ffffff;
+                            color: #64748b;
+                            font-size: 9px;
+                            font-weight: bold;
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            border: 1px solid #cbd5e1;
+                            letter-spacing: 0.5px;
+                            z-index: 5;
                         }
                         
                         .page-content-area {
