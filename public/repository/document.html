@@ -313,6 +313,8 @@
         .page-block-content {
             min-height: 200px;
             outline: none;
+            user-select: text !important;
+            -webkit-user-select: text !important;
         }
         .page-block-content:focus {
             outline: none;
@@ -2459,12 +2461,6 @@
                                     return;
                                 }
                             }
-                        } else {
-                            const fragment = range.cloneContents();
-                            if (fragment.querySelector('.pb-break')) {
-                                e.preventDefault();
-                                return;
-                            }
                         }
                     }
                 }
@@ -4051,8 +4047,34 @@
                 const html = clipboardData.getData('text/html');
                 if (html) {
                     e.preventDefault();
+                    
+                    // Sanitize pasted HTML to prevent layout breakage
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Remove layout-breaking elements like style, meta, title, link, head
+                    doc.querySelectorAll('style, meta, title, link, head').forEach(el => el.remove());
+                    
+                    // Clean up inline styles that disrupt layout
+                    doc.querySelectorAll('*').forEach(el => {
+                        let style = el.getAttribute('style') || '';
+                        if (style) {
+                            style = style.replace(/page-break-[^;]+;?/gi, '');
+                            style = style.replace(/size:[^;]+;?/gi, '');
+                            style = style.replace(/margin:[^;]+;?/gi, '');
+                            style = style.replace(/position:\s*absolute;?/gi, '');
+                            style = style.replace(/width:\s*\d+(pt|px|in|cm|mm);?/gi, '');
+                            el.setAttribute('style', style);
+                        }
+                    });
+                    
+                    const cleanHtml = doc.body.innerHTML;
+                    
                     // Clean and paste rich HTML directly to preserve formatting
-                    document.execCommand('insertHTML', false, html);
+                    document.execCommand('insertHTML', false, cleanHtml);
+                    
+                    // Dispatch input event to trigger auto-save
+                    activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
                     return;
                 }
 

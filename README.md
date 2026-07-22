@@ -284,3 +284,9 @@ The following core updates, tooling enhancements, and system corrections have be
 ### UI & Styling Corrections
 - **Login Field Visibility**: Fixed typed credential visibility inside username and password fields on the secure login portal by increasing input element styling specificity (`.login-page-body .profile-edit-field input`) to override colliding profile rules.
 
+### Text Selection, Copy-Paste, & Deletion Enhancements
+- **Text Selection & Copying outside Edit Mode**: Added explicit `user-select: text` styling to the document editor page content blocks to guarantee that text selection and copying work correctly when viewing documents in non-edit mode.
+- **Multi-line Text Deletion**: Fixed an issue where text selections spanning across a page break (`.pb-break`) could not be deleted using Backspace/Delete by relaxing the deletion block criteria in the keyboard event handler.
+- **Pasted Rich HTML Auto-Save**: Fixed a bug where pasting rich HTML content from external sources (like MS Word or Google Docs) failed to trigger auto-save by ensuring a custom `input` event is dispatched after programmatic insertion.
+- **MS Word Style Sanitization**: Added HTML sanitization during paste events to automatically strip layout-breaking elements (`<style>`, `<meta>`, `<link>`, `<head>`) and conflicting inline style properties (like absolute margins, page sizes, and fixed widths) which previously caused page layouts and print margins to break randomly.
+
