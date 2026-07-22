@@ -704,22 +704,22 @@
         }
 
         .header-btn {
-            height: 38px !important;
-            padding: 0 16px !important;
-            border-radius: 8px !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 6px !important;
-            border: none !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            color: #ffffff !important;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
-            line-height: 1 !important;
-            white-space: nowrap !important;
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+            white-space: nowrap;
         }
         .header-btn:hover {
             transform: translateY(-1px) !important;
@@ -1909,10 +1909,10 @@
                 // Show edit/history buttons for active page
                 const page = allPages.find(p => p.id == pageId);
                 if (page) {
-                    btnHistory.style.display = 'block';
+                    btnHistory.style.display = 'none'; // History accessible from workflow panel
                     editingVersion = page._version;
                     if (page._isEditable && editorEl.querySelector('.page-block-content[contenteditable="true"]') === null) {
-                        btnEdit.style.display = 'block';
+                        btnEdit.style.display = 'inline-flex';
                         btnEdit.onclick = () => acquireLockAndEdit(pageId, page);
                     }
                     if (page._lock) {
@@ -1971,7 +1971,7 @@
                         // Update edit button for this page
                         if (editorEl.querySelector('.page-block-content[contenteditable="true"]') === null) {
                             const page = allPages.find(p => p.id == bestPageId);
-                            btnEdit.style.display = page?._isEditable ? 'block' : 'none';
+                            btnEdit.style.display = page?._isEditable ? 'inline-flex' : 'none';
                             btnEdit.onclick = () => acquireLockAndEdit(bestPageId, page);
                             editingVersion = page?._version;
                             if (page?._lock) {
@@ -2127,8 +2127,8 @@
                     block.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     
                     btnEdit.style.display = 'none';
-                    btnSave.style.display = 'block';
-                    btnCancel.style.display = 'block';
+                    btnSave.style.display = 'inline-flex';
+                    btnCancel.style.display = 'inline-flex';
                     editingVersion = pageObj._version;
 
                     btnCancel.onclick = async () => {
@@ -2144,12 +2144,10 @@
                         toolbarEl.style.display = 'none';
                         btnSave.style.display = 'none';
                         btnCancel.style.display = 'none';
-                        btnEdit.style.display = 'block';
+                        btnEdit.style.display = 'inline-flex';
                         btnEdit.onclick = () => acquireLockAndEdit(pageId, pageObj);
                         
                         document.body.classList.remove('editing-active');
-                        const header = document.querySelector('.doc-header-wrapper');
-                        if (header) header.style.transform = '';
                     };
 
                     btnSave.onclick = async () => { await savePage(pageId, blockContent, false); };
@@ -2247,7 +2245,7 @@
                                 toolbarEl.style.display = 'none';
                                 btnSave.style.display = 'none';
                                 btnCancel.style.display = 'none';
-                                btnEdit.style.display = 'block';
+                                btnEdit.style.display = 'inline-flex';
                                 const p = allPages.find(pg => pg.id == pageId);
                                 btnEdit.onclick = () => acquireLockAndEdit(pageId, p);
                                 indicator.style.color = '#10b981';
@@ -3634,7 +3632,7 @@
             setTimeout(() => {
                 const savedSize = localStorage.getItem('doc_page_size') || 'a4';
                 const savedOrientation = localStorage.getItem('doc_page_orientation') || 'portrait';
-                const savedMargins = localStorage.getItem('doc_page_margins') || 'normal';
+                const savedMargins = localStorage.getItem('doc_page_margins') || 'narrow';
                 
                 const selectSize = document.getElementById('select-page-size');
                 const selectOrientation = document.getElementById('select-page-orientation');
