@@ -2559,7 +2559,7 @@ tr:hover td {
     display: block;
 }
 
-.login-edit-panel input {
+.login-page-body .profile-edit-field input {
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     color: #0f172a !important;
@@ -2569,7 +2569,7 @@ tr:hover td {
     height: 42px;
 }
 
-.login-edit-panel input:focus {
+.login-page-body .profile-edit-field input:focus {
     border-color: var(--primary-color, #2563eb) !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
     outline: none !important;
