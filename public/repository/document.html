@@ -579,12 +579,11 @@
             .pb-break {
                 page-break-after: always !important;
                 border: none !important;
+                border-top: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 height: 0 !important;
-            }
-            .pb-break::after {
-                display: none !important;
+                visibility: hidden !important;
             }
         }
 
@@ -1448,8 +1447,9 @@
                     firstItem.innerText = `Page ${visualPageCount}`;
                     
                     firstItem.onclick = () => {
-                        block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        scrollToElement(block, 'smooth');
                         highlightSidebarPageItem(firstItem);
+                        highlightSidebarPage(blockId);
                     };
                     pageListEl.appendChild(firstItem);
                     visualPageCount++;
@@ -1464,8 +1464,9 @@
                         subItem.innerText = `Page ${visualPageCount}`;
                         
                         subItem.onclick = () => {
-                            pb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            scrollToElement(pb, 'smooth');
                             highlightSidebarPageItem(subItem);
+                            highlightSidebarPage(blockId);
                         };
                         pageListEl.appendChild(subItem);
                         visualPageCount++;
@@ -1500,8 +1501,8 @@
 
                 if (targetPageId) {
                     setTimeout(() => {
-                        scrollToPage(targetPageId);
-                    }, 100);
+                        scrollToPage(targetPageId, 'auto');
+                    }, 200);
                 }
             } catch (err) {
                 console.error(err);
@@ -1553,10 +1554,26 @@
                 highlightSidebarPage(allPages[0]?.id);
             }
 
-            function scrollToPage(pageId) {
+            function scrollToElement(element, behavior = 'smooth') {
+                const viewer = document.getElementById('page-viewer');
+                if (!element || !viewer) return;
+                
+                const rect = element.getBoundingClientRect();
+                const viewerRect = viewer.getBoundingClientRect();
+                
+                // 40px is padding-top of .page-content-area
+                const offset = viewer.scrollTop + (rect.top - viewerRect.top) - 40;
+                
+                viewer.scrollTo({
+                    top: offset,
+                    behavior: behavior
+                });
+            }
+
+            function scrollToPage(pageId, behavior = 'smooth') {
                 const block = editorEl.querySelector(`.page-block[data-page-id="${pageId}"]`);
                 if (block) {
-                    block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    scrollToElement(block, behavior);
                     highlightSidebarPage(pageId);
                 }
             }
@@ -1605,21 +1622,21 @@
                     
                     if (targets.length === 0) return;
                     
-                    // Find the target element closest to the top of the viewer
                     const viewerRect = viewer.getBoundingClientRect();
+                    const threshold = viewerRect.top + 60; // 60px down from viewer top
                     let bestIndex = 0;
-                    let minDistance = Infinity;
-                    let bestPageId = null;
+                    let bestPageId = targets[0].pageId;
                     
-                    targets.forEach((target, index) => {
+                    for (let i = 0; i < targets.length; i++) {
+                        const target = targets[i];
                         const rect = target.element.getBoundingClientRect();
-                        const distance = Math.abs(rect.top - viewerRect.top);
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            bestIndex = index;
+                        if (rect.top <= threshold) {
+                            bestIndex = i;
                             bestPageId = target.pageId;
+                        } else {
+                            break;
                         }
-                    });
+                    }
                     
                     // Highlight the page item at the corresponding index in the sidebar page list
                     const pageItems = Array.from(document.querySelectorAll('.page-item'));
@@ -2983,6 +3000,16 @@
                         }
                         .page-block:last-child {
                             page-break-after: avoid !important;
+                        }
+                        .pb-break {
+                            page-break-after: always !important;
+                            border: none !important;
+                            border-top: none !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            height: 0 !important;
+                            visibility: hidden !important;
+                            display: block !important;
                         }
 
                         .page-block-content {
