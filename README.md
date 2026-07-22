@@ -270,7 +270,7 @@ The following core updates, tooling enhancements, and system corrections have be
 - **Unzip System Fallback**: Added native system `unzip` command check and execution in `install.js` to bypass JavaScript decompression limits and reduce dependency installations.
 
 ### Document Viewer & Print Optimization
-- **Browser Print Header Suppression**: Integrated `@page { margin: 0; }` configuration into both static and dynamic stylesheets, which suppresses browser-generated print metadata headers (date, page title, URL, page counters) that normally print in margins.
+- **Browser Print Header Suppression**: Integrated `@page { margin: 0; }` configuration into both static and dynamic stylesheets, which suppresses browser-generated print metadata headers (date, page title, URL, page counters) that normally print in margins. Fixed a syntax issue by removing invalid `!important` keywords from dynamic `@page` rules, ensuring browsers respect the borderless print page dimensions and margins.
 - **Print Spacing & Layout**: Added compensation margins (`body { padding: 12mm; }`) to restore layout boundaries when printing, and eliminated pink/red visual page break lines (`.pb-break`) from rendering on printed sheets.
 
 ### Paging & Advanced Editor Tooling
@@ -279,6 +279,7 @@ The following core updates, tooling enhancements, and system corrections have be
 - **Menu Hover Hide/Reveal**: Configured the navigation bar to auto-hide in editor mode, sliding down into view when hover triggers at the top edge of the viewport.
 - **Format & Page Margin Actions**: Integrated controls for Page Margins, Premium Format Painter, Clear Formatting, Top Ruler guide, and a complete Find & Replace panel within the editor view.
 - **Word File Direct Pasting**: Integrated direct clipboard format capture to support copying from Microsoft Word (`.docx`) files with rich text styling preserved.
+- **Recent Documents List**: Added a dedicated "Recent Documents" node at the top of the repository navigation tree. When selected (or loaded by default when no specific folder is in the query path), it queries the database for the 10 most recent active documents that the logged-in individual is authorized to view, showing the file name and the subject/reference number.
 
 ### UI & Styling Corrections
 - **Login Field Visibility**: Fixed typed credential visibility inside username and password fields on the secure login portal by increasing input element styling specificity (`.login-page-body .profile-edit-field input`) to override colliding profile rules.
