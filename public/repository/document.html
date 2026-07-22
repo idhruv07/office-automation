@@ -686,54 +686,54 @@
             z-index: 5;
         }
 
-        /* Auto-hiding menu rules in editing mode */
-        body.editing-active .doc-header-wrapper {
-            position: fixed !important;
-            top: 0 !important;
-            left: 280px !important; /* Align to the right of the main sidebar */
-            right: 0 !important;
-            margin: 0 !important;
-            padding: 12px 24px !important;
-            z-index: 99999 !important;
-            transform: translateY(-100%);
-            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
-            background: rgba(15, 23, 42, 0.96) !important;
-            backdrop-filter: blur(10px) !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-            width: auto !important; /* Let it scale fluidly relative to left/right offsets */
-            box-sizing: border-box !important;
+        /* Header wrapper clean layout styles */
+        .doc-header-wrapper {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 12px 20px !important;
+            margin-bottom: 20px !important;
+            background: #0f172a !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+            position: relative !important;
+            z-index: 1001 !important;
+            transform: none !important;
+            transition: none !important;
         }
-        #app-container.sidebar-collapsed .doc-header-wrapper {
-            left: 70px !important; /* Align to collapsed sidebar */
+
+        .header-btn {
+            height: 38px !important;
+            padding: 0 16px !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            border: none !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
         }
-        /* Hover trigger overlay at the top of viewport */
-        #top-menu-hover-trigger {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 280px; /* Align to sidebar */
-            right: 0;
-            height: 12px;
-            z-index: 99998;
-            background: transparent;
+        .header-btn:hover {
+            transform: translateY(-1px) !important;
+            filter: brightness(1.1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
-        #app-container.sidebar-collapsed #top-menu-hover-trigger {
-            left: 70px !important;
-        }
-        body.editing-active #top-menu-hover-trigger {
-            display: block;
-        }
-        /* Show the header wrapper when trigger or wrapper is hovered */
-        body.editing-active #top-menu-hover-trigger:hover ~ #repo-app .doc-header-wrapper,
-        body.editing-active .doc-header-wrapper:hover {
+        .header-btn:active {
             transform: translateY(0) !important;
         }
     </style>
 </head>
 <body>
     <div id="repo-app" style="width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px;">
-        <div class="doc-header-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative; z-index: 1001;">
+        <div class="doc-header-wrapper">
             <div class="breadcrumb-container">
                 <h2 style="margin:0; display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <a href="/repository/index.html" style="color:#94a3b8; text-decoration:none;">Repository</a>
@@ -748,33 +748,33 @@
                     </div>
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div class="repo-search-container">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="repo-search-container" style="width: 280px;">
                     <span class="search-icon-svg">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 18px; height: 18px; color: #64748b;">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </span>
-                    <input id="global-search-input" type="text" placeholder="Search files, contents, metadata..." class="repo-search-input">
+                    <input id="global-search-input" type="text" placeholder="Search files, contents..." class="repo-search-input" style="height: 38px;">
                     <div id="global-search-results" class="repo-search-results"></div>
                 </div>
-                <div id="action-buttons" style="display: flex; gap: 12px;">
-                    <button id="btn-print" class="btn-primary" style="background:#0284c7; display:flex; align-items:center;" onclick="window.triggerPrint()">
+                <div id="action-buttons" style="display: flex; gap: 8px; align-items: center;">
+                    <button id="btn-print" class="header-btn" style="background:#0284c7;" onclick="window.triggerPrint()">
                         <span class="material-symbols-outlined" style="font-size:18px;">print</span> Print
                     </button>
-                    <button id="btn-history" class="btn-primary" style="background:#64748b; display:none;">
+                    <button id="btn-history" class="header-btn" style="background:#475569; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">history</span> History
                     </button>
-                    <button id="btn-edit" class="btn-primary" style="display:none;">
+                    <button id="btn-edit" class="header-btn" style="background:#3b82f6; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">edit</span> Edit Page
                     </button>
-                    <button id="btn-save" class="btn-primary" style="background:#10b981; display:none;">
+                    <button id="btn-save" class="header-btn" style="background:#10b981; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">save</span> Save Changes
                     </button>
-                    <button id="btn-cancel" class="btn-primary" style="background:#ef4444; display:none;">
+                    <button id="btn-cancel" class="header-btn" style="background:#ef4444; display:none;">
                         <span class="material-symbols-outlined" style="font-size:18px;">close</span> Cancel
                     </button>
-                    <button id="btn-workflow-toggle" onclick="const p = document.getElementById('workflow-panel'); const isHidden = (p.style.display === 'none' || p.style.display === ''); if (isHidden) { p.style.display = 'flex'; p.offsetHeight; p.style.transform = 'translateX(0%)'; if (typeof window.markWorkflowCommentsAsSeen === 'function') window.markWorkflowCommentsAsSeen(); } else { p.style.transform = 'translateX(100%)'; setTimeout(() => { if (p.style.transform === 'translateX(100%)') p.style.display = 'none'; }, 300); } event.stopPropagation();" class="btn-primary" style="background:#8b5cf6; display:flex; align-items:center; gap:6px; position:relative; z-index:1001;">
+                    <button id="btn-workflow-toggle" onclick="const p = document.getElementById('workflow-panel'); const isHidden = (p.style.display === 'none' || p.style.display === ''); if (isHidden) { p.style.display = 'flex'; p.offsetHeight; p.style.transform = 'translateX(0%)'; if (typeof window.markWorkflowCommentsAsSeen === 'function') window.markWorkflowCommentsAsSeen(); } else { p.style.transform = 'translateX(100%)'; setTimeout(() => { if (p.style.transform === 'translateX(100%)') p.style.display = 'none'; }, 300); } event.stopPropagation();" class="header-btn" style="background:#8b5cf6;">
                         <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span> Workflow <span id="wf-badge-count" style="display:none; background:#ef4444; color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:4px; font-weight:bold; line-height:1;">0</span>
                     </button>
                 </div>
@@ -808,13 +808,13 @@
                 </div>
                 <div id="toolbar" class="toolbar-modern">
                     <!-- History actions -->
-                    <button onclick="document.execCommand('undo')" title="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
-                    <button onclick="document.execCommand('redo')" title="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
+                    <button onclick="window.customUndo()" title="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
+                    <button onclick="window.customRedo()" title="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
                     
                     <span class="toolbar-separator"></span>
                     
                     <!-- Font Family Select -->
-                    <select id="font-family-select" onchange="applyFontFamily(this.value)" title="Font Family" class="toolbar-select" style="width: 140px;">
+                    <select id="font-family-select" onmousedown="window.saveCurrentEditorSelection()" onchange="applyFontFamily(this.value)" title="Font Family" class="toolbar-select" style="width: 140px;">
                         <option value="Times New Roman" selected>Times New Roman</option>
                         <option value="Arial">Arial</option>
                         <option value="Calibri">Calibri</option>
@@ -825,7 +825,7 @@
                     </select>
 
                     <!-- Font Size Custom Input -->
-                    <input type="text" id="font-size-input" list="font-sizes" value="13pt" title="Font Size" class="toolbar-select" style="width: 90px; text-align: left; padding: 4px 6px 4px 10px;" onchange="applyFontSize(this.value)">
+                    <input type="text" id="font-size-input" list="font-sizes" value="13pt" title="Font Size" class="toolbar-select" style="width: 90px; text-align: left; padding: 4px 6px 4px 10px;" onmousedown="window.saveCurrentEditorSelection()" onfocus="window.saveCurrentEditorSelection()" onkeydown="if(event.key==='Enter'){ applyFontSize(this.value); event.preventDefault(); }" onchange="applyFontSize(this.value)">
                     <datalist id="font-sizes">
                         <option value="10pt">10pt</option>
                         <option value="11pt">11pt</option>
@@ -1111,32 +1111,126 @@
     <script src="/assets/menu.js"></script>
     <script src="/assets/layout.js"></script>
     <script>
+        // ----------------------------------------------------
+        // Selection Preservation & Undo/Redo Engine
+        // ----------------------------------------------------
+        window.lastEditorSelectionRange = null;
+        window.editorUndoStack = [];
+        window.editorRedoStack = [];
+
+        window.saveCurrentEditorSelection = function() {
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed) {
+                window.lastEditorSelectionRange = sel.getRangeAt(0).cloneRange();
+            }
+        };
+
+        document.addEventListener('selectionchange', () => {
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed) {
+                const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
+                if (activeBlock && activeBlock.contains(sel.anchorNode)) {
+                    window.lastEditorSelectionRange = sel.getRangeAt(0).cloneRange();
+                }
+            }
+        });
+
+        window.pushUndoState = function() {
+            const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
+            if (!activeBlock) return;
+            const html = activeBlock.innerHTML;
+            if (window.editorUndoStack.length === 0 || window.editorUndoStack[window.editorUndoStack.length - 1] !== html) {
+                window.editorUndoStack.push(html);
+                if (window.editorUndoStack.length > 50) window.editorUndoStack.shift();
+                window.editorRedoStack = [];
+            }
+        };
+
+        window.customUndo = function() {
+            const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
+            if (!activeBlock) {
+                document.execCommand('undo');
+                return;
+            }
+            if (window.editorUndoStack.length > 1) {
+                const currentState = window.editorUndoStack.pop();
+                window.editorRedoStack.push(currentState);
+                const prevState = window.editorUndoStack[window.editorUndoStack.length - 1];
+                activeBlock.innerHTML = prevState;
+                activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
+            } else {
+                document.execCommand('undo');
+            }
+        };
+
+        window.customRedo = function() {
+            const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
+            if (!activeBlock) {
+                document.execCommand('redo');
+                return;
+            }
+            if (window.editorRedoStack.length > 0) {
+                const nextState = window.editorRedoStack.pop();
+                window.editorUndoStack.push(nextState);
+                activeBlock.innerHTML = nextState;
+                activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
+            } else {
+                document.execCommand('redo');
+            }
+        };
+
         window.applyFontFamily = function(font) {
+            if (!font) return;
+            window.pushUndoState();
+            let sel = window.getSelection();
+            if ((!sel.rangeCount || sel.getRangeAt(0).collapsed) && window.lastEditorSelectionRange) {
+                sel.removeAllRanges();
+                sel.addRange(window.lastEditorSelectionRange);
+            }
             document.execCommand('fontName', false, font);
+            if (sel.rangeCount > 0) {
+                window.lastEditorSelectionRange = sel.getRangeAt(0).cloneRange();
+            }
         };
 
         window.applyFontSize = function(sizeVal) {
-            let size = sizeVal;
+            if (!sizeVal) return;
+            let size = sizeVal.trim();
             if (!isNaN(size)) {
                 size = size + 'pt';
             }
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                if (range.toString().length === 0) return;
-                
-                const span = document.createElement('span');
-                span.style.fontSize = size;
-                try {
-                    range.surroundContents(span);
-                } catch (e) {
-                    const html = `<span style="font-size: ${size};">${range.toString()}</span>`;
-                    document.execCommand('insertHTML', false, html);
-                }
-                const activeBlock = getActiveBlock();
-                if (activeBlock) {
-                    activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
-                }
+            let sel = window.getSelection();
+            let range = null;
+
+            if (sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && sel.getRangeAt(0).toString().length > 0) {
+                range = sel.getRangeAt(0);
+            } else if (window.lastEditorSelectionRange && !window.lastEditorSelectionRange.collapsed) {
+                sel.removeAllRanges();
+                sel.addRange(window.lastEditorSelectionRange);
+                range = window.lastEditorSelectionRange;
+            }
+
+            if (!range || range.collapsed || range.toString().length === 0) return;
+
+            window.pushUndoState();
+
+            const span = document.createElement('span');
+            span.style.fontSize = size;
+            try {
+                range.surroundContents(span);
+            } catch (e) {
+                const html = `<span style="font-size: ${size};">${range.toString()}</span>`;
+                document.execCommand('insertHTML', false, html);
+            }
+
+            const selAfter = window.getSelection();
+            if (selAfter.rangeCount > 0) {
+                window.lastEditorSelectionRange = selAfter.getRangeAt(0).cloneRange();
+            }
+
+            const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
+            if (activeBlock) {
+                activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
             }
         };
 
@@ -1932,6 +2026,8 @@
 
                     lockBanner.style.display = 'none';
                     blockContent.contentEditable = 'true';
+                    window.editorUndoStack = [blockContent.innerHTML];
+                    window.editorRedoStack = [];
 
                     // Automatically prepend Page 1 with header if it doesn't exist yet, or update it if already present
                     const isFirstPage = (pageId == allPages[0]?.id);
@@ -2499,6 +2595,22 @@
                     }
                 }
 
+                // Ctrl + Z / Ctrl + Y Undo Redo handlers
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        window.customRedo();
+                    } else {
+                        window.customUndo();
+                    }
+                    return;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+                    e.preventDefault();
+                    window.customRedo();
+                    return;
+                }
+
                 // Ctrl + Enter to trigger page break
                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                     e.preventDefault();
@@ -2845,6 +2957,9 @@
                 const row = cell.closest('tr');
                 const table = cell.closest('table');
                 if (!table || !row) return;
+
+                // Push current HTML snapshot to Undo stack before applying table modification
+                window.pushUndoState();
 
                 if (action === 'mergeCenter') {
                     const nextCell = cell.nextElementSibling;
