@@ -439,16 +439,42 @@ async function getRecentDocuments(req, res) {
         }
 
         const result = await db.query(
-            `SELECT d.*, fn.name as folder_name,
+            `WITH user_edits AS (
+                SELECT d.id,
+                       MAX(dpv.edited_at) as user_last_edited_at,
+                       1 as sort_priority
+                FROM documents d
+                JOIN document_pages dp ON dp.document_id = d.id
+                JOIN document_page_versions dpv ON dpv.page_id = dp.id
+                WHERE dpv.edited_by = $1 AND d.status = 'active'
+                GROUP BY d.id
+             ),
+             all_accessible AS (
+                SELECT d.id,
+                       d.created_at as fallback_date,
+                       2 as sort_priority
+                FROM documents d
+                WHERE (d.owner_office_id = (SELECT office_id FROM users WHERE id = $1) OR d.owner_office_id IS NULL)
+                  AND d.status = 'active'
+             ),
+             combined AS (
+                SELECT id, user_last_edited_at as sort_date, sort_priority FROM user_edits
+                UNION ALL
+                SELECT id, fallback_date as sort_date, sort_priority FROM all_accessible
+                WHERE id NOT IN (SELECT id FROM user_edits)
+             )
+             SELECT d.id, d.title, d.reference_no, d.created_at,
                     COUNT(dp.id)::int as page_count,
-                    MAX(dp.page_date) as latest_page_date
-             FROM documents d
+                    MAX(dp.page_date) as latest_page_date,
+                    fn.name as folder_name,
+                    c.sort_date,
+                    c.sort_priority
+             FROM combined c
+             JOIN documents d ON c.id = d.id
              LEFT JOIN folder_nodes fn ON d.folder_id = fn.id
              LEFT JOIN document_pages dp ON dp.document_id = d.id
-             WHERE (d.owner_office_id = (SELECT office_id FROM users WHERE id = $1) OR d.owner_office_id IS NULL)
-               AND d.status = 'active'
-             GROUP BY d.id, fn.name
-             ORDER BY d.created_at DESC, d.id DESC
+             GROUP BY d.id, fn.name, c.sort_date, c.sort_priority
+             ORDER BY c.sort_priority ASC, c.sort_date DESC, d.id DESC
              LIMIT 10`,
             [req.user.id]
         );
