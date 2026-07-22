@@ -3151,17 +3151,17 @@
                     @media screen {
                         /* Visual page guide inside editor for selected layout */
                         .page-block-content {
-                            max-width: ${widthMm}mm !important;
+                            max-width: 100% !important;
+                            width: 100% !important;
                             min-height: ${heightMm}mm !important;
-                            margin-left: auto !important;
-                            margin-right: auto !important;
-                            box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+                            margin: 0 auto !important;
                             background-color: white !important;
-                            border: 1px solid #cbd5e1 !important;
+                            border: none !important;
+                            border-bottom: 1px dashed #cbd5e1 !important;
+                            box-shadow: none !important;
                             padding: ${marginMm}mm !important;
                             box-sizing: border-box !important;
                             position: relative !important;
-                            margin-bottom: 30px !important;
                         }
                         
                         /* Explicitly force page break visibility when layout guides are active */
@@ -3179,7 +3179,7 @@
                         .page-block-content .pb-break::after {
                             content: 'PAGE BREAK';
                             position: absolute;
-                            right: 0;
+                            right: 20px;
                             top: -10px;
                             background: #ffffff;
                             color: #64748b;
@@ -3193,13 +3193,13 @@
                         }
                         
                         .page-content-area {
-                            background: #f1f5f9 !important;
-                            padding: 40px 20px !important;
+                            background: white !important;
+                            padding: 0 !important;
                         }
                         
                         #editor-content {
-                            max-width: ${widthMm + 20}mm !important;
-                            margin: 0 auto !important;
+                            max-width: 100% !important;
+                            margin: 0 !important;
                         }
                     }
                 `;
@@ -3212,7 +3212,7 @@
                 // Update ruler size and re-render if it is visible
                 const ruler = document.getElementById('editor-ruler');
                 if (ruler) {
-                    ruler.style.maxWidth = `${widthMm}mm`;
+                    ruler.style.maxWidth = '100%';
                     if (ruler.style.display === 'block') {
                         window.renderRuler();
                     }
