@@ -77,4 +77,27 @@ router.post('/upload-image', authenticateToken, upload.single('image'), async (r
     }
 });
 
+// Convert uploaded .docx document directly to HTML to preserve formatting
+router.post('/convert-docx-to-html', authenticateToken, upload.single('document'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No document file uploaded' });
+        }
+
+        const mammoth = require('mammoth');
+        const tempPath = req.file.path;
+        
+        // Convert using mammoth
+        const result = await mammoth.convertToHtml({ path: tempPath });
+        
+        // Clean up temp file
+        await fs.remove(tempPath);
+
+        res.json({ html: result.value, warnings: result.warnings });
+    } catch (err) {
+        console.error('Docx conversion failed:', err);
+        res.status(500).json({ message: 'Failed to convert Word document to HTML' });
+    }
+});
+
 module.exports = router;
