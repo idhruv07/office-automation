@@ -228,6 +228,79 @@
             font-weight: 600;
             padding-top: 4px;
         }
+        
+        /* Custom Toolbar Dropdowns & Color Pickers */
+        .toolbar-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .toolbar-dropdown-trigger {
+            padding: 6px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            min-width: 32px;
+            transition: all 0.2s;
+        }
+        .toolbar-dropdown-trigger:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: #cbd5e1;
+        }
+        .toolbar-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            min-width: 150px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 8px;
+            z-index: 10000;
+        }
+        .toolbar-dropdown:hover .toolbar-dropdown-content {
+            display: block;
+        }
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            width: 120px;
+        }
+        .color-option {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.1s;
+        }
+        .color-option:hover {
+            transform: scale(1.15);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .spacing-option {
+            display: block;
+            padding: 6px 12px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        .spacing-option:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
         #editor-content {
             min-height: 500px;
             outline: none;
@@ -749,39 +822,58 @@
                         <option value="Segoe UI">Segoe UI</option>
                     </select>
 
-                    <!-- Font Size Select -->
-                    <select id="font-size-select" onchange="applyFontSize(this.value)" title="Font Size" class="toolbar-select" style="width: 75px;">
-                        <option value="1">10pt</option>
-                        <option value="2">11pt</option>
-                        <option value="3">12pt</option>
-                        <option value="4" selected>13pt</option>
-                        <option value="5">14pt</option>
-                        <option value="6">18pt</option>
-                        <option value="7">24pt</option>
-                    </select>
+                    <!-- Font Size Custom Input -->
+                    <input type="text" id="font-size-input" list="font-sizes" value="13pt" title="Font Size" class="toolbar-select" style="width: 65px; text-align: center;" onchange="applyFontSize(this.value)">
+                    <datalist id="font-sizes">
+                        <option value="10pt">10pt</option>
+                        <option value="11pt">11pt</option>
+                        <option value="12pt">12pt</option>
+                        <option value="13pt">13pt</option>
+                        <option value="14pt">14pt</option>
+                        <option value="18pt">18pt</option>
+                        <option value="24pt">24pt</option>
+                        <option value="36pt">36pt</option>
+                    </datalist>
 
-                    <!-- Font Color Select -->
-                    <select id="font-color-select" onchange="document.execCommand('foreColor', false, this.value); this.value='';" title="Font Color" class="toolbar-select" style="width: 100px;">
-                        <option value="" disabled selected>Font Color</option>
-                        <option value="#000000">Black</option>
-                        <option value="#ef4444">Red</option>
-                        <option value="#3b82f6">Blue</option>
-                        <option value="#10b981">Green</option>
-                        <option value="#8b5cf6">Purple</option>
-                        <option value="#f59e0b">Orange</option>
-                        <option value="#64748b">Slate Gray</option>
-                    </select>
-                    
-                    <!-- Highlight Color Select -->
-                    <select id="text-highlight-select" onchange="document.execCommand('backColor', false, this.value); this.value='';" title="Highlight Color" class="toolbar-select" style="width: 100px;">
-                        <option value="" disabled selected>Highlight</option>
-                        <option value="#fef08a">Yellow</option>
-                        <option value="#bbf7d0">Green</option>
-                        <option value="#bfdbfe">Blue</option>
-                        <option value="#fbcfe8">Pink</option>
-                        <option value="#fcd34d">Amber</option>
-                        <option value="transparent">Clear</option>
-                    </select>
+                    <!-- Font Color Picker Dropdown -->
+                    <div class="toolbar-dropdown">
+                        <button class="toolbar-dropdown-trigger" title="Font Color" onmousedown="event.preventDefault()">
+                            <span class="material-symbols-outlined">format_color_text</span>
+                        </button>
+                        <div class="toolbar-dropdown-content" style="min-width: unset; padding: 8px;">
+                            <div class="color-grid">
+                                <div class="color-option" style="background-color: #000000;" title="Black" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#000000')"></div>
+                                <div class="color-option" style="background-color: #ef4444;" title="Red" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#ef4444')"></div>
+                                <div class="color-option" style="background-color: #3b82f6;" title="Blue" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#3b82f6')"></div>
+                                <div class="color-option" style="background-color: #10b981;" title="Green" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#10b981')"></div>
+                                <div class="color-option" style="background-color: #8b5cf6;" title="Purple" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#8b5cf6')"></div>
+                                <div class="color-option" style="background-color: #f59e0b;" title="Orange" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#f59e0b')"></div>
+                                <div class="color-option" style="background-color: #64748b;" title="Gray" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#64748b')"></div>
+                                <div class="color-option" style="background-color: #ec4899;" title="Pink" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#ec4899')"></div>
+                                <div class="color-option" style="background-color: #14b8a6;" title="Teal" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#14b8a6')"></div>
+                                <div class="color-option" style="background-color: #a855f7;" title="Amethyst" onmousedown="event.preventDefault()" onclick="document.execCommand('foreColor', false, '#a855f7')"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Highlight Color Picker Dropdown -->
+                    <div class="toolbar-dropdown">
+                        <button class="toolbar-dropdown-trigger" title="Highlight Color" onmousedown="event.preventDefault()">
+                            <span class="material-symbols-outlined">border_color</span>
+                        </button>
+                        <div class="toolbar-dropdown-content" style="min-width: unset; padding: 8px;">
+                            <div class="color-grid">
+                                <div class="color-option" style="background-color: #fef08a;" title="Yellow" onmousedown="event.preventDefault()" onclick="document.execCommand('backColor', false, '#fef08a')"></div>
+                                <div class="color-option" style="background-color: #bbf7d0;" title="Green" onmousedown="event.preventDefault()" onclick="document.execCommand('backColor', false, '#bbf7d0')"></div>
+                                <div class="color-option" style="background-color: #bfdbfe;" title="Blue" onmousedown="event.preventDefault()" onclick="document.execCommand('backColor', false, '#bfdbfe')"></div>
+                                <div class="color-option" style="background-color: #fbcfe8;" title="Pink" onmousedown="event.preventDefault()" onclick="document.execCommand('backColor', false, '#fbcfe8')"></div>
+                                <div class="color-option" style="background-color: #fcd34d;" title="Orange" onmousedown="event.preventDefault()" onclick="document.execCommand('backColor', false, '#fcd34d')"></div>
+                                <div class="color-option" style="background-color: transparent; border: 1px solid #cbd5e1; position: relative; display: flex; align-items: center; justify-content: center;" title="Clear" onmousedown="event.preventDefault()" onclick="document.execCommand('backColor', false, 'transparent')">
+                                    <div style="width: 100%; height: 2px; background: red; transform: rotate(45deg);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <span class="toolbar-separator"></span>
 
@@ -850,14 +942,19 @@
                         <option value="cross">✘ Cross</option>
                     </select>
                     <span class="toolbar-separator"></span>
-                    <select id="line-spacing-select" onchange="applyLineSpacing(this.value)" title="Line Spacing" class="toolbar-select" style="width: 120px;">
-                        <option value="" disabled selected>Line Spacing</option>
-                        <option value="0">0px (No Spacing)</option>
-                        <option value="1.0">1.0 (Single)</option>
-                        <option value="1.15">1.15</option>
-                        <option value="1.5">1.5</option>
-                        <option value="2.0">2.0 (Double)</option>
-                    </select>
+                    <!-- Line Spacing Dropdown -->
+                    <div class="toolbar-dropdown">
+                        <button class="toolbar-dropdown-trigger" title="Line Spacing" onmousedown="event.preventDefault()">
+                            <span class="material-symbols-outlined">format_line_spacing</span>
+                        </button>
+                        <div class="toolbar-dropdown-content" style="min-width: 100px; padding: 4px 0;">
+                            <a href="#" class="spacing-option" onmousedown="event.preventDefault()" onclick="applyLineSpacing('0')">0px</a>
+                            <a href="#" class="spacing-option" onmousedown="event.preventDefault()" onclick="applyLineSpacing('1.0')">1.0 (Single)</a>
+                            <a href="#" class="spacing-option" onmousedown="event.preventDefault()" onclick="applyLineSpacing('1.15')">1.15</a>
+                            <a href="#" class="spacing-option" onmousedown="event.preventDefault()" onclick="applyLineSpacing('1.5')">1.5</a>
+                            <a href="#" class="spacing-option" onmousedown="event.preventDefault()" onclick="applyLineSpacing('2.0')">2.0 (Double)</a>
+                        </div>
+                    </div>
                     
                     <span class="toolbar-separator"></span>
                     
@@ -1016,8 +1113,29 @@
             document.execCommand('fontName', false, font);
         };
 
-        window.applyFontSize = function(size) {
-            document.execCommand('fontSize', false, size);
+        window.applyFontSize = function(sizeVal) {
+            let size = sizeVal;
+            if (!isNaN(size)) {
+                size = size + 'pt';
+            }
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                if (range.toString().length === 0) return;
+                
+                const span = document.createElement('span');
+                span.style.fontSize = size;
+                try {
+                    range.surroundContents(span);
+                } catch (e) {
+                    const html = `<span style="font-size: ${size};">${range.toString()}</span>`;
+                    document.execCommand('insertHTML', false, html);
+                }
+                const activeBlock = getActiveBlock();
+                if (activeBlock) {
+                    activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
         };
 
         async function initBreadcrumbs() {
@@ -2569,8 +2687,22 @@
             window.triggerImageInsert = function() {
                 const activeBlock = getActiveBlock();
                 if (!activeBlock) return;
+                
+                // Save selection range before prompt modal disrupts it
+                const sel = window.getSelection();
+                let range = null;
+                if (sel.rangeCount > 0) {
+                    range = sel.getRangeAt(0).cloneRange();
+                }
+                
                 const url = prompt("Enter Image URL (e.g. /storage/assets/... or /admin/images/emblem.png):");
                 if (url) {
+                    // Restore focus and selection range
+                    activeBlock.focus();
+                    if (range) {
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
                     const imgHtml = `<img src="${url}" style="max-width: 100%; height: auto; display: block; margin: 10px auto;" />`;
                     document.execCommand('insertHTML', false, imgHtml);
                 }
@@ -2749,12 +2881,45 @@
                         }
                     });
                 } else if (action === 'deleteRow') {
-                    row.remove();
+                    const rowsToDelete = new Set();
+                    const range = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+                    if (range) {
+                        Array.from(table.rows).forEach(r => {
+                            if (sel.containsNode(r, true) || range.intersectsNode(r)) {
+                                rowsToDelete.add(r);
+                            }
+                        });
+                    }
+                    if (rowsToDelete.size > 0) {
+                        rowsToDelete.forEach(r => r.remove());
+                    } else {
+                        row.remove();
+                    }
                 } else if (action === 'deleteCol') {
-                    const cellIndex = cell.cellIndex;
-                    Array.from(table.rows).forEach(r => {
-                        if (r.cells[cellIndex]) r.cells[cellIndex].remove();
-                    });
+                    const colsToDelete = new Set();
+                    const range = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+                    if (range) {
+                        Array.from(table.rows).forEach(r => {
+                            Array.from(r.cells).forEach((c, idx) => {
+                                if (sel.containsNode(c, true) || range.intersectsNode(c)) {
+                                    colsToDelete.add(idx);
+                                }
+                            });
+                        });
+                    }
+                    if (colsToDelete.size > 0) {
+                        const sortedCols = Array.from(colsToDelete).sort((a, b) => b - a);
+                        sortedCols.forEach(cellIndex => {
+                            Array.from(table.rows).forEach(r => {
+                                if (r.cells[cellIndex]) r.cells[cellIndex].remove();
+                            });
+                        });
+                    } else {
+                        const cellIndex = cell.cellIndex;
+                        Array.from(table.rows).forEach(r => {
+                            if (r.cells[cellIndex]) r.cells[cellIndex].remove();
+                        });
+                    }
                 } else if (action === 'alignLeft') {
                     cell.style.textAlign = 'left';
                 } else if (action === 'alignCenter') {
@@ -3228,10 +3393,12 @@
                         
                         #toolbar {
                             margin: 0 !important;
-                            position: static !important;
+                            position: sticky !important;
+                            top: 0 !important;
+                            z-index: 1000 !important;
                             border-radius: 8px 8px 0 0 !important;
                             border: 1px solid #cbd5e1 !important;
-                            border-bottom: none !important;
+                            border-bottom: 1px solid #e2e8f0 !important;
                             width: 100% !important;
                             box-sizing: border-box !important;
                             display: flex !important;
@@ -4342,12 +4509,47 @@
                         }
                     });
                 } else if (action === 'deleteRow') {
-                    row.remove();
+                    const rowsToDelete = new Set();
+                    const sel = window.getSelection();
+                    const range = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+                    if (range) {
+                        Array.from(table.rows).forEach(r => {
+                            if (sel.containsNode(r, true) || range.intersectsNode(r)) {
+                                rowsToDelete.add(r);
+                            }
+                        });
+                    }
+                    if (rowsToDelete.size > 0) {
+                        rowsToDelete.forEach(r => r.remove());
+                    } else {
+                        row.remove();
+                    }
                 } else if (action === 'deleteCol') {
-                    const cellIndex = cell.cellIndex;
-                    Array.from(table.rows).forEach(r => {
-                        if (r.cells[cellIndex]) r.cells[cellIndex].remove();
-                    });
+                    const colsToDelete = new Set();
+                    const sel = window.getSelection();
+                    const range = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+                    if (range) {
+                        Array.from(table.rows).forEach(r => {
+                            Array.from(r.cells).forEach((c, idx) => {
+                                if (sel.containsNode(c, true) || range.intersectsNode(c)) {
+                                    colsToDelete.add(idx);
+                                }
+                            });
+                        });
+                    }
+                    if (colsToDelete.size > 0) {
+                        const sortedCols = Array.from(colsToDelete).sort((a, b) => b - a);
+                        sortedCols.forEach(cellIndex => {
+                            Array.from(table.rows).forEach(r => {
+                                if (r.cells[cellIndex]) r.cells[cellIndex].remove();
+                            });
+                        });
+                    } else {
+                        const cellIndex = cell.cellIndex;
+                        Array.from(table.rows).forEach(r => {
+                            if (r.cells[cellIndex]) r.cells[cellIndex].remove();
+                        });
+                    }
                 } else if (action === 'deleteTable') {
                     if (confirm('Are you sure you want to delete this table?')) {
                         table.remove();
