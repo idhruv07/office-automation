@@ -1,3 +1,81 @@
+// ------------------------------------------------------------------
+// Global Security Session Manager (Token Expiry, 401 Interceptor, Back-Button Protection)
+// ------------------------------------------------------------------
+(function() {
+    function isTokenExpired(token) {
+        if (!token) return true;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.exp && payload.exp * 1000 < Date.now()) {
+                return true;
+            }
+            return false;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function purgeAndRedirectToLogin() {
+        try {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            localStorage.removeItem('role');
+            localStorage.removeItem('must_reset');
+            sessionStorage.clear();
+        } catch(e) {}
+        
+        // Immediately wipe all body content to prevent sensitive data visibility
+        if (document.body) {
+            document.body.innerHTML = `
+                <div style="height: 100vh; width: 100vw; background: #0f172a; color: white; display: flex; align-items: center; justify-content: center; font-family: system-ui, sans-serif; position: fixed; inset: 0; z-index: 9999999;">
+                    <div style="background: #1e293b; padding: 28px 36px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center; box-shadow: 0 20px 30px rgba(0,0,0,0.5);">
+                        <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: #f8fafc;">Session Expired</h2>
+                        <p style="margin: 0; color: #94a3b8; font-size: 14px;">Your session has ended. Redirecting to login screen...</p>
+                    </div>
+                </div>
+            `;
+        }
+        window.location.href = '/';
+    }
+
+    window.purgeAndRedirectToLogin = purgeAndRedirectToLogin;
+    window.isTokenExpired = isTokenExpired;
+
+    const isPublicPage = window.location.pathname === '/' || window.location.pathname === '/index.html' || window.location.pathname === '/change-password.html';
+    if (!isPublicPage) {
+        const token = localStorage.getItem('token');
+        if (!token || isTokenExpired(token)) {
+            purgeAndRedirectToLogin();
+            return;
+        }
+    }
+
+    // Global Fetch Interceptor for 401 Unauthorized / 403 Invalid Token responses
+    if (!window._fetchInterceptorInstalled) {
+        window._fetchInterceptorInstalled = true;
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            try {
+                const response = await originalFetch.apply(this, args);
+                if (response.status === 401) {
+                    purgeAndRedirectToLogin();
+                }
+                return response;
+            } catch (err) {
+                throw err;
+            }
+        };
+    }
+
+    // Browser Back-Button (bfcache) Protection
+    window.addEventListener('pageshow', (e) => {
+        const currentToken = localStorage.getItem('token');
+        if (!isPublicPage && (!currentToken || isTokenExpired(currentToken))) {
+            purgeAndRedirectToLogin();
+        }
+    });
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     // Inject Tailwind and theme fonts for all pages
     if (!document.getElementById('tailwind-script')) {
@@ -66,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const mustReset = localStorage.getItem('must_reset') === 'true';
 
-    if (!token) {
-        window.location.href = '/';
+    if (!token || window.isTokenExpired(token)) {
+        window.purgeAndRedirectToLogin();
         return;
     }
 

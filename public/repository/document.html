@@ -1301,7 +1301,16 @@
             if (!docId) { window.location.href = '/repository'; return; }
 
             const token = localStorage.getItem('token');
-            if (!token) { window.location.href = '/'; return; }
+            if (!token || (typeof window.isTokenExpired === 'function' && window.isTokenExpired(token))) {
+                if (typeof window.purgeAndRedirectToLogin === 'function') {
+                    window.purgeAndRedirectToLogin();
+                } else {
+                    localStorage.clear();
+                    document.body.innerHTML = '';
+                    window.location.href = '/';
+                }
+                return;
+            }
 
             let currentPageId = null;
             let currentVersion = null;

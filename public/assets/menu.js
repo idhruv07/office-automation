@@ -198,14 +198,16 @@ class MenuRenderer {
                     const app = document.getElementById('app-container');
                     if (app) {
                         app.classList.add('tv-off');
-                        setTimeout(() => {
-                            localStorage.clear();
-                            window.location.href = '/';
-                        }, 1350);
-                    } else {
-                        localStorage.clear();
-                        window.location.href = '/';
                     }
+                    setTimeout(() => {
+                        if (typeof window.purgeAndRedirectToLogin === 'function') {
+                            window.purgeAndRedirectToLogin();
+                        } else {
+                            localStorage.clear();
+                            document.body.innerHTML = '';
+                            window.location.href = '/';
+                        }
+                    }, 350);
                 });
             }
 
