@@ -612,13 +612,10 @@
         }
 
         /* Auto-hiding menu rules in editing mode */
-        body.editing-active #sidebar {
-            display: none !important;
-        }
         body.editing-active .doc-header-wrapper {
             position: fixed !important;
             top: 0 !important;
-            left: 0 !important;
+            left: 280px !important; /* Align to the right of the main sidebar */
             right: 0 !important;
             margin: 0 !important;
             padding: 12px 24px !important;
@@ -629,25 +626,30 @@
             backdrop-filter: blur(10px) !important;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-            width: 100% !important;
+            width: auto !important; /* Let it scale fluidly relative to left/right offsets */
             box-sizing: border-box !important;
+        }
+        #app-container.sidebar-collapsed .doc-header-wrapper {
+            left: 70px !important; /* Align to collapsed sidebar */
         }
         /* Hover trigger overlay at the top of viewport */
         #top-menu-hover-trigger {
             display: none;
             position: fixed;
             top: 0;
-            left: 0;
+            left: 280px; /* Align to sidebar */
             right: 0;
             height: 12px;
             z-index: 99998;
             background: transparent;
         }
+        #app-container.sidebar-collapsed #top-menu-hover-trigger {
+            left: 70px !important;
+        }
         body.editing-active #top-menu-hover-trigger {
             display: block;
         }
         /* Show the header wrapper when trigger or wrapper is hovered */
-        body.editing-active #top-menu-hover-trigger:hover ~ #app-container .doc-header-wrapper,
         body.editing-active #top-menu-hover-trigger:hover ~ #repo-app .doc-header-wrapper,
         body.editing-active .doc-header-wrapper:hover {
             transform: translateY(0) !important;
@@ -3569,7 +3571,8 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const trigger = document.createElement('div');
                 trigger.id = 'top-menu-hover-trigger';
-                document.body.prepend(trigger);
+                const mainContent = document.getElementById('main-content') || document.body;
+                mainContent.prepend(trigger);
                 
                 const header = document.querySelector('.doc-header-wrapper');
                 
