@@ -425,4 +425,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialization
     loadTree();
+
+    // Dynamic recent documents refresh: triggered when returning from document editor
+    // The editor sets 'repo_recent_refresh' in localStorage after a successful save.
+    let _lastRefreshTimestamp = null;
+
+    function checkRecentRefresh() {
+        try {
+            const ts = localStorage.getItem('repo_recent_refresh');
+            if (ts && ts !== _lastRefreshTimestamp) {
+                _lastRefreshTimestamp = ts;
+                // Only refresh if the Recent Documents panel is currently active
+                const recentNodeContent = document.getElementById('recent-docs-tree-node');
+                if (recentNodeContent && recentNodeContent.classList.contains('selected')) {
+                    loadRecentDocuments();
+                }
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // Listen for storage changes from the document editor (same window)
+    window.addEventListener('storage', checkRecentRefresh);
+
+    // Also re-check when the user returns to this tab after editing
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            checkRecentRefresh();
+        }
+    });
 });

@@ -759,7 +759,7 @@
                     <div id="global-search-results" class="repo-search-results"></div>
                 </div>
                 <div id="action-buttons" style="display: flex; gap: 12px;">
-                    <button id="btn-print" class="btn-primary" style="background:#0284c7; display:flex; align-items:center;" onclick="window.print()">
+                    <button id="btn-print" class="btn-primary" style="background:#0284c7; display:flex; align-items:center;" onclick="window.triggerPrint()">
                         <span class="material-symbols-outlined" style="font-size:18px;">print</span> Print
                     </button>
                     <button id="btn-history" class="btn-primary" style="background:#64748b; display:none;">
@@ -2049,7 +2049,11 @@
 
                     btnSave.onclick = async () => { await savePage(pageId, blockContent, false); };
 
-                    // Setup autosave for this block
+                    // Setup autosave for this block (use AbortController to avoid stacking listeners)
+                    if (blockContent._autoSaveAbortCtrl) {
+                        blockContent._autoSaveAbortCtrl.abort();
+                    }
+                    blockContent._autoSaveAbortCtrl = new AbortController();
                     blockContent.addEventListener('input', () => {
                         if (blockContent.contentEditable !== 'true') return;
                         indicator.style.display = 'inline';
@@ -2063,7 +2067,7 @@
                             indicator.innerText = 'Saved';
                             setTimeout(() => { if(indicator.innerText==='Saved') indicator.style.display='none'; }, 2000);
                         }, 2000);
-                    });
+                    }, { signal: blockContent._autoSaveAbortCtrl.signal });
 
                 } catch (err) {
                     console.error(err);
@@ -2149,6 +2153,9 @@
                                 document.body.classList.remove('editing-active');
                                 const header = document.querySelector('.doc-header-wrapper');
                                 if (header) header.style.transform = '';
+                                
+                                // Signal repository page to refresh recent documents list
+                                try { localStorage.setItem('repo_recent_refresh', Date.now()); } catch(e) {}
                             }
                         }
                         rebuildPageNavigation();
@@ -2414,6 +2421,33 @@
                     const selection = window.getSelection();
                     if (selection.rangeCount > 0) {
                         const range = selection.getRangeAt(0);
+
+                        // If selection is non-collapsed and spans a .pb-break, preserve them
+                        if (!range.collapsed) {
+                            const fragment = range.cloneContents();
+                            if (fragment.querySelector('.pb-break')) {
+                                e.preventDefault();
+                                // Collect breaks to re-insert
+                                const breaks = Array.from(fragment.querySelectorAll('.pb-break')).map(br => br.cloneNode(true));
+                                // Delete selected content
+                                range.deleteContents();
+                                // Re-insert page breaks at the collapsed cursor position
+                                const sel2 = window.getSelection();
+                                if (sel2.rangeCount > 0) {
+                                    const pos = sel2.getRangeAt(0);
+                                    breaks.forEach(br => {
+                                        pos.insertNode(br);
+                                        pos.setStartAfter(br);
+                                        pos.collapse(true);
+                                    });
+                                    sel2.removeAllRanges();
+                                    sel2.addRange(pos);
+                                }
+                                // Trigger autosave
+                                activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
+                                return;
+                            }
+                        }
                         
                         if (range.collapsed) {
                             if (e.key === 'Backspace') {
@@ -2679,6 +2713,25 @@
 
             // (Per-block autosave is handled inside acquireLockAndEdit when the block becomes editable)
             // The old editorEl-level autosave is removed since editing is now per page block.
+
+            // Smart print: flush unsaved changes before opening print dialog
+            window.triggerPrint = async function() {
+                const activeBlock = getActiveBlock();
+                if (activeBlock) {
+                    // There is an active edit session — save silently first
+                    const activeBlockWrapper = editorEl.querySelector('.page-block-content[contenteditable="true"]');
+                    const parentBlock = activeBlockWrapper ? activeBlockWrapper.closest('.page-block') : null;
+                    const editingPageIdNow = parentBlock ? parentBlock.dataset.pageId : currentPageId;
+                    if (editingPageIdNow && activeBlockWrapper) {
+                        clearTimeout(autoSaveTimeout);
+                        await savePage(editingPageIdNow, activeBlockWrapper, true);
+                    }
+                    // Small delay to let the DOM finish updating
+                    setTimeout(() => window.print(), 300);
+                } else {
+                    window.print();
+                }
+            };
 
             window.triggerImageInsert = function() {
                 const activeBlock = getActiveBlock();
@@ -3344,7 +3397,7 @@
                             border: none !important;
                             border-bottom: 1px dashed #cbd5e1 !important;
                             box-shadow: none !important;
-                            padding: ${marginMm}mm !important;
+                            padding: 10mm ${marginMm}mm ${marginMm}mm ${marginMm}mm !important;
                             box-sizing: border-box !important;
                             position: relative !important;
                         }
@@ -4073,8 +4126,8 @@
                     // Clean and paste rich HTML directly to preserve formatting
                     document.execCommand('insertHTML', false, cleanHtml);
                     
-                    // Dispatch input event to trigger auto-save
-                    activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
+                    // Dispatch input event to trigger auto-save after DOM settles
+                    setTimeout(() => activeBlock.dispatchEvent(new Event('input', { bubbles: true })), 100);
                     return;
                 }
 
