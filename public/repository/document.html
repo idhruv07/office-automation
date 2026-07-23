@@ -686,7 +686,7 @@
                 page-break-after: avoid;
             }
             /* DEFAULT: Only print Page 1 — applies to both Print button and Ctrl+P */
-            body:not(.print-all-pages) .page-block:not(:first-child) {
+            body:not(.print-all-pages) .page-block ~ .page-block {
                 display: none !important;
             }
             .pb-break {
@@ -3609,7 +3609,7 @@
                         }
                         
                         /* By default, only show the first page in print / print preview */
-                        body:not(.print-all-pages) .page-block:not(:first-child) {
+                        body:not(.print-all-pages) .page-block ~ .page-block {
                             display: none !important;
                         }
 
