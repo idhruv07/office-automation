@@ -302,6 +302,20 @@
             background: #f1f5f9;
             color: #0f172a;
         }
+        .dropdown-option {
+            display: block;
+            padding: 6px 12px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .dropdown-option:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
 
         #editor-content {
             min-height: 500px;
@@ -825,29 +839,40 @@
                     
                     <span class="toolbar-separator"></span>
                     
-                    <!-- Font Family Select -->
-                    <select id="font-family-select" onmousedown="window.saveCurrentEditorSelection()" onchange="applyFontFamily(this.value)" title="Font Family" class="toolbar-select" style="width: 140px;">
-                        <option value="Times New Roman" selected>Times New Roman</option>
-                        <option value="Arial">Arial</option>
-                        <option value="Calibri">Calibri</option>
-                        <option value="Courier New">Courier New</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="Verdana">Verdana</option>
-                        <option value="Segoe UI">Segoe UI</option>
-                    </select>
+                    <!-- Font Family Dropdown -->
+                    <div class="toolbar-dropdown">
+                        <button class="toolbar-dropdown-trigger" style="width: 140px; justify-content: space-between; font-family: inherit; font-size: 13px;" onmousedown="event.preventDefault()">
+                            <span id="current-font-family">Times New Roman</span>
+                            <span style="font-size: 10px; color: #94a3b8; margin-left: 6px;">▼</span>
+                        </button>
+                        <div class="toolbar-dropdown-content" style="min-width: 160px; max-height: 200px; overflow-y: auto; padding: 4px 0;">
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontFamily('Times New Roman')">Times New Roman</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontFamily('Arial')">Arial</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontFamily('Calibri')">Calibri</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontFamily('Courier New')">Courier New</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontFamily('Georgia')">Georgia</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontFamily('Verdana')">Verdana</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontFamily('Segoe UI')">Segoe UI</div>
+                        </div>
+                    </div>
 
-                    <!-- Font Size Custom Input -->
-                    <input type="text" id="font-size-input" list="font-sizes" value="13pt" title="Font Size" class="toolbar-select" style="width: 90px; text-align: left; padding: 4px 6px 4px 10px;" onmousedown="window.saveCurrentEditorSelection()" onfocus="window.saveCurrentEditorSelection()" onkeydown="if(event.key==='Enter'){ applyFontSize(this.value); event.preventDefault(); }" onchange="applyFontSize(this.value)">
-                    <datalist id="font-sizes">
-                        <option value="10pt">10pt</option>
-                        <option value="11pt">11pt</option>
-                        <option value="12pt">12pt</option>
-                        <option value="13pt">13pt</option>
-                        <option value="14pt">14pt</option>
-                        <option value="18pt">18pt</option>
-                        <option value="24pt">24pt</option>
-                        <option value="36pt">36pt</option>
-                    </datalist>
+                    <!-- Font Size Dropdown -->
+                    <div class="toolbar-dropdown">
+                        <button class="toolbar-dropdown-trigger" style="width: 70px; justify-content: space-between; font-family: inherit; font-size: 13px;" onmousedown="event.preventDefault()">
+                            <span id="current-font-size">13pt</span>
+                            <span style="font-size: 10px; color: #94a3b8; margin-left: 4px;">▼</span>
+                        </button>
+                        <div class="toolbar-dropdown-content" style="min-width: 80px; max-height: 200px; overflow-y: auto; padding: 4px 0;">
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('10pt')">10pt</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('11pt')">11pt</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('12pt')">12pt</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('13pt')">13pt</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('14pt')">14pt</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('18pt')">18pt</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('24pt')">24pt</div>
+                            <div class="dropdown-option" onmousedown="event.preventDefault()" onclick="applyFontSize('36pt')">36pt</div>
+                        </div>
+                    </div>
 
                     <!-- Font Color Picker Dropdown -->
                     <div class="toolbar-dropdown">
@@ -1211,6 +1236,9 @@
             if (sel.rangeCount > 0) {
                 window.lastEditorSelectionRange = sel.getRangeAt(0).cloneRange();
             }
+            // Update custom dropdown label
+            const label = document.getElementById('current-font-family');
+            if (label) label.innerText = font;
         };
 
         window.applyFontSize = function(sizeVal) {
@@ -1229,27 +1257,33 @@
                 sel.addRange(window.lastEditorSelectionRange);
             }
             if (!sel.rangeCount || sel.getRangeAt(0).collapsed) return;
-            let range = sel.getRangeAt(0);
 
             window.pushUndoState();
 
-            const span = document.createElement('span');
-            span.style.fontSize = size;
-            try {
-                range.surroundContents(span);
-            } catch (e) {
-                const html = `<span style="font-size: ${size};">${range.toString()}</span>`;
-                document.execCommand('insertHTML', false, html);
+            // Native execCommand to wrap selection in <font size="7">
+            document.execCommand('fontSize', false, '7');
+
+            // Replace all <font size="7"> tags with custom <span> style
+            if (activeBlock) {
+                const fontTags = activeBlock.querySelectorAll('font[size="7"]');
+                fontTags.forEach(tag => {
+                    const span = document.createElement('span');
+                    span.style.fontSize = size;
+                    span.innerHTML = tag.innerHTML;
+                    tag.parentNode.replaceChild(span, tag);
+                });
+                activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
+            // Resave selection range
             const selAfter = window.getSelection();
             if (selAfter.rangeCount > 0) {
                 window.lastEditorSelectionRange = selAfter.getRangeAt(0).cloneRange();
             }
-
-            if (activeBlock) {
-                activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+            
+            // Update custom dropdown label
+            const label = document.getElementById('current-font-size');
+            if (label) label.innerText = size;
         };
 
         async function initBreadcrumbs() {
