@@ -1,6 +1,6 @@
 const PgBoss = require('pg-boss');
 
-const connectionString = 'postgres://postgres:postgrespassword@127.0.0.1:5433/repo_db';
+const connectionString = 'postgres://postgres:postgres@127.0.0.1:5432/repo_db';
 
 const queue = new PgBoss(connectionString);
 
