@@ -335,6 +335,23 @@
         .page-block-content:focus {
             outline: none;
         }
+        /* Ensure numbered and bulleted lists are styled and visible in editor */
+        .page-block-content ul {
+            list-style-type: disc !important;
+            padding-left: 30px !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+        }
+        .page-block-content ol {
+            list-style-type: decimal !important;
+            padding-left: 30px !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+        }
+        .page-block-content li {
+            display: list-item !important;
+            margin-bottom: 4px !important;
+        }
         .page-divider {
             display: flex;
             align-items: center;
@@ -1176,6 +1193,15 @@
             }
         });
 
+        // Set styleWithCSS to true when user focuses on an editable page block
+        document.addEventListener('focusin', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('page-block-content')) {
+                try {
+                    document.execCommand('styleWithCSS', false, true);
+                } catch (err) {}
+            }
+        });
+
         window.pushUndoState = function() {
             const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
             if (!activeBlock) return;
@@ -1223,19 +1249,57 @@
         window.applyFontFamily = function(font) {
             if (!font) return;
             const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
-            if (activeBlock) {
-                activeBlock.focus();
-            }
-            window.pushUndoState();
             let sel = window.getSelection();
-            if (window.lastEditorSelectionRange) {
+            
+            // Determine if current selection is inside the active block
+            let hasSelectionInBlock = false;
+            if (sel.rangeCount > 0 && activeBlock) {
+                if (activeBlock.contains(sel.anchorNode)) {
+                    hasSelectionInBlock = true;
+                }
+            }
+            
+            // Restore selection if not already in the block
+            if (!hasSelectionInBlock && window.lastEditorSelectionRange) {
+                if (activeBlock) activeBlock.focus();
                 sel.removeAllRanges();
                 sel.addRange(window.lastEditorSelectionRange);
             }
-            document.execCommand('fontName', false, font);
-            if (sel.rangeCount > 0) {
-                window.lastEditorSelectionRange = sel.getRangeAt(0).cloneRange();
+            
+            if (activeBlock) {
+                activeBlock.focus();
             }
+            
+            if (!sel.rangeCount) return;
+            
+            window.pushUndoState();
+            
+            // Handle collapsed selection (cursor only)
+            if (sel.getRangeAt(0).collapsed) {
+                const span = document.createElement('span');
+                span.style.fontFamily = font;
+                span.innerHTML = '&#8203;'; // Zero-width space
+                let range = sel.getRangeAt(0);
+                range.insertNode(span);
+                
+                const newRange = document.createRange();
+                newRange.setStart(span.firstChild, 1);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            } else {
+                try {
+                    document.execCommand('styleWithCSS', false, true);
+                } catch (e) {}
+                document.execCommand('fontName', false, font);
+            }
+            
+            // Resave selection
+            const selAfter = window.getSelection();
+            if (selAfter.rangeCount > 0) {
+                window.lastEditorSelectionRange = selAfter.getRangeAt(0).cloneRange();
+            }
+            
             // Update custom dropdown label
             const label = document.getElementById('current-font-family');
             if (label) label.innerText = font;
@@ -1248,30 +1312,64 @@
                 size = size + 'pt';
             }
             const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
-            if (activeBlock) {
-                activeBlock.focus();
-            }
             let sel = window.getSelection();
-            if (window.lastEditorSelectionRange) {
+            
+            // Determine if current selection is inside the active block
+            let hasSelectionInBlock = false;
+            if (sel.rangeCount > 0 && activeBlock) {
+                if (activeBlock.contains(sel.anchorNode)) {
+                    hasSelectionInBlock = true;
+                }
+            }
+            
+            // Restore selection if not already in the block
+            if (!hasSelectionInBlock && window.lastEditorSelectionRange) {
+                if (activeBlock) activeBlock.focus();
                 sel.removeAllRanges();
                 sel.addRange(window.lastEditorSelectionRange);
             }
-            if (!sel.rangeCount || sel.getRangeAt(0).collapsed) return;
+            
+            if (activeBlock) {
+                activeBlock.focus();
+            }
+            
+            if (!sel.rangeCount) return;
 
             window.pushUndoState();
 
-            // Native execCommand to wrap selection in <font size="7">
-            document.execCommand('fontSize', false, '7');
+            // Handle collapsed selection (cursor only)
+            if (sel.getRangeAt(0).collapsed) {
+                const span = document.createElement('span');
+                span.style.fontSize = size;
+                span.innerHTML = '&#8203;'; // Zero-width space
+                let range = sel.getRangeAt(0);
+                range.insertNode(span);
+                
+                const newRange = document.createRange();
+                newRange.setStart(span.firstChild, 1);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            } else {
+                // Native execCommand to wrap selection in <font size="7">
+                try {
+                    document.execCommand('styleWithCSS', false, false); // use HTML tags temporarily so we can find it easily
+                } catch (e) {}
+                document.execCommand('fontSize', false, '7');
 
-            // Replace all <font size="7"> tags with custom <span> style
+                // Replace all <font size="7"> tags with custom <span> style
+                if (activeBlock) {
+                    const fontTags = activeBlock.querySelectorAll('font[size="7"]');
+                    fontTags.forEach(tag => {
+                        const span = document.createElement('span');
+                        span.style.fontSize = size;
+                        span.innerHTML = tag.innerHTML;
+                        tag.parentNode.replaceChild(span, tag);
+                    });
+                }
+            }
+
             if (activeBlock) {
-                const fontTags = activeBlock.querySelectorAll('font[size="7"]');
-                fontTags.forEach(tag => {
-                    const span = document.createElement('span');
-                    span.style.fontSize = size;
-                    span.innerHTML = tag.innerHTML;
-                    tag.parentNode.replaceChild(span, tag);
-                });
                 activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
