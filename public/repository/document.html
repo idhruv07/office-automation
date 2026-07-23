@@ -1197,9 +1197,13 @@
 
         window.applyFontFamily = function(font) {
             if (!font) return;
+            const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
+            if (activeBlock) {
+                activeBlock.focus();
+            }
             window.pushUndoState();
             let sel = window.getSelection();
-            if ((!sel.rangeCount || sel.getRangeAt(0).collapsed) && window.lastEditorSelectionRange) {
+            if (window.lastEditorSelectionRange) {
                 sel.removeAllRanges();
                 sel.addRange(window.lastEditorSelectionRange);
             }
@@ -1215,18 +1219,17 @@
             if (!isNaN(size)) {
                 size = size + 'pt';
             }
+            const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
+            if (activeBlock) {
+                activeBlock.focus();
+            }
             let sel = window.getSelection();
-            let range = null;
-
-            if (sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && sel.getRangeAt(0).toString().length > 0) {
-                range = sel.getRangeAt(0);
-            } else if (window.lastEditorSelectionRange && !window.lastEditorSelectionRange.collapsed) {
+            if (window.lastEditorSelectionRange) {
                 sel.removeAllRanges();
                 sel.addRange(window.lastEditorSelectionRange);
-                range = window.lastEditorSelectionRange;
             }
-
-            if (!range || range.collapsed || range.toString().length === 0) return;
+            if (!sel.rangeCount || sel.getRangeAt(0).collapsed) return;
+            let range = sel.getRangeAt(0);
 
             window.pushUndoState();
 
@@ -1244,7 +1247,6 @@
                 window.lastEditorSelectionRange = selAfter.getRangeAt(0).cloneRange();
             }
 
-            const activeBlock = typeof getActiveBlock === 'function' ? getActiveBlock() : null;
             if (activeBlock) {
                 activeBlock.dispatchEvent(new Event('input', { bubbles: true }));
             }
