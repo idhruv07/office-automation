@@ -47,13 +47,11 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
         }
         #action-buttons button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
             filter: brightness(1.1) !important;
             cursor: pointer;
         }
         #action-buttons button:active {
-            transform: translateY(0) !important;
+            filter: brightness(0.95) !important;
         }
         #workflow-panel {
             position: fixed;
@@ -543,7 +541,7 @@
             z-index: 1000;
             margin-top: 8px;
         }
-        .breadcrumb-container:hover .breadcrumb-dropdown {
+        .breadcrumb-container.open .breadcrumb-dropdown {
             display: block;
         }
         .breadcrumb-dropdown::before {
@@ -721,13 +719,13 @@
             line-height: 1;
             white-space: nowrap;
         }
-        .header-btn:hover {
+        .header-btn-removed {
             transform: translateY(-1px) !important;
             filter: brightness(1.1) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
         .header-btn:active {
-            transform: translateY(0) !important;
+            filter: brightness(0.95) !important;
         }
     </style>
 </head>
@@ -979,7 +977,7 @@
                     </select>
 
                     <!-- Page Margins Select -->
-                    <select id="select-page-margins" onchange="updatePageLayout()" title="Page Margins" class="toolbar-select" style="width: 125px;">
+                    <select id="select-page-margins" onchange="updatePageLayout()" title="Page Margins" class="toolbar-select" style="width: 155px;">
                         <option value="none">None (0mm)</option>
                         <option value="compact">Compact (5mm)</option>
                         <option value="narrow" selected>Narrow (10mm)</option>
@@ -1285,6 +1283,24 @@
             }
 
             loadBreadcrumbFolders();
+
+            // Click-based breadcrumb toggle (replaces old hover CSS)
+            const breadcrumbContainer = document.querySelector('.breadcrumb-container');
+            if (breadcrumbContainer) {
+                const h2 = breadcrumbContainer.querySelector('h2');
+                if (h2) {
+                    h2.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        breadcrumbContainer.classList.toggle('open');
+                    });
+                }
+                // Close when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!breadcrumbContainer.contains(e.target)) {
+                        breadcrumbContainer.classList.remove('open');
+                    }
+                });
+            }
         }
 
         if (document.readyState === 'loading') {
@@ -3979,9 +3995,14 @@
                     widthMm = heightMm;
                 }
                 
-                let marginMm = 20;
-                if (margin === 'narrow') marginMm = 10;
-                else if (margin === 'wide') marginMm = 30;
+                let marginMm = 10; // Default Narrow
+                if (margin === 'none') marginMm = 0;
+                else if (margin === 'compact') marginMm = 5;
+                else if (margin === 'narrow') marginMm = 10;
+                else if (margin === 'moderate') marginMm = 15;
+                else if (margin === 'normal') marginMm = 20;
+                else if (margin === 'wide') marginMm = 25;
+                else if (margin === 'extra-wide') marginMm = 30;
                 
                 ticksContainer.innerHTML = '';
                 const totalCm = Math.floor(widthMm / 10);

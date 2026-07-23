@@ -137,7 +137,7 @@ async function doGlobalSearch(query) {
         let html = '';
         data.results.forEach(r => {
             const snippet = r.snippet.replace(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => `<mark style="background:#fbbf24;color:black;border-radius:2px;">${m}</mark>`);
-            html += `<div onclick="window.location.href='/repository/document.html?id=${r.document_id}'" style="padding:12px;border-bottom:1px solid #334155;cursor:pointer;transition:0.15s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='transparent'">
+            html += `<div onclick="window.location.href='/repository/document.html?id=${r.document_id}&v=${Date.now()}'" style="padding:12px;border-bottom:1px solid #334155;cursor:pointer;transition:0.15s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='transparent'">
                 <div style="font-weight:bold;color:#e2e8f0;font-size:13px;">${r.doc_title}</div>
                 <div style="font-size:12px;color:#64748b;margin-top:2px;">${r.folder_path || 'Repository'}</div>
                 <div style="font-size:12px;color:#94a3b8;margin-top:4px;">${snippet}</div>

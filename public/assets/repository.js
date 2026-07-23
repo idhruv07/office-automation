@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.viewDocument = function(docId) {
-        window.location.href = `/repository/document.html?id=${docId}`;
+        window.location.href = `/repository/document.html?id=${docId}&v=${Date.now()}`;
     };
 
     // Global Search Functionality
