@@ -25,8 +25,8 @@ const dbConfig = {
     user: process.env.REPO_DB_USER || 'postgres',
     host: process.env.REPO_DB_HOST || '127.0.0.1',
     database: process.env.REPO_DB_NAME || 'repo_db',
-    password: process.env.REPO_DB_PASSWORD || 'postgrespassword',
-    port: parseInt(process.env.REPO_DB_PORT) || 5433,
+    password: process.env.REPO_DB_PASSWORD || 'postgres',
+    port: parseInt(process.env.REPO_DB_PORT) || 5432,
 };
 
 const gzippedPath = path.join(__dirname, 'repo_db_complete_backup.sql.gz');
