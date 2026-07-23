@@ -8,6 +8,10 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Prevent browser caching so latest edits are always loaded -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Document Viewer - Office Automation</title>
     <link rel="stylesheet" href="/assets/style.css">
     <style>
@@ -587,8 +591,7 @@
 
         @media print {
             body {
-                /* Provide content margins since @page margin is 0 */
-                padding: 12mm !important;
+                padding: 0 !important;
                 margin: 0 !important;
                 background: white !important;
                 color: black !important;
@@ -607,7 +610,9 @@
                 height: auto !important;
                 width: 100% !important;
             }
-            #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #toolbar, .toolbar-modern, #search-bar, #lock-banner, .page-divider, .doc-header-wrapper, #workflow-panel, .workflow-sidebar, .modal-overlay, .modal-content, #global-search-results {
+            #sidebar, .main-top-bar, #footer, .page-sidebar, #action-buttons, .toolbar, #toolbar, .toolbar-modern,
+            #search-bar, #lock-banner, .page-divider, .doc-header-wrapper, #workflow-panel, .workflow-sidebar,
+            .modal-overlay, .modal-content, #global-search-results, .breadcrumb-dropdown, #editor-ruler {
                 display: none !important;
             }
             /* Strip all borders/shadows/radius from the content wrapper */
@@ -648,6 +653,10 @@
             }
             .page-block:last-child {
                 page-break-after: avoid;
+            }
+            /* DEFAULT: Only print Page 1 — applies to both Print button and Ctrl+P */
+            body:not(.print-all-pages) .page-block:not(:first-child) {
+                display: none !important;
             }
             .pb-break {
                 page-break-after: always !important;
