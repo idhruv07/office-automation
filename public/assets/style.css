@@ -853,6 +853,10 @@ td {
     font-size: 0.9375rem;
 }
 
+th, td {
+    background-clip: padding-box !important;
+}
+
 tr:last-child td {
     border-bottom: none;
 }
