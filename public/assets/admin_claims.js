@@ -6,6 +6,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const customDateInput = document.getElementById('filter-custom-date');
 
     let currentStatusFilter = '';
+    let isBulkAction = false;
+    let currentBulkIds = [];
+    let currentClaimId = null;
+    let currentAction = null;
+
+    function getClaimAmount(claim) {
+        if (!claim || !claim.data) return null;
+        const data = claim.data;
+
+        // Check specific fields based on type
+        const typeLower = (claim.type_name || '').toLowerCase();
+        if (typeLower.includes('contingent')) {
+            return data.total_amount || data.totalAmt || null;
+        }
+        if (typeLower.includes('medical')) {
+            const opd = parseFloat(data.opd_amount) || 0;
+            const indoor = parseFloat(data.indoor_amount) || 0;
+            const test = parseFloat(data.test_investigation_amount) || 0;
+            const ins = parseFloat(data.amount_claimed_received) || 0;
+            return (opd + indoor + test - ins).toFixed(2);
+        }
+        if (typeLower.includes('gpf')) {
+            return data.gpf_advance_req || data.gpf_consolidated || null;
+        }
+        if (typeLower.includes('newspaper')) {
+            return data.amount || null;
+        }
+        
+        // Fallbacks for LTC, TD, Permanent Transfer, etc.
+        return data.total_amount_claimed || data.balance_due || null;
+    }
+
+    function formatCommas(amt) {
+        if (amt === null || amt === undefined || amt === '') return '';
+        let clean = String(amt).replace(/[₹\-\/]/g, '').trim();
+        const num = parseFloat(clean);
+        if (isNaN(num)) return amt;
+        return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
     function getPeriodParam() {
         const val = periodSelect.value;
@@ -67,7 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div>
                             ${typeName} <span style="font-weight: 400; color: #94a3b8; font-size: 0.8rem; margin-left: 10px;">${grouped[typeName].length} items</span>
                         </div>
-                        <button onclick="generateMultiFwdNote('${typeName.replace(/'/g, "\\'")}')" style="background: #4f46e5; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">Generate Multi-Forward Note</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="openBulkModal('${typeName.replace(/'/g, "\\'")}')" style="background: #059669; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">Multi Approve</button>
+                            <button onclick="generateMultiFwdNote('${typeName.replace(/'/g, "\\'")}')" style="background: #4f46e5; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">Generate Multi-Forward Note</button>
+                        </div>
                     </h3>
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <thead>
@@ -82,10 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             </tr>
                         </thead>
                         <tbody>
-                            ${grouped[typeName].map(c => `
+                            ${grouped[typeName].map(c => {
+                                const amt = getClaimAmount(c);
+                                const amtStr = amt ? `Rs. ${formatCommas(amt)}/-` : '';
+                                return `
                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                     <td style="padding: 12px 10px 12px 20px;">
-                                        <input type="checkbox" class="claim-cb claim-cb-${typeName.replace(/[^a-zA-Z0-9]/g, '')}" value="${c.id}" data-type="${typeName.replace(/'/g, "\\'")}" data-name="${c.user_name || ''}" data-desig="${c.designation || ''}" data-pno="${c.personal_no || ''}" data-gender="${c.gender || ''}">
+                                        <input type="checkbox" class="claim-cb claim-cb-${typeName.replace(/[^a-zA-Z0-9]/g, '')}" value="${c.id}" data-type="${typeName.replace(/'/g, "\\'")}" data-name="${c.user_name || ''}" data-desig="${c.designation || ''}" data-pno="${c.personal_no || ''}" data-gender="${c.gender || ''}" data-amount="${amtStr}">
                                     </td>
                                     <td style="padding: 12px 20px; font-size: 11px;">
                                         <div style="font-weight: 700; color: #1e293b;">${c.user_name}</div>
@@ -126,7 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         `}
                                     </td>
                                 </tr>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -170,7 +216,25 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openModal = function(id, action) {
         currentClaimId = id;
         currentAction = action;
+        isBulkAction = false;
         document.getElementById('modal-title').textContent = `${action} Claim #${id}`;
+        document.getElementById('action-remarks').value = '';
+        document.getElementById('action-modal').style.display = 'flex';
+    };
+
+    window.openBulkModal = function(typeName) {
+        const safeName = typeName.replace(/[^a-zA-Z0-9]/g, '');
+        const selectedCbs = document.querySelectorAll(`.claim-cb-${safeName}:checked`);
+        if (selectedCbs.length === 0) {
+            alert('Please select at least one claim to approve.');
+            return;
+        }
+
+        currentBulkIds = Array.from(selectedCbs).map(cb => parseInt(cb.value));
+        isBulkAction = true;
+        currentAction = 'Approved';
+        
+        document.getElementById('modal-title').textContent = `Bulk Approve ${currentBulkIds.length} Claims`;
         document.getElementById('action-remarks').value = '';
         document.getElementById('action-modal').style.display = 'flex';
     };
@@ -178,16 +242,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-confirm-action').addEventListener('click', async () => {
         const remarks = document.getElementById('action-remarks').value;
         try {
-            const res = await fetch(`/api/admin/claims/${currentClaimId}/status`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: currentAction, remarks })
-            });
+            let res;
+            if (isBulkAction) {
+                res = await fetch('/api/admin/claims/bulk-status', {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ids: currentBulkIds, status: currentAction, remarks })
+                });
+            } else {
+                res = await fetch(`/api/admin/claims/${currentClaimId}/status`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: currentAction, remarks })
+                });
+            }
+
             if(res.ok) {
-                alert(`Claim ${currentAction}`);
+                alert(isBulkAction ? `Selected claims Approved successfully` : `Claim ${currentAction}`);
                 document.getElementById('action-modal').style.display = 'none';
                 loadClaims(currentStatusFilter);
             } else {
@@ -225,7 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name:   cb.getAttribute('data-name'),
             desig:  cb.getAttribute('data-desig'),
             pno:    cb.getAttribute('data-pno'),
-            gender: cb.getAttribute('data-gender')
+            gender: cb.getAttribute('data-gender'),
+            amount: cb.getAttribute('data-amount')
         }));
 
         sessionStorage.setItem('multiFwdNote', JSON.stringify({

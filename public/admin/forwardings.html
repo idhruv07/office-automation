@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forwarding Letters - Admin - Office Auto</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <div class="fwd-title-container">
+        <h1 class="fwd-title">Forwarding Letters</h1>
+    </div>
+
+    <div class="adm-table-section">
+        <div class="adm-table-header">
+            <h3>Generated Forwarding Notes</h3>
+            <span id="forwardings-count" class="fwd-result-count">0 Results</span>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Employee Details</th>
+                        <th>Claim Details</th>
+                        <th>Generated Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="forwardings-tbody">
+                    <tr>
+                        <td colspan="5" class="fwd-table-loading">Loading forwarding notes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/assets/menu.js"></script>
+    <script src="/assets/layout.js"></script>
+    <script src="/assets/admin_forwardings.js"></script>
+</body>
+</html>

@@ -129,3 +129,6 @@ WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE link = '/admin/office_settings.
 INSERT INTO menu_items (label, link, permission_required, display_order)
 SELECT 'FWD Templates', '/admin/fwd_templates.html', 'can_manage_claims', 15
 WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE link = '/admin/fwd_templates.html');
+
+-- 10. Add fwd_recipient column to claims
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS fwd_recipient TEXT;

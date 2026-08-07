@@ -1634,6 +1634,30 @@ tr:hover td {
     outline: none;
 }
 
+.fwd-select {
+    background: transparent !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    padding: 2px 20px 2px 4px !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    display: inline-block !important;
+    height: auto !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.fwd-select-bold {
+    font-weight: bold !important;
+}
+
+.fwd-custom-input {
+    border-bottom: 1px dashed #666 !important;
+    min-width: 120px !important;
+    font-weight: bold !important;
+    display: inline-block;
+}
+
 .fwd-modal-overlay {
     position: fixed;
     top: 0;
@@ -4746,6 +4770,62 @@ body.theme-amber #sidebar-toggle:hover {
     z-index: 10 !important;
 }
 
+/* Forwardings Page styles */
+.fwd-title-container {
+    margin-bottom: 2rem;
+}
+.fwd-title {
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+.fwd-result-count {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+}
+.fwd-table-loading {
+    padding: 20px;
+    text-align: center;
+    color: #64748b;
+}
+.fwd-table-empty {
+    padding: 20px;
+    text-align: center;
+    color: #ef4444;
+    font-weight: 600;
+}
+.fwd-badge {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.fwd-btn-view {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+.fwd-btn-view:hover {
+    text-decoration: underline;
+}
+.fwd-cell-id {
+    font-weight: 700;
+    color: #3b82f6;
+}
+.fwd-cell-bold {
+    font-weight: 600;
+    color: #1e293b;
+}
+.fwd-cell-sub {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
 /* Absolute print media overrides - placed at the very end to guarantee precedence */
 @media print {
     #sidebar,
@@ -4786,5 +4866,30 @@ body.theme-amber #sidebar-toggle:hover {
         margin: 0 !important;
         padding: 5mm !important;
         overflow: visible !important;
+    }
+
+    /* Firefox border and field line printer optimization */
+    table, th, td, 
+    .mrc-compact table, .mrc-compact table th, .mrc-compact table td,
+    .gpf-final-table, .gpf-final-table th, .gpf-final-table td,
+    .ltc-compact table, .ltc-compact table th, .ltc-compact table td,
+    .td-compact table, .td-compact table th, .td-compact table td,
+    .cb-exp-table, .cb-exp-table th, .cb-exp-table td,
+    .cb-pay-table, .cb-pay-table th, .cb-pay-table td {
+        border: 1.5px solid #000000 !important;
+        border-collapse: collapse !important;
+    }
+
+    input, select, textarea,
+    .mrc-compact input, .mrc-compact select, .mrc-compact textarea,
+    .no-border-input, .gpf-final-uline, .ltc-compact input, .td-compact input {
+        border: none !important;
+        border-bottom: 1.5px solid #000000 !important;
+        background: transparent !important;
+    }
+
+    /* Support dashed/dotted input lines and ensure they render solid black in Firefox print preview */
+    .gpf-final-uline, .gpf-uline, [class*="uline"], [class*="underline"] {
+        border-bottom: 1.5px solid #000000 !important;
     }
 }

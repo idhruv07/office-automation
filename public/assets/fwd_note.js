@@ -4,6 +4,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
     let isContingentGlobal = false;
 
+    function getClaimAmount(claim) {
+        if (!claim || !claim.data) return null;
+        const data = claim.data;
+
+        // Check specific fields based on type
+        const typeLower = (claim.type_name || '').toLowerCase();
+        if (typeLower.includes('contingent')) {
+            return data.total_amount || data.totalAmt || null;
+        }
+        if (typeLower.includes('medical')) {
+            const opd = parseFloat(data.opd_amount) || 0;
+            const indoor = parseFloat(data.indoor_amount) || 0;
+            const test = parseFloat(data.test_investigation_amount) || 0;
+            const ins = parseFloat(data.amount_claimed_received) || 0;
+            return (opd + indoor + test - ins).toFixed(2);
+        }
+        if (typeLower.includes('gpf')) {
+            return data.gpf_advance_req || data.gpf_consolidated || null;
+        }
+        if (typeLower.includes('newspaper')) {
+            return data.amount || null;
+        }
+        
+        // Fallbacks for LTC, TD, Permanent Transfer, etc.
+        return data.total_amount_claimed || data.balance_due || null;
+    }
+
+    function formatCommas(amt) {
+        if (amt === null || amt === undefined || amt === '') return '...';
+        let clean = String(amt).replace(/[₹\-\/]/g, '').trim();
+        const num = parseFloat(clean);
+        if (isNaN(num)) return amt;
+        return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     // ── 1. FETCH & INJECT OFFICE CONFIG ────────────────────────────────────────
     let officeConfig = {};
     try {
@@ -116,11 +151,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                         } catch(e) { console.warn("Could not load codeheads", e); }
 
+                        const amtPart = totalAmtVal !== '...' ? ` (Rs. ${formatCommas(totalAmtVal)}/-)` : '';
                         document.querySelector('.fwd-sub-block').innerHTML = `<div class="fwd-sub-line">
-                            Sub&nbsp;:&nbsp;Forwarding of Contingent Bill in R/o <span class="fwd-ghost" id="contExpAccount" contenteditable="true" spellcheck="false" style="font-weight:bold;">${expAccountVal}</span>
+                            Sub&nbsp;:&nbsp;Forwarding of Contingent Bill${amtPart} in R/o <span class="fwd-ghost" id="contExpAccount" contenteditable="true" spellcheck="false" style="font-weight:bold;">${expAccountVal}</span> &ndash; Reg.
                         </div>`;
 
-                        document.querySelector('.fwd-body-para').innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Contingent Bill for Rs. <span class="fwd-ghost" id="contTotalAmt" contenteditable="true" spellcheck="false" style="font-weight:bold;">${totalAmtVal}</span>/- (Rs. <span class="fwd-ghost" id="contAmtWords" contenteditable="true" spellcheck="false" style="font-weight:bold;">${amtWordsVal}</span>) towards <span class="fwd-ghost" id="contExpAccount2" contenteditable="true" spellcheck="false" style="font-weight:bold;">${expAccountVal}</span> for the period <span class="fwd-ghost" id="contDuring" contenteditable="true" spellcheck="false" style="font-weight:bold;">${duringVal}</span> in the O/o CDA (IT&amp;SDC), Secunderabad is forwarded herewith along with the Satisfactory Certificate for payment. The expenditure may please be booked to the head <select id="contCodehead" class="fwd-ghost" style="border:1px solid #ccc; outline:none; background:transparent; font-family:inherit; font-size:inherit;">${codeheadOptions}</select> and the payment may be credited to the account of M/s. <span class="fwd-ghost" id="contMs" contenteditable="true" spellcheck="false" style="border-bottom: 1px dashed #666; min-width: 150px; display: inline-block; text-align: center; font-weight:bold;" data-ph="[Write name here]"></span>`;
+                        document.querySelector('.fwd-body-para').innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Contingent Bill for Rs. <span class="fwd-ghost" id="contTotalAmt" contenteditable="true" spellcheck="false" style="font-weight:bold;">${totalAmtVal}</span>/- (Rs. <span class="fwd-ghost" id="contAmtWords" contenteditable="true" spellcheck="false" style="font-weight:bold;">${amtWordsVal}</span>) towards <span class="fwd-ghost" id="contExpAccount2" contenteditable="true" spellcheck="false" style="font-weight:bold;">${expAccountVal}</span> for the period <span class="fwd-ghost" id="contDuring" contenteditable="true" spellcheck="false" style="font-weight:bold;">${duringVal}</span> in the O/o CDA (IT&amp;SDC), Secunderabad is forwarded herewith along with the Satisfactory Certificate for payment. The expenditure may please be booked to the head <select id="contCodehead" class="fwd-ghost fwd-select">${codeheadOptions}</select> and the payment may be credited to the account of M/s. <span class="fwd-ghost" id="contMs" contenteditable="true" spellcheck="false" style="border-bottom: 1px dashed #666; min-width: 150px; display: inline-block; text-align: center; font-weight:bold;" data-ph="[Write name here]"></span>`;
 
                         wire('contExpAccount', 'contExpAccount2');
 
@@ -129,7 +165,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (sel) {
                             function resizeSelect() {
                                 let span = document.createElement('span');
-                                span.style.font = window.getComputedStyle(sel).font;
+                                const style = window.getComputedStyle(sel);
+                                span.style.fontFamily = style.fontFamily;
+                                span.style.fontSize = style.fontSize;
+                                span.style.fontWeight = style.fontWeight;
+                                span.style.fontStyle = style.fontStyle;
+                                span.style.fontVariant = style.fontVariant;
                                 span.style.visibility = 'hidden';
                                 span.style.position = 'absolute';
                                 span.style.whiteSpace = 'pre';
@@ -140,6 +181,65 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                             sel.addEventListener('change', resizeSelect);
                             resizeSelect(); // Initialize
+                        }
+
+                        const recipientContainer = document.getElementById('fwdRecipientContainer');
+                        if (recipientContainer) {
+                            recipientContainer.innerHTML = `
+                                <select id="fwdRecipientSelect" class="fwd-ghost fwd-select fwd-select-bold">
+                                    <option value="Admin Pay">Admin Pay</option>
+                                    <option value="Admin I">Admin I</option>
+                                    <option value="Admin II">Admin II</option>
+                                    <option value="Admin III">Admin III</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span id="fwdRecipientCustom" class="fwd-ghost fwd-custom-input" contenteditable="true" spellcheck="false" style="display: none;" data-ph="[Specify recipient]"></span>
+                            `;
+
+                            const selectEl = document.getElementById('fwdRecipientSelect');
+                            const customEl = document.getElementById('fwdRecipientCustom');
+
+                            function resizeRecipientSelect() {
+                                let span = document.createElement('span');
+                                const style = window.getComputedStyle(selectEl);
+                                span.style.fontFamily = style.fontFamily;
+                                span.style.fontSize = style.fontSize;
+                                span.style.fontWeight = style.fontWeight;
+                                span.style.fontStyle = style.fontStyle;
+                                span.style.fontVariant = style.fontVariant;
+                                span.style.visibility = 'hidden';
+                                span.style.position = 'absolute';
+                                span.style.whiteSpace = 'pre';
+                                span.textContent = selectEl.options[selectEl.selectedIndex].text;
+                                document.body.appendChild(span);
+                                selectEl.style.width = (span.clientWidth + 45) + 'px';
+                                document.body.removeChild(span);
+                            }
+
+                            function handleSelectChange() {
+                                resizeRecipientSelect();
+                                if (selectEl.value === 'Other') {
+                                    customEl.style.display = 'inline-block';
+                                } else {
+                                    customEl.style.display = 'none';
+                                    customEl.textContent = '';
+                                }
+                            }
+
+                            selectEl.addEventListener('change', handleSelectChange);
+
+                            // Restore state if saved
+                            if (claim.fwd_recipient) {
+                                const standardOptions = ['Admin Pay', 'Admin I', 'Admin II', 'Admin III'];
+                                if (standardOptions.includes(claim.fwd_recipient)) {
+                                    selectEl.value = claim.fwd_recipient;
+                                } else {
+                                    selectEl.value = 'Other';
+                                    customEl.style.display = 'inline-block';
+                                    customEl.textContent = claim.fwd_recipient;
+                                }
+                            }
+                            handleSelectChange(); // Set initial visibility & width
                         }
                     })();
                 } else {
@@ -163,6 +263,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     document.getElementById('subClaimType').textContent = subClaimString;
                     document.getElementById('bodyClaimType').textContent = bodyClaimString;
+
+                    const amt = getClaimAmount(claim);
+                    if (amt) {
+                        const amtContainer = document.getElementById('bodyClaimAmtContainer');
+                        const amtEl = document.getElementById('bodyClaimAmt');
+                        if (amtContainer && amtEl) {
+                            amtEl.textContent = `Rs. ${formatCommas(amt)}`;
+                            amtContainer.style.display = 'inline';
+                        }
+                    }
                 }
                 
                 // ── Fetch claim-type-specific ref no and override if set ──────
@@ -239,9 +349,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         var oEmail   = document.getElementById('officeEmail').textContent.trim();
         var oRef     = document.getElementById('fwdRefNo').textContent.trim();
         var oSigName = document.getElementById('signatoryName').textContent.trim();
-        var oSigDept = document.getElementById('signatoryDept').textContent.trim();
-        var logoLeftSrc  = document.getElementById('logoLeft')  ? document.getElementById('logoLeft').src  : (base + 'images/emblem.png');
-        var logoRightSrc = document.getElementById('logoRight') ? document.getElementById('logoRight').src : (base + 'images/azadi.png');
+        const oSigDept      = document.getElementById('signatoryDept').textContent.trim();
+        const logoLeftSrc   = document.getElementById('logoLeft')  ? document.getElementById('logoLeft').src  : (base + 'images/emblem.png');
+        const logoRightSrc  = document.getElementById('logoRight') ? document.getElementById('logoRight').src : (base + 'images/azadi.png');
+
+        let recipientStr = 'Admin-Pay';
+        if (isContingentGlobal) {
+            const selectEl = document.getElementById('fwdRecipientSelect');
+            const customEl = document.getElementById('fwdRecipientCustom');
+            if (selectEl) {
+                if (selectEl.value === 'Other') {
+                    recipientStr = customEl.textContent.trim() || 'Admin-Pay';
+                } else {
+                    recipientStr = selectEl.value;
+                }
+            }
+        }
 
         if (isContingentGlobal) {
             var subHtml = document.querySelector('.fwd-sub-block').innerHTML;
@@ -272,7 +395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <span>Date: ${date}</span>
             </div>
             <div class="fwd-to-block">
-              To<br>The Officer in charge<br>Admin-Pay<br>
+              To<br>The Officer in charge<br>${recipientStr}<br>
               O/o the CDA Secunderabad<br>No. 1 Staff Road<br>Secunderabad-09
             </div>
             <div class="fwd-sub-block">
@@ -293,6 +416,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         var pno          = document.getElementById('subPno').textContent.trim();
         var refStr       = salutation + ' ' + name + (name&&desig?', ':'') + desig + ((name||desig)&&pno?'/':'') + pno;
         var bodyClaimType= document.getElementById('bodyClaimType').textContent.trim();
+
+        const amtContainer = document.getElementById('bodyClaimAmtContainer');
+        const amtStr = (amtContainer && amtContainer.style.display !== 'none') ? ` for ${document.getElementById('bodyClaimAmt').textContent.trim()}/-` : '';
 
         return `
         <div class="fwd-letterhead">
@@ -320,7 +446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <div class="fwd-divider">&lt;&lt;&lt;&gt;&gt;&gt;</div>
         <div class="fwd-body-para">
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${bodyClaimType} in r/o ${refStr} is forwarded herewith for further necessary action at your end please.
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${bodyClaimType}${amtStr} in r/o ${refStr} is forwarded herewith for further necessary action at your end please.
         </div>
         <div class="fwd-sig-block">${oSigName}<br>${oSigDept}</div>
         `;
@@ -331,6 +457,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = buildBody();
         const htmlToSave = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Forwarding Note</title><link rel="stylesheet" href="/assets/style.css"><style>body { padding:28px 36px 40px !important; background: #fff; }</style></head><body>${content}</body></html>`;
         
+        let fwdRecipient = undefined;
+        if (isContingentGlobal) {
+            const selectEl = document.getElementById('fwdRecipientSelect');
+            const customEl = document.getElementById('fwdRecipientCustom');
+            if (selectEl) {
+                if (selectEl.value === 'Other') {
+                    fwdRecipient = customEl.textContent.trim();
+                } else {
+                    fwdRecipient = selectEl.value;
+                }
+            }
+        }
+
         if (claimId) {
             // Save to backend
             fetch(`/api/admin/claims/${claimId}/fwd-note`, {
@@ -339,7 +478,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ htmlContent: htmlToSave })
+                body: JSON.stringify({ 
+                    htmlContent: htmlToSave,
+                    fwdRecipient: fwdRecipient
+                })
             })
             .then(res => res.json())
             .then(data => {

@@ -2248,10 +2248,11 @@
                                 </div>
                             `;
                             if (!blockContent.querySelector('.pb-break')) {
-                                blockContent.innerHTML = letterheadHtml + `<p><br></p><hr class="pb-break" />` + blockContent.innerHTML;
+                                blockContent.innerHTML = `<p><br></p>` + letterheadHtml + `<p><br></p><hr class="pb-break" />` + blockContent.innerHTML;
                             } else {
-                                blockContent.innerHTML = letterheadHtml + blockContent.innerHTML;
+                                blockContent.innerHTML = `<p><br></p>` + letterheadHtml + blockContent.innerHTML;
                             }
+                            lhContainer = blockContent.querySelector('.fwd-letterhead');
                         } else {
                             // Update existing letterhead element properties dynamically to match date configuration
                             const titleEl = lhContainer.querySelector('.fwd-lh-title');
@@ -2272,13 +2273,64 @@
                             
                             const imgRight = lhContainer.querySelector('.fwd-lh-img:last-child img');
                             if (imgRight) imgRight.src = logoRight;
+
+                            // Even if it already exists, ensure there is an empty line before the header!
+                            const prev = lhContainer.previousElementSibling;
+                            const isPrevEmpty = prev && prev.tagName.toLowerCase() === 'p' && (prev.innerHTML === '<br>' || prev.textContent.trim() === '');
+                            if (!isPrevEmpty) {
+                                const p = document.createElement('p');
+                                p.innerHTML = '<br>';
+                                lhContainer.parentNode.insertBefore(p, lhContainer);
+                            }
+                        }
+
+                        // Ensure there is an empty line after the reference number line
+                        const allNodes = Array.from(blockContent.querySelectorAll('p, div'));
+                        let refNode = null;
+                        for (const node of allNodes) {
+                            if (node.classList.contains('fwd-letterhead')) continue;
+                            const text = node.textContent;
+                            if (text.includes('No. IT&SDC') || text.includes('No. IT & SDC') || text.includes('Gen. Corr') || (text.includes('No.') && text.includes('Dt:'))) {
+                                refNode = node;
+                                break;
+                            }
+                        }
+                        if (refNode) {
+                            const next = refNode.nextElementSibling;
+                            const isNextEmpty = next && next.tagName.toLowerCase() === 'p' && (next.innerHTML === '<br>' || next.textContent.trim() === '');
+                            if (!isNextEmpty) {
+                                const p = document.createElement('p');
+                                p.innerHTML = '<br>';
+                                refNode.parentNode.insertBefore(p, refNode.nextSibling);
+                            }
                         }
                     }
 
                     blockContent.focus();
                     
-                    // Focus on the first paragraph below the prepended header (Page 1 body line)
-                    const pNode = blockContent.querySelector('.fwd-letterhead + p');
+                    // Focus on the first paragraph below the prepended header or below reference line (Page 1 body line)
+                    let pNode = null;
+                    if (isFirstPage) {
+                        const allNodes = Array.from(blockContent.querySelectorAll('p, div'));
+                        let refNode = null;
+                        for (const node of allNodes) {
+                            if (node.classList.contains('fwd-letterhead')) continue;
+                            const text = node.textContent;
+                            if (text.includes('No. IT&SDC') || text.includes('No. IT & SDC') || text.includes('Gen. Corr') || (text.includes('No.') && text.includes('Dt:'))) {
+                                refNode = node;
+                                break;
+                            }
+                        }
+                        if (refNode) {
+                            pNode = refNode.nextElementSibling;
+                        }
+                        if (!pNode) {
+                            pNode = blockContent.querySelector('.fwd-letterhead + p');
+                        }
+                    } else {
+                        pNode = blockContent.firstElementChild;
+                    }
+
                     if (pNode) {
                         try {
                             const range = document.createRange();
@@ -2287,7 +2339,7 @@
                             range.collapse(true);
                             sel.removeAllRanges();
                             sel.addRange(range);
-                        } catch (err) { console.error('Failed to focus on Page 1 body', err); }
+                        } catch (err) { console.error('Failed to focus on Page body', err); }
                     }
                     document.body.classList.add('editing-active');
                     toolbarEl.style.display = 'flex';
@@ -3321,16 +3373,50 @@
             function isSelectionAtStart(container) {
                 try {
                     const sel = window.getSelection();
-                    if (!sel.rangeCount) return false;
+                    if (!sel || !sel.rangeCount) return true;
                     const range = sel.getRangeAt(0);
+                    if (!container.contains(range.startContainer)) {
+                        return true;
+                    }
                     
                     const preRange = document.createRange();
                     preRange.selectNodeContents(container);
                     preRange.setEnd(range.startContainer, range.startOffset);
                     
-                    const text = preRange.toString().trim();
+                    const textBefore = preRange.toString().trim();
                     const hasElements = preRange.cloneContents().childElementCount > 0;
-                    return text.length === 0 && !hasElements;
+                    
+                    // If selection is truly at start (preRange has nothing)
+                    if (textBefore.length === 0 && !hasElements) return true;
+                    
+                    // Smart check: if text before selection is just header/reference text, treat as start
+                    const headerEl = container.querySelector('.fwd-letterhead');
+                    const headerText = headerEl ? headerEl.textContent.trim() : '';
+                    
+                    const allNodes = Array.from(container.querySelectorAll('p, div'));
+                    let refText = '';
+                    for (const node of allNodes) {
+                        if (node.classList.contains('fwd-letterhead')) continue;
+                        const t = node.textContent;
+                        if (t.includes('No. IT&SDC') || t.includes('No. IT & SDC') || t.includes('Gen. Corr') || (t.includes('No.') && t.includes('Dt:'))) {
+                            refText = t.trim();
+                            break;
+                        }
+                    }
+                    
+                    const cleanTextBefore = textBefore.replace(/\s+/g, ' ');
+                    const cleanHeaderText = headerText.replace(/\s+/g, ' ');
+                    const cleanRefText = refText.replace(/\s+/g, ' ');
+                    const combinedText = (cleanHeaderText + ' ' + cleanRefText).trim().replace(/\s+/g, ' ');
+                    
+                    if (cleanTextBefore === '' || 
+                        cleanTextBefore === cleanHeaderText || 
+                        cleanTextBefore === cleanRefText ||
+                        cleanTextBefore === combinedText) {
+                        return true;
+                    }
+                    
+                    return false;
                 } catch (e) {
                     console.warn('isSelectionAtStart check failed, fallback to false', e);
                     return false;
@@ -3342,26 +3428,49 @@
                 if (!activeBlock) return;
                 const blockContent = activeBlock;
                 
-                const letterheadHtml = `
-                    <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0 0 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
-                        <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/emblem.png" alt="Emblem" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
-                        <div class="fwd-lh-center" style="text-align: center; flex: 1; line-height: 1.25;">
-                            <div class="fwd-lh-title" style="font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">OFFICE OF THE CDA ( IT &amp; SDC )</div>
-                            <div class="fwd-lh-sub" style="font-size: 11.5px; color: #333; margin-top: 2px;">Mornington Road, PAO(ORs)AOC Compound,</div>
-                            <div class="fwd-lh-sub" style="font-size: 11.5px; color: #333;">Trimulgherry, Secunderabad – 500 015.</div>
-                            <div class="fwd-lh-email" style="font-size: 10.5px; color: #555; margin-top: 1px;">Email: itsdcsec-cda@nic.in</div>
-                            <div class="fwd-lh-phone" style="font-size: 10.5px; color: #555;">Phone/ Fax No: 040-27742553/29805085</div>
+                // Try to clone the first page's letterhead dynamically to keep consistent formatting/edits
+                const firstLh = document.querySelector('.fwd-letterhead');
+                let letterheadHtml = '';
+                if (firstLh) {
+                    letterheadHtml = firstLh.outerHTML;
+                } else {
+                    letterheadHtml = `
+                        <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0 0 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
+                            <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/emblem.png" alt="Emblem" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
+                            <div class="fwd-lh-center" style="text-align: center; flex: 1; line-height: 1.25;">
+                                <div class="fwd-lh-title" style="font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">OFFICE OF THE CDA ( IT &amp; SDC )</div>
+                                <div class="fwd-lh-sub" style="font-size: 11.5px; color: #333; margin-top: 2px;">Mornington Road, PAO(ORs)AOC Compound,</div>
+                                <div class="fwd-lh-sub" style="font-size: 11.5px; color: #333;">Trimulgherry, Secunderabad – 500 015.</div>
+                                <div class="fwd-lh-email" style="font-size: 10.5px; color: #555; margin-top: 1px;">Email: itsdcsec-cda@nic.in</div>
+                                <div class="fwd-lh-phone" style="font-size: 10.5px; color: #555;">Phone/ Fax No: 040-27742553/29805085</div>
+                            </div>
+                            <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/azadi.png" alt="Logo Right" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
                         </div>
-                        <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/azadi.png" alt="Logo Right" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
-                    </div>
-                `;
+                    `;
+                }
+
+                const tempId = 'cursor-target-' + Date.now();
 
                 if (isSelectionAtStart(blockContent)) {
-                    const fullHtml = letterheadHtml + `<p><br></p><hr class="pb-break" />` + blockContent.innerHTML;
+                    const fullHtml = `<p><br></p>` + letterheadHtml + `<p id="${tempId}"><br></p><hr class="pb-break" />` + blockContent.innerHTML;
                     blockContent.innerHTML = fullHtml;
                 } else {
-                    const insertHtml = `<hr class="pb-break" />` + letterheadHtml + `<p><br></p>`;
+                    const insertHtml = `<p><br></p><hr class="pb-break" /><div style="page-break-before: always; break-before: page; margin-top: 0;"></div>` + letterheadHtml + `<p id="${tempId}"><br></p>`;
                     document.execCommand('insertHTML', false, insertHtml);
+                }
+
+                const targetEl = blockContent.querySelector('#' + tempId);
+                if (targetEl) {
+                    blockContent.focus();
+                    try {
+                        const range = document.createRange();
+                        const sel = window.getSelection();
+                        range.selectNodeContents(targetEl);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    } catch (err) { console.error('Failed to shift focus to page break body', err); }
+                    targetEl.removeAttribute('id');
                 }
             };
 

@@ -283,6 +283,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const d = new Date();
                 return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
             }
+            function formatToDDMMYYYY(dateStr) {
+                if (!dateStr) return '';
+                const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (match) {
+                    return `${match[3]}/${match[2]}/${match[1]}`;
+                }
+                return dateStr;
+            }
             const todayFormatted = getTodayDDMMYYYY();
 
             setVal('declaration_date', todayFormatted);
@@ -316,7 +324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // ── TD (Temporary Duty) Template ──────────────────────────────────
             if (folderName === 'td') {
                 setVal('td_orders_for_move', currentUser.orders_for_move);
-                setVal('td_move_date', currentUser.move_date);
+                setVal('td_move_date', formatToDDMMYYYY(currentUser.move_date));
                 setVal('td_authority', currentUser.authority);
 
                 // Format: Basic Pay + Pay Level (e.g., 56100 + Level 8)
@@ -332,7 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // ── Permanent Transfer Template ──────────────────────────────────
             if (folderName === 'permanent_transfer') {
                 setVal('td_orders_for_move', currentUser.orders_for_move);
-                setVal('td_move_date', currentUser.move_date);
+                setVal('td_move_date', formatToDDMMYYYY(currentUser.move_date));
                 setVal('td_authority', currentUser.authority);
 
                 const basicPay = currentUser.basic_pay || '';

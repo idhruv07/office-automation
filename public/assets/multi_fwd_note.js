@@ -105,10 +105,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     tbody.innerHTML = individuals.map((person, idx) => {
         const salutation = (person.gender && person.gender.toLowerCase() === 'female') ? 'Smt.' : 'Shri.';
         const desigPno = (person.desig || '') + (person.desig && person.pno ? '/' : '') + (person.pno || '');
+        const amtStr = person.amount || '';
         return `<tr>
             <td style="border:1px solid #333; padding:5px 8px;">${idx + 1}.</td>
             <td style="border:1px solid #333; padding:5px 8px;">${salutation} ${person.name},</td>
             <td style="border:1px solid #333; padding:5px 8px;">${desigPno}</td>
+            <td style="border:1px solid #333; padding:5px 8px; text-align: right;">${amtStr}</td>
         </tr>`;
     }).join('');
 
@@ -140,10 +142,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rows = individuals.map((person, idx) => {
             const salutation = (person.gender && person.gender.toLowerCase() === 'female') ? 'Smt.' : 'Shri.';
             const desigPno = (person.desig || '') + (person.desig && person.pno ? '/' : '') + (person.pno || '');
+            const amtStr = person.amount || '';
             return `<tr>
                 <td style="border:1px solid #333; padding:5px 8px;">${idx + 1}.</td>
                 <td style="border:1px solid #333; padding:5px 8px;">${salutation} ${person.name},</td>
                 <td style="border:1px solid #333; padding:5px 8px;">${desigPno}</td>
+                <td style="border:1px solid #333; padding:5px 8px; text-align: right;">${amtStr}</td>
             </tr>`;
         }).join('');
 
@@ -179,8 +183,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           <thead>
             <tr>
               <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:8%;">Sr. No.</th>
-              <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:52%;">Name</th>
-              <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:40%;">Post/Personal Number</th>
+              <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:42%;">Name</th>
+              <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:30%;">Post/Personal Number</th>
+              <th style="border:1px solid #333; padding:6px 8px; background:#f9f9f9; width:20%;">Amount</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>

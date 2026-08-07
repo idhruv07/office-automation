@@ -5,6 +5,45 @@ const path = require('path');
 const db = require('../config/db');
 const { authenticateToken } = require('./middleware');
 
+// Helper to parse date string to YYYY-MM-DD for PostgreSQL DATE type
+function parseDateToISO(dateStr) {
+    if (!dateStr || String(dateStr).trim() === '') {
+        return null;
+    }
+    const cleanStr = String(dateStr).trim();
+
+    // 1. If it's already YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleanStr)) {
+        return cleanStr;
+    }
+
+    // 2. If it's DD/MM/YYYY or DD-MM-YYYY
+    const matchFull = cleanStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (matchFull) {
+        const day = matchFull[1].padStart(2, '0');
+        const month = matchFull[2].padStart(2, '0');
+        const year = matchFull[3];
+        return `${year}-${month}-${day}`;
+    }
+
+    // 3. If it's DD/MM/YY or DD-MM-YY
+    const matchShort = cleanStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+    if (matchShort) {
+        const day = matchShort[1].padStart(2, '0');
+        const month = matchShort[2].padStart(2, '0');
+        const year = '20' + matchShort[3]; // Assume 20xx
+        return `${year}-${month}-${day}`;
+    }
+
+    // 4. Try parsing with standard Date constructor as fallback
+    const parsed = new Date(cleanStr);
+    if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString().split('T')[0];
+    }
+
+    return null;
+}
+
 // Fetch claim types
 router.get('/types', authenticateToken, async (req, res) => {
     try {
@@ -96,20 +135,20 @@ router.post('/', authenticateToken, async (req, res) => {
                 shouldOverwrite = true;
                 overwriteClaimId = existingDraft.rows[0].id;
                 currentVersion = existingDraft.rows[0].version || 1;
-            } else if (parent_claim_id) {
-                // If there's a parent_claim_id, check if the parent claim has the same name and is owned by the user
+            } else if (save_mode === 'overwrite' && parent_claim_id) {
+                // If there's a parent_claim_id, check if the parent claim exists and is owned by the user
                 const check = await client.query('SELECT version, claim_name FROM claims WHERE id = $1 AND user_id = $2', [parent_claim_id, req.user.id]);
-                if (check.rows.length > 0 && check.rows[0].claim_name === claim_name) {
+                if (check.rows.length > 0) {
                     shouldOverwrite = true;
                     overwriteClaimId = parent_claim_id;
                     currentVersion = check.rows[0].version || 1;
                 }
             }
         } else {
-            // For pending claims, follow the save_mode / parent_claim_id, but only if the name is the same
+            // For pending claims, follow the save_mode / parent_claim_id
             if (save_mode === 'overwrite' && parent_claim_id) {
                 const check = await client.query('SELECT version, claim_name FROM claims WHERE id = $1 AND user_id = $2', [parent_claim_id, req.user.id]);
-                if (check.rows.length > 0 && check.rows[0].claim_name === claim_name) {
+                if (check.rows.length > 0) {
                     shouldOverwrite = true;
                     overwriteClaimId = parent_claim_id;
                     currentVersion = check.rows[0].version || 1;
@@ -227,7 +266,7 @@ router.post('/', authenticateToken, async (req, res) => {
             let varIndex = 1;
 
             if (orders_for_move) { updateFields.push(`orders_for_move = $${varIndex++}`); updateValues.push(orders_for_move); }
-            if (move_date) { updateFields.push(`move_date = $${varIndex++}`); updateValues.push(move_date); }
+            if (move_date) { updateFields.push(`move_date = $${varIndex++}`); updateValues.push(parseDateToISO(move_date)); }
             if (authority) { updateFields.push(`authority = $${varIndex++}`); updateValues.push(authority); }
 
             if (updateFields.length > 0) {

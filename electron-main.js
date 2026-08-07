@@ -26,7 +26,13 @@ function createWindow() {
 
   // Load the local express server
   const PORT = process.env.PORT || 3000;
-  mainWindow.loadURL(`http://localhost:${PORT}`);
+  
+  // Clear Electron cache on start to ensure new CSS, JS, and HTML edits are served
+  mainWindow.webContents.session.clearCache().then(() => {
+    mainWindow.loadURL(`http://localhost:${PORT}`);
+  }).catch(() => {
+    mainWindow.loadURL(`http://localhost:${PORT}`);
+  });
 
   mainWindow.on('closed', function () {
     mainWindow = null;

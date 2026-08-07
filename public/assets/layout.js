@@ -48,6 +48,14 @@
             purgeAndRedirectToLogin();
             return;
         }
+
+        // Periodically check if token is expired while page is left open
+        setInterval(() => {
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken || isTokenExpired(currentToken)) {
+                purgeAndRedirectToLogin();
+            }
+        }, 10000);
     }
 
     // Global Fetch Interceptor for 401 Unauthorized / 403 Invalid Token responses
@@ -57,7 +65,7 @@
         window.fetch = async function(...args) {
             try {
                 const response = await originalFetch.apply(this, args);
-                if (response.status === 401) {
+                if (response.status === 401 || response.status === 403) {
                     purgeAndRedirectToLogin();
                 }
                 return response;

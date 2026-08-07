@@ -196,6 +196,44 @@ router.get('/claims', authenticateToken, authorizeRole('Admin'), async (req, res
     }
 });
 
+// Bulk update claim status (Approve/Reject/Return)
+router.put('/claims/bulk-status', authenticateToken, authorizeRole('Admin'), async (req, res) => {
+    const { ids, status, remarks } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'No claims selected' });
+    }
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        
+        for (const claimId of ids) {
+            const updateRes = await client.query(
+                'UPDATE claims SET status = $1, remarks = $2, decided_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING id',
+                [status, remarks || '', claimId]
+            );
+
+            if (updateRes.rowCount > 0) {
+                // Audit Log
+                const actionText = `Claim ${status} (Bulk)`;
+                await client.query(
+                    `INSERT INTO audit_log (claim_id, user_id, action, remarks) VALUES ($1, $2, $3, $4)`,
+                    [claimId, req.user.id, actionText, remarks || '']
+                );
+            }
+        }
+
+        await client.query('COMMIT');
+        client.release();
+        res.json({ message: `Successfully updated ${ids.length} claims to ${status}` });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        client.release();
+        console.error(err);
+        res.status(500).json({ message: 'Error updating bulk claims status' });
+    }
+});
+
 // Update claim status (Approve/Reject/Return)
 router.put('/claims/:id/status', authenticateToken, authorizeRole('Admin'), async (req, res) => {
     const { status, remarks } = req.body;
@@ -233,7 +271,7 @@ router.put('/claims/:id/status', authenticateToken, authorizeRole('Admin'), asyn
 // Save Forwarding Note
 router.post('/claims/:id/fwd-note', authenticateToken, authorizeRole('Admin'), async (req, res) => {
     const claimId = req.params.id;
-    const { htmlContent } = req.body;
+    const { htmlContent, fwdRecipient } = req.body;
     
     try {
         const result = await db.query('SELECT u.username FROM claims c JOIN users u ON c.user_id = u.id WHERE c.id = $1', [claimId]);
@@ -243,6 +281,11 @@ router.post('/claims/:id/fwd-note', authenticateToken, authorizeRole('Admin'), a
         const fwdNotePath = path.join(__dirname, '..', 'server', 'storage', username, 'claims', `${claimId}_forwarding_note.html`);
         
         await fs.outputFile(fwdNotePath, htmlContent);
+
+        if (fwdRecipient !== undefined) {
+            await db.query('UPDATE claims SET fwd_recipient = $1 WHERE id = $2', [fwdRecipient, claimId]);
+        }
+
         res.json({ message: 'Forwarding note saved successfully' });
     } catch (err) {
         console.error(err);
@@ -631,6 +674,43 @@ router.get('/claim-ref-nos/:claim_type_id/current', authenticateToken, async (re
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching current ref no' });
+    }
+});
+
+// GET all generated forwarding notes (Admin only)
+router.get('/forwardings', authenticateToken, authorizeRole('Admin'), async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT c.id, c.claim_name, c.submitted_at, u.username, u.name as user_name, u.designation, t.name as type_name
+            FROM claims c
+            JOIN users u ON c.user_id = u.id
+            JOIN claim_types t ON c.type_id = t.id
+            WHERE c.status != 'Draft'
+            ORDER BY c.submitted_at DESC
+        `);
+
+        const forwardings = [];
+        for (const row of result.rows) {
+            const fwdNotePath = path.join(__dirname, '..', 'server', 'storage', row.username, 'claims', `${row.id}_forwarding_note.html`);
+            if (await fs.pathExists(fwdNotePath)) {
+                const stats = await fs.stat(fwdNotePath);
+                forwardings.push({
+                    id: row.id,
+                    claim_name: row.claim_name,
+                    user_name: row.user_name,
+                    username: row.username,
+                    designation: row.designation,
+                    type_name: row.type_name,
+                    submitted_at: row.submitted_at,
+                    generated_at: stats.mtime,
+                    file_url: `/storage/${row.username}/claims/${row.id}_forwarding_note.html`
+                });
+            }
+        }
+        res.json(forwardings);
+    } catch (err) {
+        console.error('GET /forwardings error:', err);
+        res.status(500).json({ message: 'Error fetching forwarding notes' });
     }
 });
 
