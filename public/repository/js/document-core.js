@@ -223,14 +223,16 @@ function setupScrollSpy() {
     updateScrollSpy();
 }
 
+
 window.rebuildPageNavigation = function() {
     if (!pageListEl) return;
     pageListEl.innerHTML = '';
     
     const blocks = Array.from(editorEl.querySelectorAll('.page-block'));
     let visualPageCount = 1;
+    const totalBlocks = blocks.length;
     
-    blocks.forEach((block) => {
+    blocks.forEach((block, blockIdx) => {
         const blockId = block.dataset.pageId;
         const blockContent = block.querySelector('.page-block-content');
         if (!blockContent) return;
@@ -240,33 +242,104 @@ window.rebuildPageNavigation = function() {
         firstItem.className = 'page-item';
         firstItem.dataset.pageId = blockId;
         firstItem.dataset.visualIndex = 0;
-        firstItem.innerText = `Page ${visualPageCount}`;
-        
-        firstItem.onclick = () => {
+
+        // Label span
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'page-item-label';
+        labelSpan.textContent = `Page ${visualPageCount}`;
+        firstItem.appendChild(labelSpan);
+
+        // Move up/down buttons
+        const moveBtns = document.createElement('div');
+        moveBtns.className = 'page-move-btns';
+
+        const btnUp = document.createElement('button');
+        btnUp.className = 'page-move-btn';
+        btnUp.innerHTML = '▲';
+        btnUp.title = 'Move page up';
+        btnUp.disabled = blockIdx === 0;
+        btnUp.onclick = (e) => { e.stopPropagation(); window.moveDocPage(blockId, 'up', firstItem); };
+
+        const btnDown = document.createElement('button');
+        btnDown.className = 'page-move-btn';
+        btnDown.innerHTML = '▼';
+        btnDown.title = 'Move page down';
+        btnDown.disabled = blockIdx === totalBlocks - 1;
+        btnDown.onclick = (e) => { e.stopPropagation(); window.moveDocPage(blockId, 'down', firstItem); };
+
+        moveBtns.appendChild(btnUp);
+        moveBtns.appendChild(btnDown);
+        firstItem.appendChild(moveBtns);
+
+        firstItem.addEventListener('click', (e) => {
+            if (e.target.closest('.page-move-btns')) return;
             block.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            highlightSidebarPageItem(firstItem);
-        };
+            window.highlightSidebarPageItem(firstItem);
+        });
         pageListEl.appendChild(firstItem);
         visualPageCount++;
         
-        // Search for child page breaks inside this block content
+        // Sub-items for page breaks within this block
         const pageBreaks = Array.from(blockContent.querySelectorAll('.pb-break'));
         pageBreaks.forEach((pb, pbIdx) => {
             const subItem = document.createElement('div');
             subItem.className = 'page-item page-item-sub';
             subItem.dataset.pageId = blockId;
             subItem.dataset.visualIndex = pbIdx + 1;
-            subItem.innerText = `Page ${visualPageCount}`;
+
+            const subLabel = document.createElement('span');
+            subLabel.className = 'page-item-label';
+            subLabel.textContent = `Page ${visualPageCount}`;
+            subItem.appendChild(subLabel);
             
-            subItem.onclick = () => {
+            subItem.addEventListener('click', (e) => {
                 pb.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                highlightSidebarPageItem(subItem);
-            };
+                window.highlightSidebarPageItem(subItem);
+            });
             pageListEl.appendChild(subItem);
             visualPageCount++;
         });
     });
 }
+
+// Move a page (DB block) up or down
+window.moveDocPage = async function(pageId, direction, itemEl) {
+    const docIdParam = new URLSearchParams(window.location.search).get('id');
+    const tk = localStorage.getItem('token');
+    try {
+        itemEl.style.pointerEvents = 'none';
+        itemEl.style.opacity = '0.5';
+        const res = await fetch(`/api/repo/document/${docIdParam}/page/${pageId}/reorder`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tk}`
+            },
+            body: JSON.stringify({ direction })
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            console.warn('Page move failed:', data.message || res.status);
+            itemEl.style.pointerEvents = '';
+            itemEl.style.opacity = '';
+            return;
+        }
+        // Reload document viewer — re-fetches all pages in new order
+        await window.initializeDocumentViewer();
+        // Flash to show where the page landed
+        const movedItem = pageListEl.querySelector(`.page-item[data-page-id="${pageId}"]`);
+        if (movedItem) {
+            movedItem.classList.add('reorder-flash');
+            setTimeout(() => movedItem.classList.remove('reorder-flash'), 500);
+        }
+    } catch (err) {
+        console.error('moveDocPage error:', err);
+        itemEl.style.pointerEvents = '';
+        itemEl.style.opacity = '';
+    }
+};
+
+
 
 window.highlightSidebarPageItem = function(selectedEl) {
     document.querySelectorAll('.page-item').forEach(el => {
@@ -377,6 +450,7 @@ window.updatePageLayout = function() {
                 color: #000000 !important;
                 background: transparent !important;
                 background-image: none !important;
+                line-height: 1.35 !important;
             }
 
             .page-block-content::after {
@@ -388,6 +462,12 @@ window.updatePageLayout = function() {
                 padding-top: 6mm !important;
             }
 
+            .page-block-content p, 
+            .page-block-content div:not(.fwd-letterhead) {
+                margin-top: 0.25em !important;
+                margin-bottom: 0.35em !important;
+            }
+
             .page-block-content h1,
             .page-block-content h2,
             .page-block-content h3,
@@ -397,8 +477,37 @@ window.updatePageLayout = function() {
                 display: block !important;
                 color: #000000 !important;
                 background-color: transparent !important;
+                margin-top: 0.4em !important;
+                margin-bottom: 0.25em !important;
             }
             
+            .doc-ref-date-row {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+                flex-wrap: nowrap !important;
+                white-space: nowrap !important;
+                margin-top: 10px !important;
+                margin-bottom: 14px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .fwd-letterhead {
+                margin-bottom: 12px !important;
+                padding-bottom: 6px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                clear: both !important;
+                width: 100% !important;
+            }
+
+            .page-block-content table {
+                margin-top: 8px !important;
+                margin-bottom: 8px !important;
+            }
+
             .page-block-content,
             .page-block-content * {
                 color: #000000 !important;

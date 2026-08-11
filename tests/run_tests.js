@@ -15,7 +15,8 @@
 const path = require('path');
 const fs   = require('fs');
 
-const BASE_URL  = 'http://localhost:3000';
+const BASE_URL  = process.env.BASE_URL || 'http://localhost:3000';
+const STORAGE_ROOT = process.env.PROJECT_ROOT ? path.join(process.env.PROJECT_ROOT, 'server', 'storage') : path.join(__dirname, '..', 'server', 'storage');
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin123';
 
@@ -221,7 +222,7 @@ async function suiteClaimLifecycle() {
     // 4.3 Verify saved HTML file has correct <title>
     const { username: uname } = (await api('GET', '/api/auth/me', null, individualToken)).json || {};
     if (uname && draftId) {
-        const filePath = path.join(__dirname, '..', 'server', 'storage', uname, 'claims', `${draftId}.html`);
+        const filePath = path.join(STORAGE_ROOT, uname, 'claims', `${draftId}.html`);
         if (fs.existsSync(filePath)) {
             const content = fs.readFileSync(filePath, 'utf8');
             ok(`Saved HTML <title> matches claim name`,
@@ -375,7 +376,7 @@ async function suiteFilePaths() {
     ok('Root claim returns 201', r1.status === 201);
     const rootId = r1.json?.id;
 
-    const rootPath = path.join(__dirname, '..', 'server', 'storage', uname, 'claims', `${rootId}.html`);
+    const rootPath = path.join(STORAGE_ROOT, uname, 'claims', `${rootId}.html`);
     ok('Root claim HTML file exists at correct path', fs.existsSync(rootPath), rootPath);
 
     if (fs.existsSync(rootPath)) {
@@ -398,7 +399,7 @@ async function suiteFilePaths() {
     ok('Subfolder claim returns 201', r2.status === 201);
     const subId = r2.json?.id;
 
-    const subPath = path.join(__dirname, '..', 'server', 'storage', uname, 'claims', subfolder, `${subId}.html`);
+    const subPath = path.join(STORAGE_ROOT, uname, 'claims', subfolder, `${subId}.html`);
     ok('Subfolder claim HTML file exists at correct path', fs.existsSync(subPath), subPath);
 
     if (fs.existsSync(subPath)) {
@@ -480,8 +481,8 @@ async function suiteAdminUsers() {
 
     // 8.5 User storage directories created on creation
     const { username: uname } = (await api('GET', '/api/auth/me', null, individualToken)).json || {};
-    const billsPath  = path.join(__dirname, '..', 'server', 'storage', uname, 'bills');
-    const claimsPath = path.join(__dirname, '..', 'server', 'storage', uname, 'claims');
+    const billsPath  = path.join(STORAGE_ROOT, uname, 'bills');
+    const claimsPath = path.join(STORAGE_ROOT, uname, 'claims');
     ok('/bills storage folder created on user creation',  fs.existsSync(billsPath),  billsPath);
     ok('/claims storage folder created on user creation', fs.existsSync(claimsPath), claimsPath);
 }
@@ -593,6 +594,45 @@ async function suiteWardEntitlements() {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// SUITE 11 — Report Reminders & Dashboard Widget
+// ═════════════════════════════════════════════════════════════════════════════
+
+async function suiteReportReminders() {
+    // 11.1 Fetch user list for assignees
+    const r1 = await api('GET', '/api/reminders/users', null, individualToken);
+    ok('Fetch assignees list returns 200', r1.status === 200);
+    ok('Assignees list is an array', Array.isArray(r1.json) && r1.json.length > 0);
+
+    // 11.2 Create reminder
+    const dueDate = new Date(Date.now() + 86400000).toISOString();
+    const r2 = await api('POST', '/api/reminders', {
+        title: 'Monthly IT Audit Report',
+        description: 'Prepare quarterly security metrics',
+        due_date: dueDate,
+        urgency: 'High',
+        recurrence_rule: JSON.stringify({ type: 'monthly', interval: 1 })
+    }, individualToken);
+    ok('Create reminder returns 201', r2.status === 201);
+    const remId = r2.json?.id;
+    ok('Reminder ID returned', !!remId);
+
+    // 11.3 Dashboard widget query returns created reminder
+    const r3 = await api('GET', '/api/reminders/dashboard', null, individualToken);
+    ok('Fetch dashboard reminders returns 200', r3.status === 200);
+    const dashItem = r3.json?.find(r => r.id === remId);
+    ok('Created reminder appears in dashboard widget', !!dashItem);
+
+    // 11.4 Mark completed and verify recurrence
+    const r4 = await api('PUT', `/api/reminders/${remId}/status`, { status: 'Completed' }, individualToken);
+    ok('Complete recurring reminder returns 200', r4.status === 200);
+    ok('Recurrence message returned', r4.json?.message?.includes('Recurred'));
+
+    // 11.5 Delete reminder
+    const r5 = await api('DELETE', `/api/reminders/${remId}`, null, individualToken);
+    ok('Delete reminder returns 200', r5.status === 200);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // MAIN
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -615,6 +655,7 @@ async function main() {
     await suite('8 — Admin User Management & RBAC',     suiteAdminUsers);
     await suite('9 — Claim Overwrite & Save-as-New',    suiteClaimOverwrite);
     await suite('10 — Ward Entitlement Rules',          suiteWardEntitlements);
+    await suite('11 — Report Reminders & Dashboard Widget', suiteReportReminders);
 
     // ── Final Report ────────────────────────────────────────────────────────
     const total = passed + failed;

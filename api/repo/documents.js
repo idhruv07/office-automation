@@ -17,6 +17,7 @@ router.get('/documents', authenticateToken, docController.getDocuments);
 router.get('/document/:id/pages', authenticateToken, docController.getDocumentPages);
 router.get('/page/:id', authenticateToken, docController.getPage);
 router.put('/page/:id', authenticateToken, docController.updatePage);
+router.put('/document/:docId/page/:pageId/reorder', authenticateToken, docController.reorderPage);
 router.get('/page/:id/versions', authenticateToken, docController.getPageVersions);
 router.get('/search', authenticateToken, docController.searchRepository);
 

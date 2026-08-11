@@ -482,11 +482,81 @@ async function getRecentDocuments(req, res) {
     }
 }
 
+async function reorderPage(req, res) {
+    const docId = parseInt(req.params.docId);
+    const pageId = parseInt(req.params.pageId);
+    const { direction } = req.body; // 'up' or 'down'
+
+    if (!direction || !['up', 'down'].includes(direction)) {
+        return res.status(400).json({ message: 'direction must be "up" or "down"' });
+    }
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Permission check
+        if (!await isOfficeAdminHierarchy(req.user.id, db)) {
+            await client.query('ROLLBACK');
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        const perm = await resolvePermission(req.user.id, 'file', docId, db);
+        if (perm !== 'edit') {
+            await client.query('ROLLBACK');
+            return res.status(403).json({ message: 'Forbidden: edit permission required' });
+        }
+
+        // Get all pages ordered by sequence_no
+        const pagesRes = await client.query(
+            `SELECT id, sequence_no FROM document_pages WHERE document_id = $1 ORDER BY sequence_no ASC, id ASC`,
+            [docId]
+        );
+        const pages = pagesRes.rows;
+        const idx = pages.findIndex(p => p.id === pageId);
+
+        if (idx === -1) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ message: 'Page not found in this document' });
+        }
+
+        const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+        if (swapIdx < 0 || swapIdx >= pages.length) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ message: `Cannot move ${direction}: already at the boundary` });
+        }
+
+        const current = pages[idx];
+        const neighbour = pages[swapIdx];
+
+        // Swap sequence_no values (use temp to avoid uniqueness conflict)
+        const tempSeq = -1 * (current.sequence_no + neighbour.sequence_no + 999);
+        await client.query('UPDATE document_pages SET sequence_no = $1 WHERE id = $2', [tempSeq, current.id]);
+        await client.query('UPDATE document_pages SET sequence_no = $1 WHERE id = $2', [current.sequence_no, neighbour.id]);
+        await client.query('UPDATE document_pages SET sequence_no = $1 WHERE id = $2', [neighbour.sequence_no, current.id]);
+
+        await client.query(
+            `INSERT INTO audit_log (user_id, action, remarks) VALUES ($1, 'PAGE_REORDER', $2)`,
+            [req.user.id, `Moved page ${pageId} ${direction} in document ${docId}`]
+        );
+
+        await client.query('COMMIT');
+        res.json({ message: `Page moved ${direction} successfully` });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('PUT /api/repo/document/:docId/page/:pageId/reorder error:', err);
+        res.status(500).json({ message: 'Server error' });
+    } finally {
+        client.release();
+    }
+}
+
 module.exports = {
     getDocuments,
     getDocumentPages,
     getPage,
     updatePage,
+    reorderPage,
     getPageVersions,
     searchRepository,
     getRecentDocuments

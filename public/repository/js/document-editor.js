@@ -528,7 +528,7 @@ window.insertPageBreak = function() {
     const blockContent = activeBlock;
     
     const letterheadHtml = `
-        <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0 0 24px 0; color: black; font-family: sans-serif;" contenteditable="true">
+        <div class="fwd-letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0 0 24px 0; color: black; font-family: sans-serif; clear: both; width: 100%;" contenteditable="true">
             <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/emblem.png" alt="Emblem" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
             <div class="fwd-lh-center" style="text-align: center; flex: 1; line-height: 1.25;">
                 <div class="fwd-lh-title" style="font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">OFFICE OF THE CDA ( IT &amp; SDC )</div>
@@ -539,14 +539,53 @@ window.insertPageBreak = function() {
             </div>
             <div class="fwd-lh-img" style="flex: 0 0 60px;"><img src="/admin/images/azadi.png" alt="Logo Right" onerror="this.style.display='none'" style="height: 60px; display: block; margin: 0 auto;"></div>
         </div>
+        <div style="clear: both; width: 100%; height: 0;"></div>
     `;
 
+    const tempId = 'cursor-target-' + Date.now();
+
     if (isSelectionAtStart(blockContent)) {
-        const fullHtml = letterheadHtml + `<p><br></p><hr class="pb-break" />` + blockContent.innerHTML;
+        const fullHtml = letterheadHtml + `<div style="clear: both; width: 100%; height: 0;"></div><p id="${tempId}" style="clear: both; width: 100%; float: none; margin-top: 10px;"><br></p><hr class="pb-break" />` + blockContent.innerHTML;
         blockContent.innerHTML = fullHtml;
     } else {
-        const insertHtml = `<hr class="pb-break" />` + letterheadHtml + `<p><br></p>`;
+        const insertHtml = `<p><br></p><hr class="pb-break" /><div style="page-break-before: always; break-before: page; margin-top: 0; clear: both; width: 100%;"></div>` + letterheadHtml + `<div style="clear: both; width: 100%; height: 0;"></div><p id="${tempId}" style="clear: both; width: 100%; float: none; margin-top: 10px;"><br></p>`;
         document.execCommand('insertHTML', false, insertHtml);
+    }
+
+    const targetEl = blockContent.querySelector('#' + tempId);
+    if (targetEl) {
+        blockContent.focus();
+        try {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(targetEl);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } catch (err) { console.error('Failed to shift focus to page break body', err); }
+        targetEl.removeAttribute('id');
+    }
+};
+
+window.clearFloatAndResetWidth = function() {
+    const activeBlock = getActiveBlock();
+    if (!activeBlock) return;
+    
+    const clearHtml = `<div style="clear: both; width: 100%; height: 0; display: block; float: none; margin: 0;"></div><p style="clear: both; width: 100%; display: block; float: none; margin-top: 8px;"><br></p>`;
+    document.execCommand('insertHTML', false, clearHtml);
+    
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+        let node = sel.anchorNode;
+        if (node && node.nodeType === 3) node = node.parentNode;
+        while (node && node !== activeBlock) {
+            if (node.style) {
+                node.style.float = 'none';
+                node.style.clear = 'both';
+                node.style.width = '100%';
+            }
+            node = node.parentNode;
+        }
     }
 };
 

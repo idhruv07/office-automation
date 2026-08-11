@@ -156,6 +156,7 @@ app.use('/storage', express.static(path.join(__dirname, 'server', 'storage')));
 app.use('/api/auth', require('./api/auth'));
 app.use('/api/admin', require('./api/admin'));
 app.use('/api/claims', require('./api/claims'));
+app.use('/api/reminders', require('./api/reminders'));
 app.use('/api/repo', require('./api/repo/index'));   // Document Repository module (Office Admin hierarchy only)
 
 app.get('/api/health', (req, res) => {

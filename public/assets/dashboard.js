@@ -221,10 +221,91 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize Drag and Drop capability for all dashboard widget containers
         initDragAndDrop();
 
+        // Load Report Reminders widget
+        loadDashboardReminders(token);
+
     } catch (err) {
         console.error('Failed to load dashboard workspace metrics', err);
     }
 });
+
+async function loadDashboardReminders(token) {
+    const listEl = document.getElementById('dashboard-reminders-list');
+    if (!listEl) return;
+
+    try {
+        const res = await fetch('/api/reminders/dashboard', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed');
+
+        const reminders = await res.json();
+
+        if (reminders.length === 0) {
+            listEl.innerHTML = '<div style="color: rgba(255,255,255,0.7); font-size: 13px; text-align: center; padding: 12px;">🎉 No pending report reminders!</div>';
+            return;
+        }
+
+        listEl.innerHTML = reminders.map(r => {
+            const dueDate = new Date(r.due_date);
+            const formatted = dueDate.toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: true
+            });
+
+            const isOverdue = dueDate < new Date();
+            const badgeColor = isOverdue ? '#ef4444' : (r.urgency === 'High' ? '#ef4444' : '#f59e0b');
+
+            return `
+                <div style="background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.12);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button class="btn-dashboard-complete-rem" data-id="${r.id}" title="Mark as Completed" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #10b981; cursor: pointer; font-size: 12px; font-weight: 900; transition: all 0.2s; outline: none; padding: 0;">✓</button>
+                        <div>
+                            <div style="font-weight: 700; color: #ffffff; font-size: 14px;">${r.title}</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.6);">Assigned by: ${r.creator_name || 'System'}</div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="display: inline-block; background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800;">
+                            ${isOverdue ? 'OVERDUE' : r.urgency.toUpperCase()}
+                        </span>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px;">${formatted}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Attach action handlers for marking complete
+        listEl.querySelectorAll('.btn-dashboard-complete-rem').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                try {
+                    const res = await fetch(`/api/reminders/${id}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ status: 'Completed' })
+                    });
+                    if (res.ok) {
+                        // Reload list dynamically
+                        loadDashboardReminders(token);
+                    } else {
+                        alert('Failed to mark reminder as completed');
+                    }
+                } catch (err) {
+                    console.error('Error toggling status from dashboard:', err);
+                }
+            });
+        });
+    } catch (e) {
+        console.error('Failed to load dashboard reminders:', e);
+        listEl.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-size: 12px; text-align: center; padding: 10px;">Failed to load reminders</div>';
+    }
+}
 
 function initDragAndDrop() {
     const container = document.getElementById('dashboard-widgets-container');

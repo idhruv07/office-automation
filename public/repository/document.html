@@ -109,12 +109,65 @@
             position: relative;
         }
         .page-item {
-            padding: 12px;
-            margin-bottom: 8px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
             border-radius: 6px;
             cursor: pointer;
             transition: 0.2s;
             color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            position: relative;
+        }
+        .page-item-label {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 4px 0;
+            min-width: 0;
+        }
+        .page-move-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            opacity: 0;
+            transition: opacity 0.15s;
+            flex-shrink: 0;
+        }
+        .page-item:hover .page-move-btns,
+        .page-item.active .page-move-btns {
+            opacity: 1;
+        }
+        .page-move-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 18px;
+            border: none;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.12);
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 11px;
+            line-height: 1;
+            padding: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+        .page-move-btn:hover {
+            background: rgba(56, 189, 248, 0.35);
+            color: #ffffff;
+        }
+        .page-move-btn:disabled {
+            opacity: 0.2;
+            cursor: default;
+        }
+        .page-move-btn:disabled:hover {
+            background: rgba(255,255,255,0.12);
+            color: #cbd5e1;
         }
         .page-item:hover {
             background: rgba(255,255,255,0.1);
@@ -124,6 +177,13 @@
             color: var(--text-on-dark, #ffffff) !important;
             font-weight: 700 !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+        }
+        .page-item.active .page-move-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .page-item.active .page-move-btn:hover {
+            background: rgba(255,255,255,0.4);
         }
         .page-item-sub {
             padding-left: 28px !important;
@@ -139,6 +199,14 @@
             color: var(--primary-color, #38bdf8) !important;
             font-weight: 700 !important;
             box-shadow: none !important;
+        }
+        /* Page reorder animation */
+        .page-item.reorder-flash {
+            animation: reorder-flash 0.4s ease;
+        }
+        @keyframes reorder-flash {
+            0% { background: rgba(56, 189, 248, 0.5); }
+            100% { background: transparent; }
         }
         .toolbar-modern {
             background: #f8fafc;
@@ -698,6 +766,28 @@
                 height: 0 !important;
                 visibility: hidden !important;
             }
+            /* Normalize paragraph margins in print — only on p tags, NOT divs (flex divs must keep their display) */
+            .page-block-content p {
+                margin-top: 0.3em !important;
+                margin-bottom: 0.3em !important;
+            }
+            /* Ensure inline flex layouts are preserved in print */
+            .page-block-content div[style*="display: flex"],
+            .page-block-content div[style*="display:flex"] {
+                display: flex !important;
+            }
+            /* Force reference-number + date row onto a single line in print */
+            .doc-ref-date-row,
+            .page-block-content div[style*="display: flex"][style*="justify-content: space-between"],
+            .page-block-content div[style*="display:flex"][style*="justify-content:space-between"] {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+                flex-wrap: nowrap !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
         }
 
         .pb-break {
@@ -939,6 +1029,7 @@
                     <button onmousedown="event.preventDefault()" onclick="document.execCommand('underline')" title="Underline"><span class="material-symbols-outlined">format_underlined</span></button>
                     <button id="btn-format-painter" onmousedown="event.preventDefault()" onclick="toggleFormatPainter()" title="Format Painter"><span class="material-symbols-outlined">format_paint</span></button>
                     <button onmousedown="event.preventDefault()" onclick="document.execCommand('removeFormat')" title="Clear Formatting"><span class="material-symbols-outlined">format_clear</span></button>
+                    <button onmousedown="event.preventDefault()" onclick="window.clearFloatAndResetWidth()" title="Clear Layout &amp; Floats (Occupy Full Width)"><span class="material-symbols-outlined" style="color:#38bdf8;">wrap_text</span></button>
                     
                     <span class="toolbar-separator"></span>
 
@@ -1922,8 +2013,9 @@
                 
                 const blocks = Array.from(editorEl.querySelectorAll('.page-block'));
                 let visualPageCount = 1;
+                const totalBlocks = blocks.length;
                 
-                blocks.forEach((block) => {
+                blocks.forEach((block, blockIdx) => {
                     const blockId = block.dataset.pageId;
                     const blockContent = block.querySelector('.page-block-content');
                     if (!blockContent) return;
@@ -1933,13 +2025,48 @@
                     firstItem.className = 'page-item';
                     firstItem.dataset.pageId = blockId;
                     firstItem.dataset.visualIndex = 0;
-                    firstItem.innerText = `Page ${visualPageCount}`;
-                    
-                    firstItem.onclick = () => {
+
+                    // Label
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'page-item-label';
+                    labelSpan.textContent = `Page ${visualPageCount}`;
+                    firstItem.appendChild(labelSpan);
+
+                    // Move buttons (up/down) — only on block-level items, not sub-items
+                    const moveBtns = document.createElement('div');
+                    moveBtns.className = 'page-move-btns';
+                    moveBtns.title = 'Reorder page';
+
+                    const btnUp = document.createElement('button');
+                    btnUp.className = 'page-move-btn';
+                    btnUp.innerHTML = '▲';
+                    btnUp.title = 'Move page up';
+                    btnUp.disabled = blockIdx === 0;
+                    btnUp.onclick = (e) => {
+                        e.stopPropagation();
+                        movePage(blockId, 'up', firstItem);
+                    };
+
+                    const btnDown = document.createElement('button');
+                    btnDown.className = 'page-move-btn';
+                    btnDown.innerHTML = '▼';
+                    btnDown.title = 'Move page down';
+                    btnDown.disabled = blockIdx === totalBlocks - 1;
+                    btnDown.onclick = (e) => {
+                        e.stopPropagation();
+                        movePage(blockId, 'down', firstItem);
+                    };
+
+                    moveBtns.appendChild(btnUp);
+                    moveBtns.appendChild(btnDown);
+                    firstItem.appendChild(moveBtns);
+
+                    firstItem.addEventListener('click', (e) => {
+                        if (e.target.closest('.page-move-btns')) return;
                         scrollToElement(block, 'smooth');
                         highlightSidebarPageItem(firstItem);
                         highlightSidebarPage(blockId);
-                    };
+                    });
                     pageListEl.appendChild(firstItem);
                     visualPageCount++;
                     
@@ -1950,18 +2077,61 @@
                         subItem.className = 'page-item page-item-sub';
                         subItem.dataset.pageId = blockId;
                         subItem.dataset.visualIndex = pbIdx + 1;
-                        subItem.innerText = `Page ${visualPageCount}`;
+
+                        const subLabel = document.createElement('span');
+                        subLabel.className = 'page-item-label';
+                        subLabel.textContent = `Page ${visualPageCount}`;
+                        subItem.appendChild(subLabel);
                         
-                        subItem.onclick = () => {
+                        subItem.addEventListener('click', (e) => {
                             scrollToElement(pb, 'smooth');
                             highlightSidebarPageItem(subItem);
                             highlightSidebarPage(blockId);
-                        };
+                        });
                         pageListEl.appendChild(subItem);
                         visualPageCount++;
                     });
                 });
             }
+
+            // Move a page up or down by swapping its sequence_no with its neighbour
+            async function movePage(pageId, direction, itemEl) {
+                const docIdParam = new URLSearchParams(window.location.search).get('id');
+                const tk = localStorage.getItem('token');
+                try {
+                    itemEl.style.pointerEvents = 'none';
+                    itemEl.style.opacity = '0.5';
+                    const res = await fetch(`/api/repo/document/${docIdParam}/page/${pageId}/reorder`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${tk}`
+                        },
+                        body: JSON.stringify({ direction })
+                    });
+                    if (!res.ok) {
+                        const data = await res.json();
+                        console.warn('Page move failed:', data.message);
+                        itemEl.style.pointerEvents = '';
+                        itemEl.style.opacity = '';
+                        return;
+                    }
+                    // Reload the page list and redraw editor
+                    await window.initializeDocumentViewer();
+                    // Flash the moved item
+                    const newItem = pageListEl.querySelector(`.page-item[data-page-id="${pageId}"]`);
+                    if (newItem) {
+                        newItem.classList.add('reorder-flash');
+                        setTimeout(() => newItem.classList.remove('reorder-flash'), 500);
+                    }
+                } catch (err) {
+                    console.error('movePage error:', err);
+                    itemEl.style.pointerEvents = '';
+                    itemEl.style.opacity = '';
+                }
+            }
+
+
 
             function highlightSidebarPageItem(selectedEl) {
                 document.querySelectorAll('.page-item').forEach(el => {
@@ -1997,6 +2167,130 @@
                 console.error(err);
                 pageListEl.innerHTML = '<span style="color:red">Error loading</span>';
             }
+
+            // ─── Universal Print Preparation ──────────────────────────────────────
+            // Runs before every print (Ctrl+P or Print button) to normalize content.
+            // Does NOT modify the visual screen view — all changes are reverted afterprint.
+
+            function prepareForPrint() {
+                const editor = document.getElementById('editor-content');
+                if (!editor) return;
+
+                // 1. Strip --tw-* CSS variable bloat from ALL inline styles in content.
+                //    These phantom variables block Chrome's print engine from reading real CSS.
+                editor.querySelectorAll('[style]').forEach(el => {
+                    const style = el.getAttribute('style') || '';
+                    if (style.includes('--tw-') || style.includes('--tw')) {
+                        const cleaned = style
+                            .replace(/--[a-zA-Z0-9-]+\s*:\s*[^;]*;?\s*/g, '')  // strip ALL CSS custom properties
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                        el._origStyle = style; // stash original
+                        if (cleaned) {
+                            el.setAttribute('style', cleaned);
+                        } else {
+                            el.removeAttribute('style');
+                        }
+                    }
+                });
+
+                // 2. Tag all ref-no / date header rows with .doc-ref-date-row so
+                //    the @media print CSS can force them onto one flex line.
+                //    Pattern A: single parent with text-align:left child + text-align:right child
+                //    Pattern B: element whose text contains both a ref no and a date
+                editor.querySelectorAll('.page-block-content div, .page-block-content p').forEach(el => {
+                    if (el.classList.contains('doc-ref-date-row')) return; // already tagged
+                    if (el.classList.contains('fwd-letterhead')) return;
+
+                    // Pattern A — parent div with left/right children (the most common case)
+                    const children = Array.from(el.children);
+                    if (children.length === 2) {
+                        const leftText = (children[0].textContent || '').trim();
+                        const rightText = (children[1].textContent || '').trim();
+                        const leftStyle = (children[0].getAttribute('style') || '');
+                        const rightStyle = (children[1].getAttribute('style') || '');
+                        const leftIsLeft = leftStyle.includes('text-align: left') || leftStyle.includes('text-align:left');
+                        const rightIsRight = rightStyle.includes('text-align: right') || rightStyle.includes('text-align:right');
+                        const hasRefNo = /No\.\s*\w|Ref\.\s*No|Order No|Admin Order/i.test(leftText + rightText);
+                        const hasDate = /Dated|Dt\.|Date:/i.test(leftText + rightText);
+                        if (hasRefNo && hasDate && (leftIsLeft || rightIsRight)) {
+                            el.classList.add('doc-ref-date-row', '_print-tagged');
+                            return;
+                        }
+                    }
+
+                    // Pattern B — single element that already has flex+space-between in its inline style
+                    const elStyle = (el.getAttribute('style') || '');
+                    const hasFlex = elStyle.includes('display: flex') || elStyle.includes('display:flex');
+                    const hasSpaceBetween = elStyle.includes('space-between');
+                    if (hasFlex && hasSpaceBetween) {
+                        el.classList.add('doc-ref-date-row', '_print-tagged');
+                    }
+                });
+
+                // 3. Auto-convert any &nbsp;-padded ref/date text lines into flex rows for print
+                autoConvertRefDateRows(editor);
+            }
+
+            function cleanupAfterPrint() {
+                const editor = document.getElementById('editor-content');
+                if (!editor) return;
+
+                // Restore original inline styles that had --tw-* variables
+                editor.querySelectorAll('[style]').forEach(el => {
+                    if (el._origStyle !== undefined) {
+                        el.setAttribute('style', el._origStyle);
+                        delete el._origStyle;
+                    }
+                });
+
+                // Remove tags added only for print
+                editor.querySelectorAll('._print-tagged').forEach(el => {
+                    el.classList.remove('doc-ref-date-row', '_print-tagged');
+                });
+            }
+
+            function autoConvertRefDateRows(container = document) {
+                if (!container) return;
+                const selector = '.page-block-content p, .page-block-content div:not(.doc-ref-date-row):not(.fwd-letterhead)';
+                const elements = Array.from(container.querySelectorAll(selector));
+                
+                elements.forEach(el => {
+                    if (el.closest('.doc-ref-date-row')) return;
+                    const html = el.innerHTML;
+                    if (!html || html.includes('doc-ref-date-row')) return;
+                    
+                    const match = html.match(/^(?:\s|<[^>]+>)*([^\n<]+?)(?:&nbsp;|\s){3,}(Dated[\.:]|Date[\.:]|Dt[\.:])\s*(?:&nbsp;|\s)*([^\n<]+?)(?:\s|<[^>]+>)*$/i);
+                    if (match) {
+                        const leftText = match[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+                        const dateLabel = match[2].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+                        const dateVal = match[3].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+                        
+                        if (leftText && dateVal && (leftText.length > 2 || /No|Ref|DO|Order/i.test(leftText))) {
+                            const flexDiv = document.createElement('div');
+                            flexDiv.className = 'doc-ref-date-row';
+                            flexDiv.style.cssText = 'display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; flex-wrap: nowrap !important; margin: 10px 0 14px 0;';
+                            
+                            const leftElem = document.createElement('strong');
+                            leftElem.textContent = leftText;
+                            
+                            const rightElem = document.createElement('strong');
+                            rightElem.textContent = `${dateLabel} ${dateVal}`;
+                            
+                            flexDiv.appendChild(leftElem);
+                            flexDiv.appendChild(rightElem);
+                            
+                            if (el.parentNode) {
+                                el.parentNode.replaceChild(flexDiv, el);
+                            }
+                        }
+                    }
+                });
+            }
+
+            window.addEventListener('beforeprint', prepareForPrint);
+            window.addEventListener('afterprint', cleanupAfterPrint);
+            // ─────────────────────────────────────────────────────────────────────
 
             async function renderAllPages(pages) {
                 editorEl.innerHTML = '';
@@ -3452,10 +3746,10 @@
                 const tempId = 'cursor-target-' + Date.now();
 
                 if (isSelectionAtStart(blockContent)) {
-                    const fullHtml = `<p><br></p>` + letterheadHtml + `<p id="${tempId}"><br></p><hr class="pb-break" />` + blockContent.innerHTML;
+                    const fullHtml = letterheadHtml + `<div style="clear: both; width: 100%; height: 0;"></div><p id="${tempId}" style="clear: both; width: 100%; float: none; margin-top: 10px;"><br></p><hr class="pb-break" />` + blockContent.innerHTML;
                     blockContent.innerHTML = fullHtml;
                 } else {
-                    const insertHtml = `<p><br></p><hr class="pb-break" /><div style="page-break-before: always; break-before: page; margin-top: 0;"></div>` + letterheadHtml + `<p id="${tempId}"><br></p>`;
+                    const insertHtml = `<p><br></p><hr class="pb-break" /><div style="page-break-before: always; break-before: page; margin-top: 0; clear: both; width: 100%;"></div>` + letterheadHtml + `<div style="clear: both; width: 100%; height: 0;"></div><p id="${tempId}" style="clear: both; width: 100%; float: none; margin-top: 10px;"><br></p>`;
                     document.execCommand('insertHTML', false, insertHtml);
                 }
 
@@ -3471,6 +3765,28 @@
                         sel.addRange(range);
                     } catch (err) { console.error('Failed to shift focus to page break body', err); }
                     targetEl.removeAttribute('id');
+                }
+            };
+
+            window.clearFloatAndResetWidth = function() {
+                const activeBlock = getActiveBlock();
+                if (!activeBlock) return;
+                
+                const clearHtml = `<div style="clear: both; width: 100%; height: 0; display: block; float: none; margin: 0;"></div><p style="clear: both; width: 100%; display: block; float: none; margin-top: 8px;"><br></p>`;
+                document.execCommand('insertHTML', false, clearHtml);
+                
+                const sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    let node = sel.anchorNode;
+                    if (node && node.nodeType === 3) node = node.parentNode;
+                    while (node && node !== activeBlock) {
+                        if (node.style) {
+                            node.style.float = 'none';
+                            node.style.clear = 'both';
+                            node.style.width = '100%';
+                        }
+                        node = node.parentNode;
+                    }
                 }
             };
 
@@ -3735,7 +4051,7 @@
                             padding: 0 !important;
                         }
 
-                        /* Clear parent layout space, padding, and margins */
+                        /* Clear parent layout space, padding, and margins — but NOT display:flex on content */
                         body, html, #app-container, .main-content, main, .doc-layout, #page-viewer, .page-content-area, #editor-content {
                             background: white !important;
                             background-color: white !important;
@@ -3783,6 +4099,7 @@
                             color: #000000 !important;
                             background: transparent !important;
                             background-image: none !important;
+                            line-height: 1.35 !important;
                         }
 
                         .page-block-content::after {
@@ -3795,7 +4112,18 @@
                             padding-top: 6mm !important;
                         }
 
-                        /* Guarantee Heading 1-6 tags display block and print visibility */
+                        /* Normalize paragraph margins only (NOT divs — flex divs need their display preserved) */
+                        .page-block-content p {
+                            margin-top: 0.3em !important;
+                            margin-bottom: 0.3em !important;
+                        }
+
+                        /* Preserve inline flex layouts in print */
+                        .page-block-content div[style*="display: flex"],
+                        .page-block-content div[style*="display:flex"] {
+                            display: flex !important;
+                        }
+
                         .page-block-content h1,
                         .page-block-content h2,
                         .page-block-content h3,
@@ -3805,8 +4133,37 @@
                             display: block !important;
                             color: #000000 !important;
                             background-color: transparent !important;
+                            margin-top: 0.4em !important;
+                            margin-bottom: 0.25em !important;
                         }
-                        
+
+                        /* Force ALL ref-no/date rows onto a single line in print */
+                        .doc-ref-date-row,
+                        .page-block-content div[style*="display: flex"][style*="justify-content: space-between"],
+                        .page-block-content div[style*="display:flex"][style*="justify-content:space-between"] {
+                            display: flex !important;
+                            justify-content: space-between !important;
+                            align-items: center !important;
+                            width: 100% !important;
+                            flex-wrap: nowrap !important;
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+
+                        .fwd-letterhead {
+                            margin-bottom: 12px !important;
+                            padding-bottom: 6px !important;
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                            clear: both !important;
+                            width: 100% !important;
+                        }
+
+                        .page-block-content table {
+                            margin-top: 8px !important;
+                            margin-bottom: 8px !important;
+                        }
+
                         .page-block-content,
                         .page-block-content * {
                             color: #000000 !important;
@@ -3851,6 +4208,16 @@
                         }
                         .page-block:first-child .fwd-letterhead {
                             margin-bottom: 12px !important;
+                        }
+
+                        /* On screen, .doc-ref-date-row shows naturally (its inline style sets flex) */
+                        /* This prevents print rules from affecting screen layout */
+                        .doc-ref-date-row {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            width: 100%;
+                            flex-wrap: nowrap;
                         }
                     }
                         
@@ -4523,35 +4890,56 @@
                     return;
                 }
 
-                // 2. Check if rich HTML content is pasted (e.g. text copied from MS Word)
+                // 2. Check if rich HTML content is pasted (e.g. text copied from Google Docs, MS Word, or web)
                 const html = clipboardData.getData('text/html');
                 if (html) {
                     e.preventDefault();
                     
-                    // Sanitize pasted HTML to prevent layout breakage
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     
-                    // Remove layout-breaking elements like style, meta, title, link, head
-                    doc.querySelectorAll('style, meta, title, link, head').forEach(el => el.remove());
+                    // Remove non-content tags like script, iframe, object, embed, meta, link
+                    doc.querySelectorAll('script, iframe, object, embed, meta, link, head').forEach(el => el.remove());
                     
-                    // Clean up inline styles that disrupt layout
+                    // Preserve inline styles while stripping layout disruptors
                     doc.querySelectorAll('*').forEach(el => {
                         let style = el.getAttribute('style') || '';
                         if (style) {
+                            style = style.replace(/position:\s*(fixed|absolute);?/gi, '');
                             style = style.replace(/page-break-[^;]+;?/gi, '');
-                            style = style.replace(/size:[^;]+;?/gi, '');
-                            style = style.replace(/margin:[^;]+;?/gi, '');
-                            style = style.replace(/position:\s*absolute;?/gi, '');
-                            style = style.replace(/width:\s*\d+(pt|px|in|cm|mm);?/gi, '');
                             el.setAttribute('style', style);
                         }
                     });
                     
                     const cleanHtml = doc.body.innerHTML;
                     
-                    // Clean and paste rich HTML directly to preserve formatting
-                    document.execCommand('insertHTML', false, cleanHtml);
+                    // Insert cleanHtml using DOM Range fragment to prevent browser style-stripping
+                    const selection = window.getSelection();
+                    if (selection && selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        range.deleteContents();
+                        
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = cleanHtml;
+                        
+                        const fragment = document.createDocumentFragment();
+                        let lastNode = null;
+                        while (tempDiv.firstChild) {
+                            lastNode = tempDiv.firstChild;
+                            fragment.appendChild(lastNode);
+                        }
+                        
+                        range.insertNode(fragment);
+                        
+                        if (lastNode) {
+                            range.setStartAfter(lastNode);
+                            range.setEndAfter(lastNode);
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        }
+                    } else {
+                        document.execCommand('insertHTML', false, cleanHtml);
+                    }
                     
                     // Dispatch input event to trigger auto-save after DOM settles
                     setTimeout(() => activeBlock.dispatchEvent(new Event('input', { bubbles: true })), 100);
