@@ -1,0 +1,548 @@
+<style>
+    .cea-wrap { font-size: 12px !important; line-height: 1.3; }
+    .cea-wrap h2 { font-size: 15px !important; text-align: center; margin-bottom: 6px !important; border-bottom: 1.5px solid #333; padding-bottom: 4px; }
+    .cea-wrap h3 { font-size: 13px !important; background: #f8fafc; padding: 2px 8px; margin: 10px 0 4px 0 !important; border-left: 3px solid #3b82f6; }
+    .cea-wrap input, .cea-wrap select, .cea-wrap textarea { font-size: 12px !important; padding: 2px 4px !important; border: 1px solid #d1d5db; border-radius: 2px; }
+    .cea-wrap table { width: 100%; border-collapse: collapse !important; margin-bottom: 8px; }
+    .cea-wrap table th, .cea-wrap table td { border: 1px solid #9ca3af !important; padding: 2px 4px !important; vertical-align: middle; }
+    .cea-wrap table th { background-color: #f9fafb; text-align: left; font-weight: bold; }
+    .cea-wrap .nbi { border: none !important; width: 100%; padding: 2px 4px !important; margin: 0 !important; background: transparent !important; }
+    .cea-wrap .ii { border: none !important; border-bottom: 1px solid #555 !important; background: transparent !important; display: inline-block !important; padding: 0 3px !important; margin: 0 2px !important; width: auto !important; min-width: 80px; }
+    .cea-wrap .cert-block { border: 1px dashed #9ca3af; border-radius: 6px; padding: 12px; margin-bottom: 14px; line-height: 2.2; font-size: 12px; }
+    .cea-wrap .cert-block h4 { margin: 0 0 8px 0; text-align: center; font-size: 13px; font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    @media screen {
+        .cea-wrap h3 { background: rgba(79,70,229,0.04) !important; border-left: 3px solid var(--accent-color, #6366f1) !important; color: var(--primary-color, #3b3b98) !important; font-weight: 700 !important; }
+        .cea-wrap table th { background-color: var(--primary-color, #3b3b98) !important; color: white !important; border-color: var(--primary-color, #3b3b98) !important; }
+        .cea-wrap input:focus, .cea-wrap select:focus { border-color: var(--primary-color, #3b3b98) !important; box-shadow: 0 0 0 2px rgba(99,102,241,0.15) !important; outline: none !important; }
+    }
+    @media print {
+        .no-print { display: none !important; }
+        .cea-wrap { font-size: 10.5px !important; }
+        .cea-wrap h2 { font-size: 13px !important; }
+        .cea-wrap h3 { font-size: 11px !important; background: transparent !important; border-left: none !important; text-decoration: underline; color: #000 !important; }
+        .cea-wrap table th, .cea-wrap table td { padding: 1px 3px !important; font-size: 10.5px !important; border: 1px solid #555 !important; }
+        .cea-wrap table th { background: transparent !important; color: #000 !important; }
+        .cea-wrap input, .cea-wrap select { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
+        .cea-wrap .ii { border-bottom: 1px solid #000 !important; }
+        .cea-wrap .cert-block { border: 1px solid #666 !important; }
+        .pb { break-before: page; page-break-before: always; }
+    }
+</style>
+
+<div class="cea-wrap p-4" id="cea_root">
+
+    <!-- Header -->
+    <div class="cea-header-block">
+        <h2 class="cea-main-title">Claim Form for Reimbursement of Children Education Allowance</h2>
+        <div class="cea-auth-subtitle">Authority: DoPT Order No. N.A-27012/02/2017-Estt.(AL) dated 16 Aug 2017 (effective 1 July 2017)</div>
+    </div>
+
+    <form id="cea_frm" novalidate>
+
+    <!-- Section 1 -->
+    <h3>Claim Details</h3>
+    <table>
+        <tr>
+            <th style="width:30%;">Claim for the Academic Year *</th>
+            <td style="width:20%;"><input id="cea_ay" name="ay" class="nbi" placeholder="e.g. 2025-26" required></td>
+            <th style="width:30%;">Academic Year applied now (Item 10) *</th>
+            <td style="width:20%;"><input id="cea_ay2" name="ay2" class="nbi" placeholder="e.g. 2025-26" required></td>
+        </tr>
+    </table>
+    <div style="font-style:italic; font-size:10px; margin-bottom:8px;">I hereby apply for reimbursement of Children Education Allowance for my child / children; relevant particulars are furnished below.</div>
+
+    <!-- Section 2: Employee & Spouse -->
+    <h3>Employee &amp; Spouse Particulars (Items 1–6)</h3>
+    <table class="mb-2">
+        <tr>
+            <th class="cea-col-25">1. Name of the Govt Servant *</th>
+            <td class="cea-col-25"><input id="cea_emp" name="emp" class="nbi ltc_final_name_sync" required></td>
+            <th class="cea-col-25">2. Employee Code *</th>
+            <td class="cea-col-25"><input id="cea_code" name="code" class="nbi ltc_final_pno_sync" required></td>
+        </tr>
+        <tr>
+            <th>3. Designation *</th>
+            <td><input id="cea_desg" name="desg" class="nbi ltc_final_desig_sync" required></td>
+            <th>4. Name of Organisation / Section *</th>
+            <td><input id="cea_org" name="org" class="nbi" required></td>
+        </tr>
+        <tr>
+            <th>5. Is spouse employed?</th>
+            <td colspan="3">
+                <select name="sp" id="cea_sp" class="nbi">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Conditional Spouse Employment Details Block -->
+    <div id="cea_spouse_block" class="mov-hide mb-2">
+        <div class="cea-sub-hdr">Spouse Employment Details</div>
+        <table>
+            <tr>
+                <th class="cea-col-25">Name of Spouse</th>
+                <td class="cea-col-25"><input id="cea_spn" name="spn" class="nbi"></td>
+                <th class="cea-col-25">Employer Type</th>
+                <td class="cea-col-25">
+                    <select id="cea_spt" name="spt" class="nbi">
+                        <option value="">Select</option>
+                        <option>Central Govt.</option>
+                        <option>PSU</option>
+                        <option>State Govt.</option>
+                        <option>Autonomous Body</option>
+                        <option>Private / Other</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th>6. Designation of Spouse</th>
+                <td><input id="cea_spd" name="spd" class="nbi"></td>
+                <th>6. Office / Organisation</th>
+                <td><input id="cea_spo" name="spo" class="nbi"></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Section 3: Child Details -->
+    <div class="cea-hdr-with-action">
+        <h3>7. Details of Child / Children (CEA / Hostel Subsidy)</h3>
+        <button type="button" id="cea_add_child_btn" class="btn-add-row no-print">➕ Add Child</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th class="cea-col-seq">Sequence</th>
+                <th class="cea-col-name">Name of Child</th>
+                <th class="cea-col-dob">DOB</th>
+                <th class="cea-col-std">Standard</th>
+                <th class="cea-col-sch">Name &amp; Place of School / Institution</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="cea_child_row_0">
+                <td class="text-center">1st Child</td>
+                <td>
+                    <select name="k0n" id="cea_k0_sel" class="nbi cea-child-sel" data-idx="0">
+                        <option value="">Select / Enter Name...</option>
+                    </select>
+                    <input type="text" name="k0n_custom" id="cea_k0_txt" class="nbi mov-hide" placeholder="Type name...">
+                </td>
+                <td><input type="date" name="k0d" id="cea_k0d" class="nbi"></td>
+                <td><input name="k0c" id="cea_k0c" class="nbi"></td>
+                <td><input name="k0s" id="cea_k0s" class="nbi"></td>
+            </tr>
+            <tr id="cea_child_row_1" class="mov-hide">
+                <td class="text-center">
+                    2nd Child
+                    <button type="button" class="btn-rm-row cea-rm-child-btn no-print" data-idx="1" title="Remove 2nd Child">✖</button>
+                </td>
+                <td>
+                    <select name="k1n" id="cea_k1_sel" class="nbi cea-child-sel" data-idx="1">
+                        <option value="">Select / Enter Name...</option>
+                    </select>
+                    <input type="text" name="k1n_custom" id="cea_k1_txt" class="nbi mov-hide" placeholder="Type name...">
+                </td>
+                <td><input type="date" name="k1d" id="cea_k1d" class="nbi"></td>
+                <td><input name="k1c" id="cea_k1c" class="nbi"></td>
+                <td><input name="k1s" id="cea_k1s" class="nbi"></td>
+            </tr>
+            <tr id="cea_child_row_2" class="mov-hide">
+                <td class="text-center">
+                    3rd Child
+                    <button type="button" class="btn-rm-row cea-rm-child-btn no-print" data-idx="2" title="Remove 3rd Child">✖</button>
+                </td>
+                <td>
+                    <select name="k2n" id="cea_k2_sel" class="nbi cea-child-sel" data-idx="2">
+                        <option value="">Select / Enter Name...</option>
+                    </select>
+                    <input type="text" name="k2n_custom" id="cea_k2_txt" class="nbi mov-hide" placeholder="Type name...">
+                </td>
+                <td><input type="date" name="k2d" id="cea_k2d" class="nbi"></td>
+                <td><input name="k2c" id="cea_k2c" class="nbi"></td>
+                <td><input name="k2s" id="cea_k2s" class="nbi"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="cea-note-text">CEA is admissible for the two eldest surviving children only (Item 17).</div>
+
+    <!-- Section 4: Expenditure -->
+    <h3>8. Reimbursement of Expenditure</h3>
+    <table>
+        <thead>
+            <tr>
+                <th class="cea-col-seq">Sequence</th>
+                <th class="cea-col-period">Period</th>
+                <th class="cea-col-rate">Rate of CEA p.m. (₹)</th>
+                <th class="cea-col-amt">Amount Claimed (₹)</th>
+                <th class="cea-col-rem">Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="cea_exp_row_0">
+                <td class="text-center">1st Child</td>
+                <td><input name="r0p" id="cea_r0p" class="nbi" placeholder="e.g. Apr 2025 – Mar 2026"></td>
+                <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r0r" id="cea_r0r"></td>
+                <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r0a" id="cea_r0a"></td>
+                <td><input name="r0m" id="cea_r0m" class="nbi"></td>
+            </tr>
+            <tr id="cea_exp_row_1" class="mov-hide">
+                <td class="text-center">2nd Child</td>
+                <td><input name="r1p" id="cea_r1p" class="nbi" placeholder="e.g. Apr 2025 – Mar 2026"></td>
+                <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r1r" id="cea_r1r"></td>
+                <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r1a" id="cea_r1a"></td>
+                <td><input name="r1m" id="cea_r1m" class="nbi"></td>
+            </tr>
+            <tr id="cea_exp_row_2" class="mov-hide">
+                <td class="text-center">3rd Child</td>
+                <td><input name="r2p" id="cea_r2p" class="nbi" placeholder="e.g. Apr 2025 – Mar 2026"></td>
+                <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r2r" id="cea_r2r"></td>
+                <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r2a" id="cea_r2a"></td>
+                <td><input name="r2m" id="cea_r2m" class="nbi"></td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-right font-bold">Total amount claimed: ₹</td>
+                <td colspan="2"><input id="cea_total" name="cea_total" class="nbi font-bold" readonly></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Section 5: Hostel, Disability & Documents -->
+    <h3>Hostel Subsidy, Disability &amp; Documents (Items 9–14)</h3>
+    <table class="mb-2">
+        <tr>
+            <th class="cea-col-28">Hostel Subsidy claimed?</th>
+            <td class="cea-col-22">
+                <select name="hs" id="cea_hs" class="nbi">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </td>
+            <th class="cea-col-28">11(a). Is the child a disabled child?</th>
+            <td class="cea-col-22">
+                <select name="dis" id="cea_dis" class="nbi">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="2" class="cea-col-50">12. Bonafide cert. / self-attested report card / fee receipt(s) for entire academic year attached? *</th>
+            <td colspan="2" class="cea-col-50">
+                <select id="cea_doc" name="doc" class="nbi" required>
+                    <option value="">Select</option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Conditional Hostel Subsidy Details Block -->
+    <div id="cea_hostel_block" class="mov-hide mb-2">
+        <div class="cea-sub-hdr">Hostel Subsidy Details</div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="cea-col-33">9. Distance from hostel to residence (km)</th>
+                    <th class="cea-col-33">13. Bonafide cert. (hostel amount) attached?</th>
+                    <th class="cea-col-34">14. Hostel Subsidy claimed (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input id="cea_hdist" name="hdist" class="nbi" type="number" min="0" step="0.1"></td>
+                    <td>
+                        <select id="cea_hbon" name="hbon" class="nbi">
+                            <option value="">Select</option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </td>
+                    <td><input id="cea_hamt" name="hamt" class="nbi" type="number" min="0" step="0.01"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Conditional Disability Details Block -->
+    <div id="cea_disability_block" class="mov-hide mb-2">
+        <div class="cea-sub-hdr">Disability Details</div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="cea-col-25">Name of disabled child</th>
+                    <th class="cea-col-25">11(b). Nature of disability</th>
+                    <th class="cea-col-25">11(c). Date of disability certificate</th>
+                    <th class="cea-col-25">11(d). Percentage of disability (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input id="cea_dchild" name="dchild" class="nbi"></td>
+                    <td><input id="cea_dnat" name="dnat" class="nbi"></td>
+                    <td><input id="cea_ddt" name="ddt" class="nbi" type="date"></td>
+                    <td><input id="cea_dpc" name="dpc" class="nbi" type="number" min="0" max="100" step="0.01"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section 6: Certificates -->
+    <!-- Section 6: Certificates -->
+    <h3>Certificates &amp; Undertaking (Items 15–17)</h3>
+    <div class="mb-3">
+        <div class="cea-check-row mb-1">
+            <input type="checkbox" id="k15b" name="k15b" class="cea-chk">
+            <label for="k15b">15(b). I certify that my spouse shall not apply / has not applied for CEA for the child / children mentioned above.</label>
+        </div>
+        <div class="cea-check-row mb-1">
+            <input type="checkbox" id="k15c" name="k15c" class="cea-chk">
+            <label for="k15c">15(c). I certify that I or my wife / husband has not claimed this reimbursement from any other source and will not claim the same in future. *</label>
+        </div>
+        <div class="cea-check-row mb-1">
+            <input type="checkbox" id="k16" name="k16" class="cea-chk">
+            <label for="k16">16. I certify that the child in respect of whom reimbursement is applied is studying in a school / Jr. College recognised and affiliated to a Board of Education / University. *</label>
+        </div>
+        <div class="cea-check-row mb-1">
+            <input type="checkbox" id="k17" name="k17" class="cea-chk">
+            <label for="k17">17. I certify that I am claiming CEA in respect of my two eldest surviving children only; the information furnished is complete and correct. I undertake to promptly intimate any change affecting my eligibility and to refund excess payments, if any. *</label>
+        </div>
+    </div>
+    <table>
+        <tr>
+            <th style="width:20%;">Date *</th>
+            <td style="width:30%;"><input id="cea_dt" name="dt" class="nbi ltc_final_date_sync" type="date" required></td>
+            <th style="width:20%;">Place *</th>
+            <td style="width:30%;"><input id="cea_pl" name="pl" class="nbi" required></td>
+        </tr>
+        <tr>
+            <th>Signature of Govt Servant (type full name) *</th>
+            <td colspan="3"><input id="cea_sig" name="sig" class="nbi" required></td>
+        </tr>
+    </table>
+
+    <!-- ══════════════════════════════════════════
+         ANNEXURE A — Certificate from Head of Institution
+         (static for 3 children; values synced via claims_new.js CEA block)
+    ══════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════
+         ANNEXURE A — Certificate from Head of Institution
+    ══════════════════════════════════════════ -->
+    <div class="pb">
+        <h3>Annexure A — Certificate from Head of Institution / School</h3>
+        <p class="cea-note-text no-print">To be completed and signed by the school for each child. Child details sync from Item 7.</p>
+
+        <!-- Annexure A — 1st Child -->
+        <div class="cert-block" id="cea_annexA_0">
+            <h4>1st Child</h4>
+            Ref No. <input name="h0ref" class="ii cea-w70"> &nbsp; Date <input name="h0dt" class="ii cea-w90"><br>
+            It is certified that Master / Kumari
+            <input name="h0n" id="cea_h0n" class="ii cea-w160">
+            having Admission No. <input name="h0adm" class="ii">
+            D.O.B <input type="date" name="h0d" id="cea_h0d" class="ii cea-w110">
+            Son / Daughter of Mr./Mrs. <input name="h0par" id="cea_h0par" class="ii cea-w160">
+            was studying in class <input name="h0c" id="cea_h0c" class="ii cea-w60">
+            Sec <input name="h0sec" class="ii cea-w45">
+            Roll No. <input name="h0roll" class="ii cea-w55">
+            during the previous academic year <input name="h0yr" id="cea_h0yr" class="ii cea-w90">
+            in School / Institution <input name="h0s" id="cea_h0s" class="ii cea-w200">
+            vide affiliation / recognised by <input name="h0aff" class="ii cea-w140">
+            and the affiliation / recognition number is <input name="h0afn" class="ii cea-w110">.<br>
+            <div class="cea-flex-sb mt-2">
+                <span>Place <input name="h0pl" class="ii cea-w100"> &nbsp; Date <input name="h0d2" class="ii cea-w100"></span>
+                <span>Signature of Principal (affix school stamp)</span>
+            </div>
+        </div>
+
+        <!-- Annexure A — 2nd Child -->
+        <div class="cert-block mov-hide" id="cea_annexA_1">
+            <h4>2nd Child</h4>
+            Ref No. <input name="h1ref" class="ii cea-w70"> &nbsp; Date <input name="h1dt" class="ii cea-w90"><br>
+            It is certified that Master / Kumari
+            <input name="h1n" id="cea_h1n" class="ii cea-w160">
+            having Admission No. <input name="h1adm" class="ii">
+            D.O.B <input type="date" name="h1d" id="cea_h1d" class="ii cea-w110">
+            Son / Daughter of Mr./Mrs. <input name="h1par" id="cea_h1par" class="ii cea-w160">
+            was studying in class <input name="h1c" id="cea_h1c" class="ii cea-w60">
+            Sec <input name="h1sec" class="ii cea-w45">
+            Roll No. <input name="h1roll" class="ii cea-w55">
+            during the previous academic year <input name="h1yr" id="cea_h1yr" class="ii cea-w90">
+            in School / Institution <input name="h1s" id="cea_h1s" class="ii cea-w200">
+            vide affiliation / recognised by <input name="h1aff" class="ii cea-w140">
+            and the affiliation / recognition number is <input name="h1afn" class="ii cea-w110">.<br>
+            <div class="cea-flex-sb mt-2">
+                <span>Place <input name="h1pl" class="ii cea-w100"> &nbsp; Date <input name="h1d2" class="ii cea-w100"></span>
+                <span>Signature of Principal (affix school stamp)</span>
+            </div>
+        </div>
+
+        <!-- Annexure A — 3rd Child -->
+        <div class="cert-block mov-hide" id="cea_annexA_2">
+            <h4>3rd Child</h4>
+            Ref No. <input name="h2ref" class="ii cea-w70"> &nbsp; Date <input name="h2dt" class="ii cea-w90"><br>
+            It is certified that Master / Kumari
+            <input name="h2n" id="cea_h2n" class="ii cea-w160">
+            having Admission No. <input name="h2adm" class="ii">
+            D.O.B <input type="date" name="h2d" id="cea_h2d" class="ii cea-w110">
+            Son / Daughter of Mr./Mrs. <input name="h2par" id="cea_h2par" class="ii cea-w160">
+            was studying in class <input name="h2c" id="cea_h2c" class="ii cea-w60">
+            Sec <input name="h2sec" class="ii cea-w45">
+            Roll No. <input name="h2roll" class="ii cea-w55">
+            during the previous academic year <input name="h2yr" id="cea_h2yr" class="ii cea-w90">
+            in School / Institution <input name="h2s" id="cea_h2s" class="ii cea-w200">
+            vide affiliation / recognised by <input name="h2aff" class="ii cea-w140">
+            and the affiliation / recognition number is <input name="h2afn" class="ii cea-w110">.<br>
+            <div class="cea-flex-sb mt-2">
+                <span>Place <input name="h2pl" class="ii cea-w100"> &nbsp; Date <input name="h2d2" class="ii cea-w100"></span>
+                <span>Signature of Principal (affix school stamp)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         ANNEXURE B — Self-Declaration Certificate
+    ══════════════════════════════════════════ -->
+    <div>
+        <h3>Annexure B — Self-Declaration Certificate</h3>
+
+        <!-- Annexure B — 1st Child -->
+        <div class="cert-block" id="cea_annexB_0">
+            <h4>1st Child</h4>
+            I <input name="s0e" id="cea_s0e" class="ii cea-w180">
+            employee code <input name="s0k" id="cea_s0k" class="ii cea-w90">
+            Designation <input name="s0g" id="cea_s0g" class="ii cea-w140">
+            do hereby certify that my Son / Daughter namely
+            <input name="s0n" id="cea_s0n" class="ii cea-w160">
+            studied in Class <input name="s0c" id="cea_s0c" class="ii cea-w55">
+            Sec <input name="s0sec" class="ii cea-w45">
+            Roll No. <input name="s0roll" class="ii cea-w55">
+            during Previous Academic Year <input name="s0yr" id="cea_s0yr" class="ii cea-w90">
+            in <input name="s0s" id="cea_s0s" class="ii cea-w200">
+            School. In the event of any change in the particulars which affect my eligibility for CEA, I undertake to intimate the same promptly and refund excess payment, if any made to me.<br>
+            <div class="cea-flex-sb mt-2">
+                <span>Place <input name="s0pl" class="ii cea-w100"> &nbsp; Date <input name="s0d" class="ii cea-w100"></span>
+                <span>Signature of Govt Servant<br>___________________________</span>
+            </div>
+        </div>
+
+        <!-- Annexure B — 2nd Child -->
+        <div class="cert-block mov-hide" id="cea_annexB_1">
+            <h4>2nd Child</h4>
+            I <input name="s1e" id="cea_s1e" class="ii cea-w180">
+            employee code <input name="s1k" id="cea_s1k" class="ii cea-w90">
+            Designation <input name="s1g" id="cea_s1g" class="ii cea-w140">
+            do hereby certify that my Son / Daughter namely
+            <input name="s1n" id="cea_s1n" class="ii cea-w160">
+            studied in Class <input name="s1c" id="cea_s1c" class="ii cea-w55">
+            Sec <input name="s1sec" class="ii cea-w45">
+            Roll No. <input name="s1roll" class="ii cea-w55">
+            during Previous Academic Year <input name="s1yr" id="cea_s1yr" class="ii cea-w90">
+            in <input name="s1s" id="cea_s1s" class="ii cea-w200">
+            School. In the event of any change in the particulars which affect my eligibility for CEA, I undertake to intimate the same promptly and refund excess payment, if any made to me.<br>
+            <div class="cea-flex-sb mt-2">
+                <span>Place <input name="s1pl" class="ii cea-w100"> &nbsp; Date <input name="s1d" class="ii cea-w100"></span>
+                <span>Signature of Govt Servant<br>___________________________</span>
+            </div>
+        </div>
+
+        <!-- Annexure B — 3rd Child -->
+        <div class="cert-block mov-hide" id="cea_annexB_2">
+            <h4>3rd Child</h4>
+            I <input name="s2e" id="cea_s2e" class="ii cea-w180">
+            employee code <input name="s2k" id="cea_s2k" class="ii cea-w90">
+            Designation <input name="s2g" id="cea_s2g" class="ii cea-w140">
+            do hereby certify that my Son / Daughter namely
+            <input name="s2n" id="cea_s2n" class="ii cea-w160">
+            studied in Class <input name="s2c" id="cea_s2c" class="ii cea-w55">
+            Sec <input name="s2sec" class="ii cea-w45">
+            Roll No. <input name="s2roll" class="ii cea-w55">
+            during Previous Academic Year <input name="s2yr" id="cea_s2yr" class="ii cea-w90">
+            in <input name="s2s" id="cea_s2s" class="ii cea-w200">
+            School. In the event of any change in the particulars which affect my eligibility for CEA, I undertake to intimate the same promptly and refund excess payment, if any made to me.<br>
+            <div class="cea-flex-sb mt-2">
+                <span>Place <input name="s2pl" class="ii cea-w100"> &nbsp; Date <input name="s2d" class="ii cea-w100"></span>
+                <span>Signature of Govt Servant<br>___________________________</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Office Use Only -->
+    <div class="pb">
+        <h3>For Office Use Only</h3>
+        <div class="mb-2">
+            <div class="cea-check-row mb-1">
+                <input type="checkbox" id="o1" name="o1" class="cea-chk"><label for="o1">1. Name of the child has been verified from service record.</label>
+            </div>
+            <div class="cea-check-row">
+                <input type="checkbox" id="o2" name="o2" class="cea-chk"><label for="o2">2. Bonafide certificate / self-attested report card / fee receipt(s) for the entire academic year attached.</label>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="cea-col-sno">S. No.</th>
+                    <th class="cea-col-name35">Name of Child</th>
+                    <th class="cea-col-amt27">Amount Claimed (₹)</th>
+                    <th class="cea-col-adm28">Amount Admissible (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="cea_office_row_0">
+                    <td class="text-center">1</td>
+                    <td><input class="nbi" id="cea_on0" name="on0" readonly></td>
+                    <td><input class="nbi" id="cea_oa0c" name="oa0c" readonly></td>
+                    <td><input class="nbi" name="oa0" type="number" step="0.01"></td>
+                </tr>
+                <tr id="cea_office_row_1" class="mov-hide">
+                    <td class="text-center">2</td>
+                    <td><input class="nbi" id="cea_on1" name="on1" readonly></td>
+                    <td><input class="nbi" id="cea_oa1c" name="oa1c" readonly></td>
+                    <td><input class="nbi" name="oa1" type="number" step="0.01"></td>
+                </tr>
+                <tr id="cea_office_row_2" class="mov-hide">
+                    <td class="text-center">3</td>
+                    <td><input class="nbi" id="cea_on2" name="on2" readonly></td>
+                    <td><input class="nbi" id="cea_oa2c" name="oa2c" readonly></td>
+                    <td><input class="nbi" name="oa2" type="number" step="0.01"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table style="margin-top:8px;">
+            <tr>
+                <th style="width:30%;">Pass for payment of ₹</th>
+                <td style="width:20%;"><input id="cea_opay" name="opay" class="nbi" type="number" step="0.01"></td>
+                <th style="width:25%;">To Shri / Ms.</th>
+                <td style="width:25%;"><input id="cea_oto" name="oto" class="nbi"></td>
+            </tr>
+            <tr>
+                <th>Reimbursement of CEA for A.Y.</th>
+                <td><input id="cea_oay" name="oay" class="nbi"></td>
+                <th>Vide</th>
+                <td><input id="cea_ovide" name="ovide" class="nbi"></td>
+            </tr>
+            <tr>
+                <th>Entered in CEA Claim Register at Page No.</th>
+                <td><input id="cea_opg" name="opg" class="nbi"></td>
+                <th>Amount reimbursed (₹)</th>
+                <td><input id="cea_oamt" name="oamt" class="nbi" type="number" step="0.01"></td>
+            </tr>
+            <tr>
+                <th>Cheque / RTGS / NEFT No.</th>
+                <td><input id="cea_orn" name="orn" class="nbi"></td>
+                <th>Dated</th>
+                <td><input id="cea_ord" name="ord" class="nbi" type="date"></td>
+            </tr>
+            <tr>
+                <th>Received by</th>
+                <td colspan="3"><input id="cea_orc" name="orc" class="nbi"></td>
+            </tr>
+        </table>
+        <div style="font-style:italic; font-size:10px; margin-top:4px;">Sign-off: Accountant · Section Officer · Director / Deputy Director (Admin)</div>
+    </div>
+
+    </form>
+</div>

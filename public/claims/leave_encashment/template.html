@@ -1,0 +1,137 @@
+<div class="el-compact p-4" id="el_root">
+    <!-- Header -->
+    <div class="el-header-box">
+        <div class="el-top-right">
+            LTC - FORM EL<br>
+            <span class="el-sub-right">(Rule 38-A, CCS (Leave) Rules, 1972)</span>
+        </div>
+        <div class="el-main-title">
+            APPLICATION FOR ENCASHMENT OF EARNED LEAVE WHILE AVAILING LTC<br>
+            <span class="el-sub-title">(HTLTC / AILTC — ADDRESSED TO THE CDA)</span>
+        </div>
+    </div>
+
+    <!-- ── INPUT FORM (hidden on print) ── -->
+    <div class="no-print mb-3">
+
+        <!-- Section 1: Applicant -->
+        <div class="el-section-hdr">
+            <span>1. From (Applicant Details)</span>
+            <button type="button" id="el_btn_profile" class="btn-profile-fill no-print">👤 Fill from Profile</button>
+        </div>
+        <table class="mb-3 el-form-table">
+            <tr>
+                <th class="el-col-25">Name <span class="req">*</span></th>
+                <td class="el-col-25"><input id="el_nm" class="no-border-input font-bold ltc_final_name_sync" required></td>
+                <th class="el-col-25">Designation <span class="req">*</span></th>
+                <td class="el-col-25"><input id="el_ds" class="no-border-input ltc_final_desig_sync" required></td>
+            </tr>
+            <tr>
+                <th>Employee Code / PAN</th>
+                <td><input id="el_ec" class="no-border-input ltc_final_pno_sync"></td>
+                <th>Section / Office <span class="req">*</span></th>
+                <td><input id="el_of" class="no-border-input" required></td>
+            </tr>
+            <tr>
+                <th>Office Address / Line 4</th>
+                <td colspan="3"><input id="el_ad" class="no-border-input" placeholder="e.g. CDA IT&amp;SDC, Secunderabad"></td>
+            </tr>
+        </table>
+
+        <!-- Section 2: LTC Details -->
+        <h3>2. LTC Details</h3>
+        <table class="mb-3 el-form-table">
+            <tr>
+                <th class="el-col-25">LTC Type <span class="req">*</span></th>
+                <td class="el-col-25">
+                    <div class="el-radio-inline">
+                        <label class="el-radio-lbl"><input type="radio" id="el_lt_ht" name="el_lt" value="HTLTC" checked class="el-radio-inp"> HTLTC</label>
+                        <label class="el-radio-lbl"><input type="radio" id="el_lt_ai" name="el_lt" value="AILTC" class="el-radio-inp"> AILTC</label>
+                    </div>
+                </td>
+                <th class="el-col-25">Block Year <span class="req">*</span></th>
+                <td class="el-col-25"><input id="el_bk" class="no-border-input" required placeholder="e.g. 2026-2029"></td>
+            </tr>
+            <tr>
+                <th>Destination <span class="req">*</span></th>
+                <td>
+                    <div class="el-radio-inline">
+                        <label class="el-radio-lbl"><input type="radio" id="el_dt_hs" name="el_dt" value="Home station" checked class="el-radio-inp"> Home station</label>
+                        <label class="el-radio-lbl"><input type="radio" id="el_dt_cs" name="el_dt" value="Choice station" class="el-radio-inp"> Choice station</label>
+                    </div>
+                </td>
+                <th>Name of Station <span class="req">*</span></th>
+                <td><input id="el_st" class="no-border-input" required placeholder="e.g. Visakhapatnam"></td>
+            </tr>
+            <tr>
+                <th>LTC Period — From <span class="req">*</span></th>
+                <td><input type="date" id="el_pf" class="no-border-input" required></td>
+                <th>LTC Period — To <span class="req">*</span></th>
+                <td><input type="date" id="el_pt" class="no-border-input" required></td>
+            </tr>
+            <tr>
+                <th>Date of Commencement of Journey <span class="req">*</span></th>
+                <td colspan="3"><input type="date" id="el_jd" class="no-border-input" required></td>
+            </tr>
+        </table>
+
+        <!-- Section 3: Leave Sanctioned -->
+        <h3>3. Leave Sanctioned</h3>
+        <table class="mb-3 el-form-table">
+            <tr>
+                <th class="el-col-25">Leave Type(s) Sanctioned <span class="req">*</span></th>
+                <td colspan="3">
+                    <div class="el-radio-inline">
+                        <label class="el-radio-lbl"><input type="checkbox" id="el_lv_el" name="el_lv" value="EL" checked class="el-radio-inp"> EL</label>
+                        <label class="el-radio-lbl"><input type="checkbox" id="el_lv_cl" name="el_lv" value="CL" class="el-radio-inp"> CL</label>
+                        <label class="el-radio-lbl"><input type="checkbox" id="el_lv_rh" name="el_lv" value="RH" class="el-radio-inp"> RH</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th class="el-col-25">Leave From <span class="req">*</span></th>
+                <td class="el-col-25"><input type="date" id="el_lf" class="no-border-input" required></td>
+                <th class="el-col-25">Leave To <span class="req">*</span></th>
+                <td class="el-col-25"><input type="date" id="el_lt2" class="no-border-input" required></td>
+            </tr>
+            <tr>
+                <th>Days of EL Encashment Requested <span class="req">*</span></th>
+                <td colspan="3">
+                    <div class="el-flex-row">
+                        <input type="number" id="el_dy" class="no-border-input font-bold el-days-input" min="1" max="10" value="10" required>
+                        <span class="el-note-text">(Maximum 10 days permitted per LTC claim)</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Section 4: Signature Block -->
+        <h3>4. Signature Block</h3>
+        <table class="mb-2 el-form-table">
+            <tr>
+                <th class="el-col-25">Place <span class="req">*</span></th>
+                <td class="el-col-25"><input id="el_pl" class="no-border-input" value="Secunderabad" required></td>
+                <th class="el-col-25">Date <span class="req">*</span></th>
+                <td class="el-col-25"><input type="date" id="el_dd" class="no-border-input ltc_final_date_sync" required></td>
+            </tr>
+            <tr>
+                <th>Name in Signature Brackets</th>
+                <td colspan="3"><input id="el_sg" class="no-border-input ltc_final_name_sync" placeholder="Defaults to applicant name"></td>
+            </tr>
+        </table>
+
+        <div id="el_err" class="el-warning-box mov-hide mt-2 mb-2"></div>
+
+    </div><!-- end no-print -->
+
+    <!-- ── LETTER PREVIEW (visible always, print-only prints this cleanly) ── -->
+    <div class="el-letter-section">
+        <div class="el-preview-header-bar no-print">
+            <h3>Letter Preview</h3>
+            <span class="el-edit-hint">✏️ Click any text in the letter below to modify manually</span>
+        </div>
+        <div class="el-letter-preview" id="el_letter" contenteditable="true" spellcheck="false">
+            <p class="el-letter-placeholder">Fill in the form fields above to see the letter preview here.</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,255 @@
+<div class="mov-compact p-4">
+    <!-- Header -->
+    <div class="mov-header-box">
+        <div class="mov-top-right">
+            FORM-II<br>
+            <span class="mov-sub-right">(Rule 18(3), CCS (Conduct) Rules, 1964)</span>
+        </div>
+        <div class="mov-main-title">
+            FORM FOR GIVING INTIMATION OR SEEKING PREVIOUS SANCTION UNDER RULE 18 (3) OF THE CCS (CONDUCT) RULES, 1964 FOR TRANSACTION IN RESPECT OF MOVABLE PROPERTY
+        </div>
+    </div>
+
+    <!-- Instructions Collapsible with exact symbol table -->
+    <details class="mov-instructions no-print mb-3">
+        <summary>Instructions to follow while filling up the above form</summary>
+        <table class="mb-2" style="margin-top: 6px;">
+            <thead>
+                <tr>
+                    <th style="width: 10%; text-align: center;">Symbol</th>
+                    <th style="width: 20%;">Sl. No./Field No.</th>
+                    <th>Instructions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">@</td>
+                    <td>3</td>
+                    <td>Purpose of application: sanction for transaction or prior intimation of transaction.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">β</td>
+                    <td>6.(a) and 6.(b)</td>
+                    <td>Mode of acquisition/disposal: whether Purchase/Sale/Gift/Mortgage/Lease or otherwise should be mentioned.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">$</td>
+                    <td>7(a)</td>
+                    <td>Full details about location viz. Municipal No., Street/Village, Taluk, District and State in which the property is situated.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">¥</td>
+                    <td>7(b)</td>
+                    <td>Type of Property: Housing and other buildings or Lands.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">&amp;</td>
+                    <td>7(d)</td>
+                    <td>Whether applicant's interest in the property is in full or part; in case of partial interest, extent of such interest must be indicated.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">*</td>
+                    <td>7(e)</td>
+                    <td>Ownership of the property. In case transaction is not exclusively in the name of the Government servant, particulars of ownership and share of each member may be given.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">#</td>
+                    <td>7(f)</td>
+                    <td>Sale/purchase price of the property (Market value in the case of gifts).</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">Ω</td>
+                    <td>8</td>
+                    <td>In case of acquisition, source or sources from which proposed to be financed: (a) Personal Savings or (b) other sources giving details.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">€</td>
+                    <td>10(c)</td>
+                    <td>Did the applicant have any dealings with the party in his official capacity at any time, or is the applicant likely to have any dealings with him in the near future? Write the answer in YES or NO. If yes, full details should be given.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">⊙</td>
+                    <td>10(d)</td>
+                    <td>How was the transaction arranged? Whether through any statutory body or a private agency through advertisement or through friends and relatives. Full particulars to be given.</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">α</td>
+                    <td>11</td>
+                    <td>Write the answer in YES or NO.</td>
+                </tr>
+            </tbody>
+        </table>
+    </details>
+
+    <!-- Section 1: Details of Government Servant -->
+    <div class="mov-section-hdr">
+        <span>1. Details of Government Servant</span>
+        <button type="button" id="mov_btn_profile" class="btn-profile-fill no-print">👤 Fill from Profile</button>
+    </div>
+    <table class="mb-3">
+        <tr>
+            <th style="width: 25%;">Name of the Government Servant <span class="req">*</span></th>
+            <td colspan="3"><input type="text" id="mov_nm" name="mov_nm" required class="no-border-input font-bold"></td>
+        </tr>
+        <tr>
+            <th style="width: 25%;">(a) Designation <span class="req">*</span></th>
+            <td style="width: 25%;"><input type="text" id="mov_dg" name="mov_dg" required class="no-border-input"></td>
+            <th style="width: 25%;">(b) Service to which belongs <span class="req">*</span></th>
+            <td style="width: 25%;"><input type="text" id="mov_sv" name="mov_sv" required class="no-border-input"></td>
+        </tr>
+        <tr>
+            <th>(c) Employee No./Code No. <span class="req">*</span></th>
+            <td colspan="3"><input type="text" id="mov_ec" name="mov_ec" required class="no-border-input"></td>
+        </tr>
+    </table>
+
+    <!-- Section 2: Scale of Pay and Present Pay -->
+    <h3>2. Scale of Pay and Present Pay</h3>
+    <table class="mb-3">
+        <tr>
+            <th style="width: 25%;">Scale of Pay <span class="req">*</span></th>
+            <td style="width: 25%;"><input type="text" id="mov_sp" name="mov_sp" placeholder="e.g. Level 8 (47600–151100)" required class="no-border-input"></td>
+            <th style="width: 25%;">Present Pay <span class="req">*</span></th>
+            <td style="width: 25%;"><input type="number" id="mov_pp" name="mov_pp" min="0" required class="no-border-input"></td>
+        </tr>
+    </table>
+
+    <!-- Section 3: Purpose of Application -->
+    <h3>3. Purpose of Application <span style="font-weight: normal; font-size: 11px; opacity: 0.9;">[@]</span></h3>
+    <table class="mb-2">
+        <tr>
+            <th style="width: 25%;">Purpose of Application <span class="req">*</span></th>
+            <td style="width: 35%;">
+                <select id="mov_pu" name="mov_pu" required class="no-border-input">
+                    <option value="">-- Select Purpose --</option>
+                    <option value="sanction">Sanction for transaction</option>
+                    <option value="intimation">Prior intimation of transaction</option>
+                </select>
+            </td>
+            <th style="width: 20%;">Proposed Date of Transaction</th>
+            <td style="width: 20%;">
+                <div id="mov_td_wrap" class="mov-hide">
+                    <input type="date" id="mov_td" name="mov_td" class="no-border-input">
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div id="mov_w30" class="mov-warning-box mov-hide mb-3">
+        ⚠️ <strong>Notice:</strong> Previous sanction must be sought at least 30 days before the proposed date of transaction. The date entered is less than 30 days from today.
+    </div>
+
+    <!-- Section 4: Description of Movable Property -->
+    <div class="mov-section-hdr">
+        <span>4. Description of Movable Property</span>
+        <button type="button" id="mov_add_prop" class="btn-add-row no-print">+ Add Property</button>
+    </div>
+    <div id="mov_props" class="mb-3"></div>
+
+    <!-- Section 5: Source of Finance -->
+    <h3>5. Source of Finance <span style="font-weight: normal; font-size: 11px; opacity: 0.9;">[Ω]</span></h3>
+    <table class="mb-3">
+        <tr>
+            <th style="width: 35%;">In case of acquisition, source or sources from which financed/proposed to be financed</th>
+            <td style="width: 25%;">
+                <select id="mov_fs" name="mov_fs" class="no-border-input">
+                    <option value="">Not applicable</option>
+                    <option value="(a) Personal savings">(a) Personal Savings</option>
+                    <option value="(b) Other sources">(b) Other sources</option>
+                    <option value="Both (a) and (b)">Both (a) and (b)</option>
+                </select>
+            </td>
+            <th style="width: 15%;">Details</th>
+            <td style="width: 25%;">
+                <div id="mov_fd_wrap" class="mov-hide">
+                    <textarea id="mov_fd" name="mov_fd" class="no-border-input" style="height: 28px;" placeholder="Details of other sources..."></textarea>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section 6: Previous Sanction / Intimation -->
+    <h3>6. Previous Sanction / Intimation</h3>
+    <table class="mb-3">
+        <tr>
+            <th style="width: 45%;">In the case of disposal of property, was requisite sanction/intimation obtained/given for its acquisition?</th>
+            <td style="width: 15%;">
+                <select id="mov_ds" name="mov_ds" class="no-border-input">
+                    <option value="">Not applicable</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </td>
+            <th style="width: 15%;">Sanction / Ack. Ref &amp; Date</th>
+            <td style="width: 25%;">
+                <div id="mov_dsr_wrap" class="mov-hide">
+                    <input type="text" id="mov_dsr" name="mov_dsr" class="no-border-input" placeholder="(Attach copy of sanction/ack)">
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section 7: Details of the Parties -->
+    <div class="mov-section-hdr">
+        <span>7. Details of the Parties</span>
+        <button type="button" id="mov_add_party" class="btn-add-row no-print">+ Add Party</button>
+    </div>
+    <div id="mov_pts" class="mb-3"></div>
+
+    <!-- Section 8: Acquisition by Gift -->
+    <h3>8. Acquisition by Gift <span style="font-weight: normal; font-size: 11px; opacity: 0.9;">[α]</span></h3>
+    <table class="mb-3">
+        <tr>
+            <th style="width: 45%;">In case of acquisition by gift, whether sanction is also required under Rule 13 of the CCS (Conduct) Rules, 1964?</th>
+            <td>
+                <div class="mov-radio-inline">
+                    <label style="cursor:pointer;"><input type="radio" name="mov_g13" value="YES"> YES</label>
+                    <label style="cursor:pointer;"><input type="radio" name="mov_g13" value="NO"> NO</label>
+                    <label style="cursor:pointer;"><input type="radio" name="mov_g13" value="N/A" checked> Not a gift</label>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section 9: Any Other Relevant Fact -->
+    <h3>9. Any Other Relevant Fact</h3>
+    <table class="mb-3">
+        <tr>
+            <th style="width: 35%;">Any other relevant fact which the applicant may like to mention</th>
+            <td>
+                <textarea id="mov_of" name="mov_of" class="no-border-input" style="height: 32px;" placeholder="Mention any other relevant facts..."></textarea>
+            </td>
+        </tr>
+    </table>
+
+    <!-- DECLARATION -->
+    <h3>DECLARATION</h3>
+    <div class="mov-decl-panel mb-2" id="mov_decl_a">
+        <strong>Option A — Sanction requested:</strong> I, <span class="mov-name-view font-bold">__________</span> hereby declare that the particulars given above are true.<br><br>
+        I request that I may be given permission to acquire/dispose of property as described above from/to the party whose name is mentioned in item 7 above.
+    </div>
+    <div class="mov-decl-panel mb-2" id="mov_decl_b">
+        <strong>Option B — Intimation:</strong> I, <span class="mov-name-view font-bold">__________</span> hereby intimate the proposed acquisition/disposal of property by me as detailed above. I declare that the particulars given above are true.
+    </div>
+
+    <div class="mov-confirm-box mb-2" style="padding: 4px 0;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="mov_ag" name="mov_ag" required style="width: 14px; height: 14px;">
+            <span>I confirm the above declaration is true and correct. <span class="req">*</span></span>
+        </label>
+    </div>
+
+    <table>
+        <tr>
+            <th style="width: 20%;">Station <span class="req">*</span></th>
+            <td style="width: 30%;"><input type="text" id="mov_st" name="mov_st" required class="no-border-input"></td>
+            <th style="width: 20%;">Signature <span class="req">*</span></th>
+            <td style="width: 30%;"><input type="text" id="mov_sn" name="mov_sn" required class="no-border-input font-bold"></td>
+        </tr>
+        <tr>
+            <th>Date <span class="req">*</span></th>
+            <td><input type="date" id="mov_dt" name="mov_dt" required class="no-border-input"></td>
+            <th>Name &amp; Designation</th>
+            <td><input type="text" id="mov_sd" name="mov_sd" readonly class="no-border-input"></td>
+        </tr>
+    </table>
+</div>

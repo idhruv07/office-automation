@@ -352,6 +352,405 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setVal('ltc_final_basic_pay', payDisplay);
             }
 
+            // ── CEA (Children Education Allowance) Template ──────────────────
+            if (folderName === 'cea') {
+                let visibleChildrenCount = 1;
+
+                // Auto-fill employee fields
+                const ceaSetVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+                ceaSetVal('cea_emp', currentUser.name);
+                ceaSetVal('cea_code', currentUser.personal_no);
+                ceaSetVal('cea_desg', currentUser.designation);
+                // Also fill Annexure B employee fields
+                for (let i = 0; i < 3; i++) {
+                    ceaSetVal(`cea_s${i}e`, currentUser.name);
+                    ceaSetVal(`cea_s${i}k`, currentUser.personal_no);
+                    ceaSetVal(`cea_s${i}g`, currentUser.designation);
+                    // Fill Annexure A parent name
+                    ceaSetVal(`cea_h${i}par`, currentUser.name);
+                }
+
+                // Populate child dropdowns from profile dependents
+                const childSelects = document.querySelectorAll('.cea-child-sel');
+                if (currentUser.dependents && currentUser.dependents.length > 0) {
+                    childSelects.forEach(sel => {
+                        currentUser.dependents.forEach(dep => {
+                            const opt = document.createElement('option');
+                            opt.value = dep.name;
+                            opt.dataset.dob = dep.dob || '';
+                            opt.textContent = dep.name;
+                            sel.appendChild(opt);
+                        });
+                        const other = document.createElement('option');
+                        other.value = '__other__';
+                        other.textContent = '— Enter manually —';
+                        sel.appendChild(other);
+                    });
+                } else {
+                    // No dependents in profile — hide selects, show text inputs
+                    for (let i = 0; i < 3; i++) {
+                        const sel = document.getElementById(`cea_k${i}_sel`);
+                        const txt = document.getElementById(`cea_k${i}_txt`);
+                        if (sel) sel.classList.add('mov-hide');
+                        if (txt) txt.classList.remove('mov-hide');
+                    }
+                }
+
+                // Helper: get the resolved name for child i
+                function ceaGetChildName(i) {
+                    const sel = document.getElementById(`cea_k${i}_sel`);
+                    if (!sel || sel.classList.contains('mov-hide')) {
+                        return document.getElementById(`cea_k${i}_txt`)?.value || '';
+                    }
+                    if (sel.value === '__other__') return document.getElementById(`cea_k${i}_txt`)?.value || '';
+                    return sel.value;
+                }
+
+                // Conditional Blocks Management (Spouse, Hostel Subsidy & Disability)
+                function updateConditionalBlocks() {
+                    const spVal = document.getElementById('cea_sp')?.value || 'No';
+                    const hsVal = document.getElementById('cea_hs')?.value || 'No';
+                    const disVal = document.getElementById('cea_dis')?.value || 'No';
+
+                    const spouseBlock = document.getElementById('cea_spouse_block');
+                    if (spouseBlock) {
+                        if (spVal === 'Yes') {
+                            spouseBlock.classList.remove('mov-hide');
+                        } else {
+                            spouseBlock.classList.add('mov-hide');
+                            ceaSetVal('cea_spn', '');
+                            ceaSetVal('cea_spt', '');
+                            ceaSetVal('cea_spd', '');
+                            ceaSetVal('cea_spo', '');
+                        }
+                    }
+
+                    const hostelBlock = document.getElementById('cea_hostel_block');
+                    if (hostelBlock) {
+                        if (hsVal === 'Yes') {
+                            hostelBlock.classList.remove('mov-hide');
+                        } else {
+                            hostelBlock.classList.add('mov-hide');
+                            ceaSetVal('cea_hdist', '');
+                            ceaSetVal('cea_hbon', '');
+                            ceaSetVal('cea_hamt', '');
+                        }
+                    }
+
+                    const disBlock = document.getElementById('cea_disability_block');
+                    if (disBlock) {
+                        if (disVal === 'Yes') {
+                            disBlock.classList.remove('mov-hide');
+                        } else {
+                            disBlock.classList.add('mov-hide');
+                            ceaSetVal('cea_dchild', '');
+                            ceaSetVal('cea_dnat', '');
+                            ceaSetVal('cea_ddt', '');
+                            ceaSetVal('cea_dpc', '');
+                        }
+                    }
+                }
+
+                // Child Visibility Management (Item 7, Item 8, Annexure A, Annexure B, Office Use Only)
+                function updateChildVisibility() {
+                    for (let i = 0; i < 3; i++) {
+                        const childRow = document.getElementById(`cea_child_row_${i}`);
+                        const expRow = document.getElementById(`cea_exp_row_${i}`);
+                        const annexA = document.getElementById(`cea_annexA_${i}`);
+                        const annexB = document.getElementById(`cea_annexB_${i}`);
+                        const officeRow = document.getElementById(`cea_office_row_${i}`);
+
+                        if (i < visibleChildrenCount) {
+                            if (childRow) childRow.classList.remove('mov-hide');
+                            if (expRow) expRow.classList.remove('mov-hide');
+                            if (annexA) annexA.classList.remove('mov-hide');
+                            if (annexB) annexB.classList.remove('mov-hide');
+                            if (officeRow) officeRow.classList.remove('mov-hide');
+                        } else {
+                            if (childRow) childRow.classList.add('mov-hide');
+                            if (expRow) expRow.classList.add('mov-hide');
+                            if (annexA) annexA.classList.add('mov-hide');
+                            if (annexB) annexB.classList.add('mov-hide');
+                            if (officeRow) officeRow.classList.add('mov-hide');
+                        }
+                    }
+                    const addBtn = document.getElementById('cea_add_child_btn');
+                    if (addBtn) {
+                        if (visibleChildrenCount >= 3) {
+                            addBtn.classList.add('mov-hide');
+                        } else {
+                            addBtn.classList.remove('mov-hide');
+                        }
+                    }
+                    ceaCalcTotal();
+                    ceaSyncAll();
+                }
+
+                function ceaRemoveChild(idx) {
+                    const clearChild = (i) => {
+                        const sel = document.getElementById(`cea_k${i}_sel`);
+                        if (sel) sel.value = '';
+                        const txt = document.getElementById(`cea_k${i}_txt`);
+                        if (txt) { txt.value = ''; txt.classList.add('mov-hide'); }
+                        ceaSetVal(`cea_k${i}d`, '');
+                        ceaSetVal(`cea_k${i}c`, '');
+                        ceaSetVal(`cea_k${i}s`, '');
+                        ceaSetVal(`cea_r${i}p`, '');
+                        ceaSetVal(`cea_r${i}r`, '');
+                        ceaSetVal(`cea_r${i}a`, '');
+                        ceaSetVal(`cea_r${i}m`, '');
+                    };
+
+                    if (idx === 1 && visibleChildrenCount === 3) {
+                        const copyVal = (src, dst) => {
+                            const s = document.getElementById(src);
+                            const d = document.getElementById(dst);
+                            if (s && d) d.value = s.value;
+                        };
+                        copyVal('cea_k2_sel', 'cea_k1_sel');
+                        copyVal('cea_k2_txt', 'cea_k1_txt');
+                        copyVal('cea_k2d', 'cea_k1d');
+                        copyVal('cea_k2c', 'cea_k1c');
+                        copyVal('cea_k2s', 'cea_k1s');
+                        copyVal('cea_r2p', 'cea_r1p');
+                        copyVal('cea_r2r', 'cea_r1r');
+                        copyVal('cea_r2a', 'cea_r1a');
+                        copyVal('cea_r2m', 'cea_r1m');
+                        clearChild(2);
+                    } else {
+                        clearChild(idx);
+                    }
+
+                    if (visibleChildrenCount > 1) visibleChildrenCount--;
+                    updateChildVisibility();
+                }
+
+                // Sync Annexures A & B and office rows from main fields
+                function ceaSyncAll() {
+                    for (let i = 0; i < 3; i++) {
+                        const isVisible = i < visibleChildrenCount;
+                        const name = isVisible ? ceaGetChildName(i) : '';
+                        const dob  = isVisible ? (document.getElementById(`cea_k${i}d`)?.value || '') : '';
+                        const cls  = isVisible ? (document.getElementById(`cea_k${i}c`)?.value || '') : '';
+                        const sch  = isVisible ? (document.getElementById(`cea_k${i}s`)?.value || '') : '';
+                        const ay   = isVisible ? (document.getElementById('cea_ay')?.value || '') : '';
+
+                        // Annexure A
+                        ceaSetVal(`cea_h${i}n`, name);
+                        ceaSetVal(`cea_h${i}d`, dob);
+                        ceaSetVal(`cea_h${i}c`, cls);
+                        ceaSetVal(`cea_h${i}s`, sch);
+                        ceaSetVal(`cea_h${i}yr`, ay);
+
+                        // Annexure B
+                        ceaSetVal(`cea_s${i}n`, name);
+                        ceaSetVal(`cea_s${i}c`, cls);
+                        ceaSetVal(`cea_s${i}s`, sch);
+                        ceaSetVal(`cea_s${i}yr`, ay);
+
+                        // Office rows
+                        ceaSetVal(`cea_on${i}`, name);
+                        ceaSetVal(`cea_oa${i}c`, isVisible ? (document.getElementById(`cea_r${i}a`)?.value || '') : '');
+                    }
+                    // oay default
+                    const oay = document.getElementById('cea_oay');
+                    const ay2 = document.getElementById('cea_ay2');
+                    if (oay && ay2 && !oay.value) oay.value = ay2.value;
+                }
+
+                // Total calculation
+                function ceaCalcTotal() {
+                    let t = 0;
+                    for (let i = 0; i < visibleChildrenCount; i++) {
+                        t += parseFloat(document.getElementById(`cea_r${i}a`)?.value) || 0;
+                    }
+                    ceaSetVal('cea_total', t > 0 ? t.toFixed(2) : '');
+                }
+
+                // Handlers & Event listeners
+                const addBtn = document.getElementById('cea_add_child_btn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        if (visibleChildrenCount < 3) {
+                            visibleChildrenCount++;
+                            updateChildVisibility();
+                        }
+                    });
+                }
+
+                const ceaRoot = document.getElementById('cea_root');
+                if (ceaRoot) {
+                    ceaRoot.addEventListener('click', (e) => {
+                        const rmBtn = e.target.closest('.cea-rm-child-btn');
+                        if (rmBtn) {
+                            const idx = parseInt(rmBtn.dataset.idx, 10);
+                            ceaRemoveChild(idx);
+                        }
+                    });
+
+                    ceaRoot.addEventListener('change', (e) => {
+                        if (e.target.id === 'cea_sp' || e.target.id === 'cea_hs' || e.target.id === 'cea_dis') {
+                            updateConditionalBlocks();
+                        }
+                        if (e.target.classList.contains('cea-child-sel')) {
+                            const sel = e.target;
+                            const idx = sel.dataset.idx;
+                            const txt = document.getElementById(`cea_k${idx}_txt`);
+                            const dob = document.getElementById(`cea_k${idx}d`);
+                            if (sel.value === '__other__') {
+                                if (txt) { txt.classList.remove('mov-hide'); txt.focus(); }
+                                if (dob) dob.value = '';
+                            } else {
+                                if (txt) txt.classList.add('mov-hide');
+                                if (dob && sel.selectedIndex > 0) {
+                                    const dobStr = sel.options[sel.selectedIndex].dataset.dob;
+                                    if (dobStr) dob.value = dobStr.split('T')[0];
+                                }
+                            }
+                            ceaSyncAll();
+                        }
+                        if (e.target.classList.contains('cea-amt')) { ceaCalcTotal(); ceaSyncAll(); }
+                    });
+                    ceaRoot.addEventListener('input', () => { ceaSyncAll(); ceaCalcTotal(); });
+                }
+
+                // Initial sync & visibility
+                updateChildVisibility();
+                updateConditionalBlocks();
+            }
+
+            // ── Leave Encashment Template ─────────────────────────────────────
+            if (folderName === 'leave_encashment') {
+                const elSet = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+                const elFd = v => { if (!v) return ''; const [y, m, d] = v.split('-'); return `${d}/${m}/${y}`; };
+                const elEsc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+                const elV = (v, ph) => v
+                    ? `<b class="el-highlight">${elEsc(v)}</b>`
+                    : `<span class="el-placeholder">${ph}</span>`;
+                const elLvs = () => [...document.querySelectorAll('input[name="el_lv"]:checked')].map(e => e.value).join('/');
+                const elRadio = n => document.querySelector(`input[name="${n}"]:checked`)?.value || '';
+
+                function elValidate() {
+                    const errs = [];
+                    const d = id => document.getElementById(id)?.value || '';
+                    if (d('pf') && d('pt') && d('pt') < d('pf')) {
+                        errs.push('LTC period end date is before its start date.');
+                    }
+                    if (d('lf') && d('lt2') && d('lt2') < d('lf')) {
+                        errs.push('Leave end date is before its start date.');
+                    }
+                    if (d('jd') && d('pf') && d('jd') < d('pf')) {
+                        errs.push('Journey start date is before the LTC period begins.');
+                    }
+                    const n = parseInt(d('el_dy'), 10);
+                    if (!isNaN(n) && (n < 1 || n > 10)) {
+                        errs.push('EL encashment days must be between 1 and 10 days.');
+                    }
+                    const lvsVal = elLvs();
+                    if (!lvsVal) {
+                        errs.push('Please select at least one leave type sanctioned.');
+                    } else if (!lvsVal.includes('EL')) {
+                        errs.push('Note: EL encashment requires Earned Leave (EL) to be part of the leave availed.');
+                    }
+
+                    const errBox = document.getElementById('el_err');
+                    if (errBox) {
+                        if (errs.length > 0) {
+                            errBox.innerHTML = '⚠️ ' + errs.map(elEsc).join('<br>⚠️ ');
+                            errBox.classList.remove('mov-hide');
+                        } else {
+                            errBox.innerHTML = '';
+                            errBox.classList.add('mov-hide');
+                        }
+                    }
+                }
+
+                function elRender() {
+                    const nm = document.getElementById('el_nm')?.value.trim() || '';
+                    const ds = document.getElementById('el_ds')?.value.trim() || '';
+                    const ec = document.getElementById('el_ec')?.value.trim() || '';
+                    const of = document.getElementById('el_of')?.value.trim() || '';
+                    const ad = document.getElementById('el_ad')?.value.trim() || '';
+                    const lt = elRadio('el_lt') || 'HTLTC';
+                    const bk = document.getElementById('el_bk')?.value.trim() || '';
+                    const dt = elRadio('el_dt') || 'Home station';
+                    const st = document.getElementById('el_st')?.value.trim() || '';
+                    const pf = elFd(document.getElementById('el_pf')?.value || '');
+                    const pt = elFd(document.getElementById('el_pt')?.value || '');
+                    const lv = elLvs() || 'EL';
+                    const lf = elFd(document.getElementById('el_lf')?.value || '');
+                    const l2 = elFd(document.getElementById('el_lt2')?.value || '');
+                    const jd = elFd(document.getElementById('el_jd')?.value || '');
+                    const dy = document.getElementById('el_dy')?.value || '10';
+                    const pl = document.getElementById('el_pl')?.value.trim() || '';
+                    const dd = elFd(document.getElementById('el_dd')?.value || '');
+                    const sg = document.getElementById('el_sg')?.value.trim() || nm;
+
+                    const rawFromItems = [
+                        nm,
+                        [ds, ec ? '(' + ec + ')' : ''].filter(Boolean).join(' '),
+                        of,
+                        ad
+                    ];
+                    const fromLabels = ['Name', 'Designation', 'Section / Office', 'Address'];
+                    const fromLines = rawFromItems.map((val, i) => elV(val, fromLabels[i])).join('<br>');
+
+                    const letter = document.getElementById('el_letter');
+                    if (!letter) return;
+
+                    let destStr = elV(dt, 'Home station');
+                    if (st) {
+                        destStr += ` (${elV(st, '')})`;
+                    }
+
+                    letter.innerHTML = `
+<p class="el-letter-from">From:<br><br>${fromLines}</p>
+<p class="el-letter-to">TO<br><br>The CDA<br>(AN II Section)<br>No 1 Staff Road<br>Secunderabad – 9.</p>
+<p class="el-letter-sub"><b>Sub: Encashment of EL while availing ${elV(lt,'HTLTC/AILTC')} for the Block ${elV(bk,'2026-2029')}</b></p>
+<p class="el-letter-salutation">Respected Sir,</p>
+<p class="el-letter-body">I intend to avail ${elV(lt,'HTLTC/AILTC')} for the Block ${elV(bk,'2026-2029')} to ${destStr} during the period from ${elV(pf,'[From Date]')} to ${elV(pt,'[To Date]')}. I have been sanctioned ${elV(lv,'EL')} from ${elV(lf,'[From Date]')} to ${elV(l2,'[To Date]')}. My date of commencement of journey is ${elV(jd,'[Date]')}. I therefore request Honourable CDA to sanction encashment of EL for ${elV(dy,'10')} days.</p>
+<p class="el-letter-thanks">Thanking you sir,</p>
+<p class="el-letter-closing">Yours faithfully,</p>
+<div class="letter-sig">
+  <div class="el-sig-left">${elV(pl,'Place')}<br>Date: ${elV(dd,'Date')}</div>
+  <div class="el-sig-right">( ${elV(sg,'Name')} )</div>
+</div>`;
+
+                    elValidate();
+                }
+
+                const fillElProfile = () => {
+                    elSet('el_nm', currentUser.name);
+                    elSet('el_ds', currentUser.designation);
+                    elSet('el_ec', currentUser.personal_no);
+                    elSet('el_of', currentUser.section || currentUser.department || 'AN II Section');
+                    elSet('el_ad', currentUser.office_address || 'CDA IT&SDC, Secunderabad');
+                    elSet('el_pl', currentUser.station || 'Secunderabad');
+                    elSet('el_sg', currentUser.name);
+                    const elToday = new Date().toISOString().split('T')[0];
+                    elSet('el_dd', elToday);
+                    elRender();
+                };
+
+                const btnProfEl = document.getElementById('el_btn_profile');
+                if (btnProfEl) btnProfEl.addEventListener('click', fillElProfile);
+
+                fillElProfile();
+
+                const elRoot = document.getElementById('el_root');
+                if (elRoot) {
+                    elRoot.addEventListener('input', (e) => {
+                        if (e.target && e.target.closest('#el_letter')) return;
+                        elRender();
+                    });
+                    elRoot.addEventListener('change', (e) => {
+                        if (e.target && e.target.closest('#el_letter')) return;
+                        elRender();
+                    });
+                }
+                elRender();
+            }
+
             // ── Newspaper Template ────────────────────────────────────────────
             if (folderName === 'newspaper') {
                 setVal('appName', currentUser.name);
@@ -388,6 +787,342 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (sigName) sigName.value = this.value;
                     });
                 }
+            }
+
+            // ── Movable Property Template (Rule 18(3) CCS Conduct Rules) ─────
+            if (folderName === 'movable_property') {
+                const fillMovProfile = () => {
+                    setVal('mov_nm', currentUser.name);
+                    setVal('mov_dg', currentUser.designation);
+                    setVal('mov_sv', currentUser.service || 'Central Civil Services');
+                    setVal('mov_ec', currentUser.personal_no);
+                    
+                    const basicPay = currentUser.basic_pay || '';
+                    let payLevel = currentUser.pay_level || '';
+                    if (payLevel && !String(payLevel).toLowerCase().includes('level')) {
+                        payLevel = 'Level ' + payLevel;
+                    }
+                    const payDisplay = payLevel ? `${payLevel} (${basicPay})` : basicPay;
+                    setVal('mov_sp', payDisplay);
+                    setVal('mov_pp', basicPay);
+                    setVal('mov_st', currentUser.station || '');
+                    setVal('mov_dt', todayStr);
+                    setVal('mov_sn', currentUser.name);
+                    setVal('mov_sd', [currentUser.name, currentUser.designation].filter(Boolean).join(', '));
+                    updateMovDeclarations();
+                };
+
+                const updateMovDeclarations = () => {
+                    const nm = document.getElementById('mov_nm')?.value || '__________';
+                    document.querySelectorAll('.mov-name-view').forEach(el => el.textContent = nm);
+                    const dg = document.getElementById('mov_dg')?.value || '';
+                    const sd = document.getElementById('mov_sd');
+                    if (sd) sd.value = [nm, dg].filter(Boolean).join(', ');
+                };
+
+                const updateMovToggles = () => {
+                    const pu = document.getElementById('mov_pu')?.value || '';
+                    const tdWrap = document.getElementById('mov_td_wrap');
+                    const w30 = document.getElementById('mov_w30');
+                    const declA = document.getElementById('mov_decl_a');
+                    const declB = document.getElementById('mov_decl_b');
+
+                    if (pu === 'sanction') {
+                        if (tdWrap) tdWrap.classList.remove('mov-hide');
+                        if (declA) declA.classList.add('active');
+                        if (declB) declB.classList.remove('active');
+                        const tdVal = document.getElementById('mov_td')?.value;
+                        if (tdVal) {
+                            const diffDays = (new Date(tdVal) - new Date(new Date().toDateString())) / 864e5;
+                            if (diffDays < 30) {
+                                if (w30) w30.classList.remove('mov-hide');
+                            } else {
+                                if (w30) w30.classList.add('mov-hide');
+                            }
+                        } else {
+                            if (w30) w30.classList.add('mov-hide');
+                        }
+                    } else if (pu === 'intimation') {
+                        if (tdWrap) tdWrap.classList.add('mov-hide');
+                        if (w30) w30.classList.add('mov-hide');
+                        if (declA) declA.classList.remove('active');
+                        if (declB) declB.classList.add('active');
+                    } else {
+                        if (tdWrap) tdWrap.classList.add('mov-hide');
+                        if (w30) w30.classList.add('mov-hide');
+                        if (declA) declA.classList.remove('active');
+                        if (declB) declB.classList.remove('active');
+                    }
+
+                    const fs = document.getElementById('mov_fs')?.value || '';
+                    const fdWrap = document.getElementById('mov_fd_wrap');
+                    if (fdWrap) {
+                        if (/Other|Both/.test(fs)) fdWrap.classList.remove('mov-hide');
+                        else fdWrap.classList.add('mov-hide');
+                    }
+
+                    const ds = document.getElementById('mov_ds')?.value || '';
+                    const dsrWrap = document.getElementById('mov_dsr_wrap');
+                    if (dsrWrap) {
+                        if (ds === 'Yes') dsrWrap.classList.remove('mov-hide');
+                        else dsrWrap.classList.add('mov-hide');
+                    }
+
+                    document.querySelectorAll('#mov_props .mov-item-wrapper').forEach(it => {
+                        const interestSel = it.querySelector('.mov-interest-sel');
+                        const extWrap = it.querySelector('.mov-interest-ext-wrap');
+                        if (extWrap && interestSel) {
+                            extWrap.classList.toggle('mov-hide', interestSel.value !== 'Part');
+                        }
+                        const ownershipSel = it.querySelector('.mov-ownership-sel');
+                        const partWrap = it.querySelector('.mov-ownership-part-wrap');
+                        if (partWrap && ownershipSel) {
+                            partWrap.classList.toggle('mov-hide', ownershipSel.value !== 'Not exclusively in my name');
+                        }
+                    });
+
+                    document.querySelectorAll('#mov_pts .mov-item-wrapper').forEach(it => {
+                        const relatedSel = it.querySelector('.mov-related-sel');
+                        const relWrap = it.querySelector('.mov-relation-wrap');
+                        if (relWrap && relatedSel) {
+                            relWrap.classList.toggle('mov-hide', relatedSel.value !== 'Yes');
+                        }
+                        const dealingsSel = it.querySelector('.mov-dealings-sel');
+                        const natureWrap = it.querySelector('.mov-dealings-nature-wrap');
+                        if (natureWrap && dealingsSel) {
+                            natureWrap.classList.toggle('mov-hide', dealingsSel.value !== 'YES');
+                        }
+                    });
+                };
+
+                let movPropCount = 0;
+                const addMovProp = () => {
+                    const idx = movPropCount++;
+                    const div = document.createElement('div');
+                    div.className = 'mov-item-wrapper mb-3';
+                    div.dataset.propIdx = idx;
+                    div.innerHTML = `
+                        <table class="mov-item-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4" style="background-color: var(--primary-color) !important; color: white !important; border-color: var(--primary-color) !important;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
+                                            <span style="font-weight: 700;">Property ${idx + 1} Particulars</span>
+                                            <button type="button" class="btn-rm-row no-print" data-rm-prop>Remove</button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th style="width: 20%;">(a) Acquisition / Disposal <span class="req">*</span></th>
+                                    <td style="width: 30%;">
+                                        <select name="mov_p${idx}_acq" required class="no-border-input">
+                                            <option value="">-- Select --</option>
+                                            <option value="Acquisition">Acquisition</option>
+                                            <option value="Disposal">Disposal</option>
+                                        </select>
+                                    </td>
+                                    <th style="width: 20%;">(b) Date of Acquisition / Disposal <span class="req">*</span></th>
+                                    <td style="width: 30%;">
+                                        <input type="date" name="mov_p${idx}_date" required class="no-border-input">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Type of Property [¥] <span class="req">*</span></th>
+                                    <td>
+                                        <select name="mov_p${idx}_type" required class="no-border-input">
+                                            <option value="">-- Select --</option>
+                                            <option value="Housing / other buildings">Housing / other buildings</option>
+                                            <option value="Lands">Lands</option>
+                                            <option value="Other movable property">Other movable property</option>
+                                        </select>
+                                    </td>
+                                    <th>(d) Mode [β] <span class="req">*</span></th>
+                                    <td>
+                                        <select name="mov_p${idx}_mode" required class="no-border-input">
+                                            <option value="">-- Select --</option>
+                                            <option value="Purchase">Purchase</option>
+                                            <option value="Sale">Sale</option>
+                                            <option value="Gift">Gift</option>
+                                            <option value="Mortgage">Mortgage</option>
+                                            <option value="Lease">Lease</option>
+                                            <option value="Otherwise">Otherwise</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>(c) Details of Property [$] <span class="req">*</span><br><span style="font-weight: normal; font-size: 10px; opacity: 0.85;">(Municipal No, Street/Village, Taluk, District, State)</span></th>
+                                    <td colspan="3">
+                                        <textarea name="mov_p${idx}_desc" required class="no-border-input" style="height: 28px;"></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>(e) Applicant's Interest [&amp;] <span class="req">*</span></th>
+                                    <td>
+                                        <select name="mov_p${idx}_interest" class="mov-interest-sel no-border-input" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="Full">Full</option>
+                                            <option value="Part">Part</option>
+                                        </select>
+                                    </td>
+                                    <th>Extent of Interest</th>
+                                    <td>
+                                        <div class="mov-hide mov-interest-ext-wrap">
+                                            <input type="text" name="mov_p${idx}_interest_ext" class="no-border-input" placeholder="Specify extent...">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>(f) Ownership [*] <span class="req">*</span></th>
+                                    <td>
+                                        <select name="mov_p${idx}_ownership" class="mov-ownership-sel no-border-input" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="Exclusively in my name">Exclusively in my name</option>
+                                            <option value="Not exclusively in my name">Not exclusively in my name</option>
+                                        </select>
+                                    </td>
+                                    <th>Ownership Details &amp; Share</th>
+                                    <td>
+                                        <div class="mov-hide mov-ownership-part-wrap">
+                                            <input type="text" name="mov_p${idx}_ownership_part" class="no-border-input" placeholder="Ownership & share...">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>(g) Sale / Purchase Price [#] (₹) <span class="req">*</span></th>
+                                    <td colspan="3">
+                                        <input type="number" name="mov_p${idx}_price" step="0.01" min="0" required class="no-border-input font-bold">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                    const propsContainer = document.getElementById('mov_props');
+                    if (propsContainer) propsContainer.appendChild(div);
+                    updateMovToggles();
+                };
+
+                let movPartyCount = 0;
+                const addMovParty = () => {
+                    const idx = movPartyCount++;
+                    const div = document.createElement('div');
+                    div.className = 'mov-item-wrapper mb-3';
+                    div.dataset.partyIdx = idx;
+                    div.innerHTML = `
+                        <table class="mov-item-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4" style="background-color: var(--primary-color) !important; color: white !important; border-color: var(--primary-color) !important;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
+                                            <span style="font-weight: 700;">Party ${idx + 1} Particulars</span>
+                                            <button type="button" class="btn-rm-row no-print" data-rm-party>Remove</button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th style="width: 25%;">(a) Name and Address of Party <span class="req">*</span></th>
+                                    <td colspan="3">
+                                        <textarea name="mov_t${idx}_name_addr" required class="no-border-input" style="height: 28px;" placeholder="Full name and location address..."></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>(b) Related to Applicant? <span class="req">*</span></th>
+                                    <td style="width: 25%;">
+                                        <select name="mov_t${idx}_related" class="mov-related-sel no-border-input" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="No">No</option>
+                                            <option value="Yes">Yes</option>
+                                        </select>
+                                    </td>
+                                    <th style="width: 25%;">Relationship</th>
+                                    <td style="width: 25%;">
+                                        <div class="mov-hide mov-relation-wrap">
+                                            <input type="text" name="mov_t${idx}_relation" class="no-border-input" placeholder="Relationship details...">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>(c) Official Dealings [€]? <span class="req">*</span></th>
+                                    <td>
+                                        <select name="mov_t${idx}_dealings" class="mov-dealings-sel no-border-input" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="NO">NO</option>
+                                            <option value="YES">YES</option>
+                                        </select>
+                                    </td>
+                                    <th>(d) Nature of Official Dealing</th>
+                                    <td>
+                                        <div class="mov-hide mov-dealings-nature-wrap">
+                                            <input type="text" name="mov_t${idx}_dealings_nature" class="no-border-input" placeholder="Nature of official dealings...">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>(e) How Transacted / Arranged [⊙]? <span class="req">*</span></th>
+                                    <td colspan="3">
+                                        <textarea name="mov_t${idx}_arranged" required class="no-border-input" style="height: 28px;" placeholder="Statutory body / agency via advertisement / friends & relatives..."></textarea>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                    const ptsContainer = document.getElementById('mov_pts');
+                    if (ptsContainer) ptsContainer.appendChild(div);
+                    updateMovToggles();
+                };
+
+                fillMovProfile();
+
+                const propsContainer = document.getElementById('mov_props');
+                if (propsContainer && propsContainer.children.length === 0) {
+                    addMovProp();
+                }
+                const ptsContainer = document.getElementById('mov_pts');
+                if (ptsContainer && ptsContainer.children.length === 0) {
+                    addMovParty();
+                }
+
+                const btnAddProp = document.getElementById('mov_add_prop');
+                if (btnAddProp) btnAddProp.addEventListener('click', addMovProp);
+
+                const btnAddParty = document.getElementById('mov_add_party');
+                if (btnAddParty) btnAddParty.addEventListener('click', addMovParty);
+
+                const btnProfMov = document.getElementById('mov_btn_profile');
+                if (btnProfMov) btnProfMov.addEventListener('click', fillMovProfile);
+
+                templateContainer.addEventListener('input', (e) => {
+                    if (e.target.id === 'mov_nm' || e.target.id === 'mov_dg') {
+                        updateMovDeclarations();
+                    }
+                    updateMovToggles();
+                });
+
+                templateContainer.addEventListener('change', updateMovToggles);
+
+                templateContainer.addEventListener('click', (e) => {
+                    if (e.target.matches('[data-rm-prop]')) {
+                        const item = e.target.closest('.mov-item-wrapper');
+                        const box = item?.parentElement;
+                        if (box && box.children.length > 1) {
+                            item.remove();
+                            updateMovToggles();
+                        }
+                    }
+                    if (e.target.matches('[data-rm-party]')) {
+                        const item = e.target.closest('.mov-item-wrapper');
+                        const box = item?.parentElement;
+                        if (box && box.children.length > 1) {
+                            item.remove();
+                            updateMovToggles();
+                        }
+                    }
+                });
+
+                updateMovToggles();
             }
 
             // ── GPF Advance Template ──────────────────────────────────────────

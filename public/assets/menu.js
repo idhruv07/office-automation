@@ -104,10 +104,32 @@ class MenuRenderer {
                     const types = await typesRes.json();
                     if (types.length > 0) {
                         const claimsGroup = menuTree.find(i => i.label === 'Claims');
-                        const newClaimChildren = types.map(type => ({
-                            label: type.name,
-                            link: `/claims/new.html?type_id=${type.id}`
-                        }));
+
+                        // LTC-related folder names that go under the LTC sub-group
+                        const ltcFolders = new Set(['ltc_final', 'ltc_intimation', 'leave_encashment']);
+
+                        const ltcChildren = [];
+                        const otherChildren = [];
+
+                        types.forEach(type => {
+                            const entry = { label: type.name, link: `/claims/new.html?type_id=${type.id}` };
+                            if (ltcFolders.has(type.folder_name)) {
+                                ltcChildren.push(entry);
+                            } else {
+                                otherChildren.push(entry);
+                            }
+                        });
+
+                        // Build the LTC sub-group if there are LTC types
+                        const newClaimChildren = [...otherChildren];
+                        if (ltcChildren.length > 0) {
+                            newClaimChildren.unshift({
+                                label: 'LTC',
+                                link: '#',
+                                children: ltcChildren
+                            });
+                        }
+
                         const newClaimItem = {
                             label: 'New Claim',
                             link: '#',
@@ -153,12 +175,31 @@ class MenuRenderer {
                                 ${children.map(child => {
                                     const grandchildren = child.children || [];
                                     if (grandchildren.length > 0) {
-                                        const hasActiveGc = grandchildren.some(gc => currentPath === gc.link || currentPath.startsWith(gc.link.split('?')[0]));
-                                        return `
+                                        const hasActiveGc = grandchildren.some(gc => {
+                                            if (gc.children && gc.children.length > 0) {
+                                                return gc.children.some(ggc => currentPath === ggc.link || currentPath.startsWith(ggc.link.split('?')[0]));
+                                            }
+                                            return currentPath === gc.link || currentPath.startsWith(gc.link.split('?')[0]);
+                                        });
+                                         return `
                                             <li class="has-submenu submenu-nested ${hasActiveGc ? 'active' : ''}">
                                                 <a href="#">${getMenuIcon(child.label)}${child.label}</a>
                                                 <ul class="submenu submenu-level2">
                                                     ${grandchildren.map(gc => {
+                                                        const ggchildren = gc.children || [];
+                                                        if (ggchildren.length > 0) {
+                                                            const hasActiveGgc = ggchildren.some(ggc => currentPath === ggc.link || currentPath.startsWith(ggc.link.split('?')[0]));
+                                                            return `
+                                                                <li class="has-submenu submenu-nested submenu-nested-l3 ${hasActiveGgc ? 'active' : ''}">
+                                                                    <a href="#">${getMenuIcon(gc.label)}${gc.label}</a>
+                                                                    <ul class="submenu submenu-level3">
+                                                                        ${ggchildren.map(ggc => {
+                                                                            const isActiveGgc = currentPath === ggc.link || currentPath.startsWith(ggc.link.split('?')[0]);
+                                                                            return `<li><a href="${ggc.link}" class="${isActiveGgc ? 'active' : ''}">${getMenuIcon(ggc.label)}${ggc.label}</a></li>`;
+                                                                        }).join('')}
+                                                                    </ul>
+                                                                </li>`;
+                                                        }
                                                         const isActive = currentPath === gc.link || currentPath.startsWith(gc.link.split('?')[0]);
                                                         return `<li><a href="${gc.link}" class="${isActive ? 'active' : ''}">${getMenuIcon(gc.label)}${gc.label}</a></li>`;
                                                     }).join('')}
