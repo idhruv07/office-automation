@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const sel = document.getElementById(`cea_r${row}_child`);
                         if (!sel) continue;
                         const curVal = sel.value;
-                        sel.innerHTML = '';
+                        sel.innerHTML = '<option value="">Select Child...</option>';
 
                         for (let i = 0; i < visibleChildrenCount; i++) {
                             const name = ceaGetChildName(i);
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (curVal !== '' && parseInt(curVal, 10) < visibleChildrenCount) {
                             sel.value = curVal;
                         } else {
-                            sel.value = String(Math.min(row, visibleChildrenCount - 1));
+                            sel.value = '';
                         }
                     }
                 }
@@ -583,8 +583,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const childAmts = [[], [], []];
                     for (let row = 0; row < visibleChildrenCount; row++) {
                         const sel = document.getElementById(`cea_r${row}_child`);
-                        let targetIdx = sel ? parseInt(sel.value, 10) : row;
-                        if (isNaN(targetIdx) || targetIdx < 0 || targetIdx >= 3) targetIdx = row;
+                        if (!sel || sel.value === '') continue;
+                        let targetIdx = parseInt(sel.value, 10);
+                        if (isNaN(targetIdx) || targetIdx < 0 || targetIdx >= 3) continue;
                         const amtVal = document.getElementById(`cea_r${row}a`)?.value || '';
                         if (amtVal) childAmts[targetIdx].push(amtVal);
                     }
