@@ -451,6 +451,55 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
 
+                // Disabled Child Options Management
+                function updateDisabledChildDropdown() {
+                    const sel = document.getElementById('cea_dchild');
+                    if (!sel) return;
+                    const cur = sel.value;
+                    sel.innerHTML = '<option value="">Select Child...</option>';
+
+                    for (let i = 0; i < visibleChildrenCount; i++) {
+                        const name = ceaGetChildName(i);
+                        const label = name ? `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : 'rd'} Child: ${name}` : `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : 'rd'} Child`;
+                        const opt = document.createElement('option');
+                        opt.value = name || `Child ${i + 1}`;
+                        opt.textContent = label;
+                        sel.appendChild(opt);
+                    }
+                    const other = document.createElement('option');
+                    other.value = '__other__';
+                    other.textContent = '— Enter manually —';
+                    sel.appendChild(other);
+
+                    if (cur) sel.value = cur;
+                }
+
+                // Expenditure Child Options Management (Item 8)
+                function updateExpenditureChildDropdowns() {
+                    for (let row = 0; row < 3; row++) {
+                        const sel = document.getElementById(`cea_r${row}_child`);
+                        if (!sel) continue;
+                        const curVal = sel.value;
+                        sel.innerHTML = '';
+
+                        for (let i = 0; i < visibleChildrenCount; i++) {
+                            const name = ceaGetChildName(i);
+                            const ord = (i === 0 ? '1st' : i === 1 ? '2nd' : '3rd');
+                            const label = name ? `${ord} Child: ${name}` : `${ord} Child`;
+                            const opt = document.createElement('option');
+                            opt.value = String(i);
+                            opt.textContent = label;
+                            sel.appendChild(opt);
+                        }
+
+                        if (curVal !== '' && parseInt(curVal, 10) < visibleChildrenCount) {
+                            sel.value = curVal;
+                        } else {
+                            sel.value = String(Math.min(row, visibleChildrenCount - 1));
+                        }
+                    }
+                }
+
                 // Child Visibility Management (Item 7, Item 8, Annexure A, Annexure B, Office Use Only)
                 function updateChildVisibility() {
                     for (let i = 0; i < 3; i++) {
@@ -482,6 +531,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             addBtn.classList.remove('mov-hide');
                         }
                     }
+                    updateExpenditureChildDropdowns();
+                    updateDisabledChildDropdown();
                     ceaCalcTotal();
                     ceaSyncAll();
                 }
@@ -527,6 +578,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Sync Annexures A & B and office rows from main fields
                 function ceaSyncAll() {
+                    updateExpenditureChildDropdowns();
+
+                    const childAmts = [[], [], []];
+                    for (let row = 0; row < visibleChildrenCount; row++) {
+                        const sel = document.getElementById(`cea_r${row}_child`);
+                        let targetIdx = sel ? parseInt(sel.value, 10) : row;
+                        if (isNaN(targetIdx) || targetIdx < 0 || targetIdx >= 3) targetIdx = row;
+                        const amtVal = document.getElementById(`cea_r${row}a`)?.value || '';
+                        if (amtVal) childAmts[targetIdx].push(amtVal);
+                    }
+
                     for (let i = 0; i < 3; i++) {
                         const isVisible = i < visibleChildrenCount;
                         const name = isVisible ? ceaGetChildName(i) : '';
@@ -550,7 +612,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         // Office rows
                         ceaSetVal(`cea_on${i}`, name);
-                        ceaSetVal(`cea_oa${i}c`, isVisible ? (document.getElementById(`cea_r${i}a`)?.value || '') : '');
+                        let officeAmtStr = '';
+                        if (isVisible && childAmts[i].length > 0) {
+                            if (childAmts[i].length === 1) {
+                                officeAmtStr = childAmts[i][0];
+                            } else {
+                                let sum = 0;
+                                childAmts[i].forEach(v => { sum += parseFloat(v) || 0; });
+                                officeAmtStr = sum > 0 ? sum.toFixed(2) : '';
+                            }
+                        }
+                        ceaSetVal(`cea_oa${i}c`, officeAmtStr);
                     }
                     // oay default
                     const oay = document.getElementById('cea_oay');
@@ -592,6 +664,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (e.target.id === 'cea_sp' || e.target.id === 'cea_hs' || e.target.id === 'cea_dis') {
                             updateConditionalBlocks();
                         }
+                        if (e.target.id === 'cea_dchild') {
+                            const txt = document.getElementById('cea_dchild_txt');
+                            if (e.target.value === '__other__') {
+                                if (txt) { txt.classList.remove('mov-hide'); txt.focus(); }
+                            } else {
+                                if (txt) txt.classList.add('mov-hide');
+                            }
+                        }
                         if (e.target.classList.contains('cea-child-sel')) {
                             const sel = e.target;
                             const idx = sel.dataset.idx;
@@ -607,11 +687,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     if (dobStr) dob.value = dobStr.split('T')[0];
                                 }
                             }
+                            updateDisabledChildDropdown();
+                            ceaSyncAll();
+                        }
+                        if (e.target.classList.contains('cea-seq-sel')) {
                             ceaSyncAll();
                         }
                         if (e.target.classList.contains('cea-amt')) { ceaCalcTotal(); ceaSyncAll(); }
                     });
-                    ceaRoot.addEventListener('input', () => { ceaSyncAll(); ceaCalcTotal(); });
+                    ceaRoot.addEventListener('input', () => { updateDisabledChildDropdown(); ceaSyncAll(); ceaCalcTotal(); });
                 }
 
                 // Initial sync & visibility

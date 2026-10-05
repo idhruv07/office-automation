@@ -181,21 +181,21 @@
         </thead>
         <tbody>
             <tr id="cea_exp_row_0">
-                <td class="text-center">1st Child</td>
+                <td><select id="cea_r0_child" name="r0_child" class="nbi cea-seq-sel" data-idx="0"></select></td>
                 <td><input name="r0p" id="cea_r0p" class="nbi" placeholder="e.g. Apr 2025 – Mar 2026"></td>
                 <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r0r" id="cea_r0r"></td>
                 <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r0a" id="cea_r0a"></td>
                 <td><input name="r0m" id="cea_r0m" class="nbi"></td>
             </tr>
             <tr id="cea_exp_row_1" class="mov-hide">
-                <td class="text-center">2nd Child</td>
+                <td><select id="cea_r1_child" name="r1_child" class="nbi cea-seq-sel" data-idx="1"></select></td>
                 <td><input name="r1p" id="cea_r1p" class="nbi" placeholder="e.g. Apr 2025 – Mar 2026"></td>
                 <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r1r" id="cea_r1r"></td>
                 <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r1a" id="cea_r1a"></td>
                 <td><input name="r1m" id="cea_r1m" class="nbi"></td>
             </tr>
             <tr id="cea_exp_row_2" class="mov-hide">
-                <td class="text-center">3rd Child</td>
+                <td><select id="cea_r2_child" name="r2_child" class="nbi cea-seq-sel" data-idx="2"></select></td>
                 <td><input name="r2p" id="cea_r2p" class="nbi" placeholder="e.g. Apr 2025 – Mar 2026"></td>
                 <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r2r" id="cea_r2r"></td>
                 <td><input class="nbi cea-amt" type="number" min="0" step="0.01" name="r2a" id="cea_r2a"></td>
@@ -282,10 +282,15 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><input id="cea_dchild" name="dchild" class="nbi"></td>
-                    <td><input id="cea_dnat" name="dnat" class="nbi"></td>
+                    <td>
+                        <select id="cea_dchild" name="dchild" class="nbi">
+                            <option value="">Select Child...</option>
+                        </select>
+                        <input type="text" id="cea_dchild_txt" name="dchild_txt" class="nbi mov-hide" placeholder="Type name...">
+                    </td>
+                    <td><input id="cea_dnat" name="dnat" class="nbi" placeholder="e.g. Visual / Hearing"></td>
                     <td><input id="cea_ddt" name="ddt" class="nbi" type="date"></td>
-                    <td><input id="cea_dpc" name="dpc" class="nbi" type="number" min="0" max="100" step="0.01"></td>
+                    <td><input id="cea_dpc" name="dpc" class="nbi" type="number" min="0" max="100" step="0.01" placeholder="e.g. 50"></td>
                 </tr>
             </tbody>
         </table>
