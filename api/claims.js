@@ -332,6 +332,78 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
+// ── Claim Sharing ──────────────────────────────────────────────────────────────
+
+// GET list of all active users (for share modal — any authenticated user)
+router.get('/users-list', authenticateToken, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT u.id, u.name, u.username, u.designation, u.personal_no
+             FROM users u
+             WHERE u.is_active = true AND u.id != $1
+             ORDER BY u.name ASC`,
+            [req.user.id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('GET /claims/users-list error:', err);
+        res.status(500).json({ message: 'Error fetching users list' });
+    }
+});
+
+// GET /api/claims/shared-templates — get pending shared templates for logged-in user
+router.get('/shared-templates', authenticateToken, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT sct.id, sct.shared_data, sct.shared_at, sct.is_dismissed, sct.is_used,
+                    sct.claim_type_id,
+                    u.name as sender_name, u.designation as sender_designation,
+                    u.personal_no as sender_personal_no,
+                    ct.name as claim_type_name, ct.folder_name as claim_type_folder
+             FROM shared_claim_templates sct
+             JOIN users u ON sct.sender_id = u.id
+             JOIN claim_types ct ON sct.claim_type_id = ct.id
+             WHERE sct.recipient_id = $1 AND sct.is_dismissed = false
+             ORDER BY sct.shared_at DESC`,
+            [req.user.id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('GET /claims/shared-templates error:', err);
+        res.status(500).json({ message: 'Error fetching shared templates' });
+    }
+});
+
+// POST /api/claims/share — share prefill data with multiple recipients
+router.post('/share', authenticateToken, async (req, res) => {
+    const { claim_type_id, shared_data, recipient_ids } = req.body;
+    if (!claim_type_id || !shared_data || !Array.isArray(recipient_ids) || recipient_ids.length === 0) {
+        return res.status(400).json({ message: 'claim_type_id, shared_data and recipient_ids are required' });
+    }
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        for (const recipientId of recipient_ids) {
+            // Validate recipient exists and is active
+            const check = await client.query('SELECT id FROM users WHERE id = $1 AND is_active = true', [recipientId]);
+            if (check.rows.length === 0) continue;
+            await client.query(
+                `INSERT INTO shared_claim_templates (sender_id, recipient_id, claim_type_id, shared_data)
+                 VALUES ($1, $2, $3, $4)`,
+                [req.user.id, recipientId, claim_type_id, shared_data]
+            );
+        }
+        await client.query('COMMIT');
+        res.json({ message: `Shared with ${recipient_ids.length} user(s) successfully` });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('POST /claims/share error:', err);
+        res.status(500).json({ message: 'Error sharing claim template' });
+    } finally {
+        client.release();
+    }
+});
+
 // Fetch a single claim
 router.get('/:id', authenticateToken, async (req, res) => {
     if (isNaN(req.params.id)) return res.status(400).json({ message: 'Invalid ID' });
@@ -443,108 +515,6 @@ router.get('/:id/docx', authenticateToken, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Error generating docx' });
-    }
-});
-
-// ── Claim Sharing ──────────────────────────────────────────────────────────────
-
-// GET list of all active users (for share modal — any authenticated user)
-router.get('/users-list', authenticateToken, async (req, res) => {
-    try {
-        const result = await db.query(
-            `SELECT u.id, u.name, u.username, u.designation, u.personal_no
-             FROM users u
-             WHERE u.is_active = true AND u.id != $1
-             ORDER BY u.name ASC`,
-            [req.user.id]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        console.error('GET /claims/users-list error:', err);
-        res.status(500).json({ message: 'Error fetching users list' });
-    }
-});
-
-// POST /api/claims/share — share prefill data with multiple recipients
-router.post('/share', authenticateToken, async (req, res) => {
-    const { claim_type_id, shared_data, recipient_ids } = req.body;
-    if (!claim_type_id || !shared_data || !Array.isArray(recipient_ids) || recipient_ids.length === 0) {
-        return res.status(400).json({ message: 'claim_type_id, shared_data and recipient_ids are required' });
-    }
-    const client = await db.pool.connect();
-    try {
-        await client.query('BEGIN');
-        for (const recipientId of recipient_ids) {
-            // Validate recipient exists and is active
-            const check = await client.query('SELECT id FROM users WHERE id = $1 AND is_active = true', [recipientId]);
-            if (check.rows.length === 0) continue;
-            await client.query(
-                `INSERT INTO shared_claim_templates (sender_id, recipient_id, claim_type_id, shared_data)
-                 VALUES ($1, $2, $3, $4)`,
-                [req.user.id, recipientId, claim_type_id, shared_data]
-            );
-        }
-        await client.query('COMMIT');
-        res.json({ message: `Shared with ${recipient_ids.length} user(s) successfully` });
-    } catch (err) {
-        await client.query('ROLLBACK');
-        console.error('POST /claims/share error:', err);
-        res.status(500).json({ message: 'Error sharing claim template' });
-    } finally {
-        client.release();
-    }
-});
-
-// GET /api/claims/shared-templates — get pending shared templates for logged-in user
-router.get('/shared-templates', authenticateToken, async (req, res) => {
-    try {
-        const result = await db.query(
-            `SELECT sct.id, sct.shared_data, sct.shared_at, sct.is_dismissed, sct.is_used,
-                    sct.claim_type_id,
-                    u.name as sender_name, u.designation as sender_designation,
-                    u.personal_no as sender_personal_no,
-                    ct.name as claim_type_name, ct.folder_name as claim_type_folder
-             FROM shared_claim_templates sct
-             JOIN users u ON sct.sender_id = u.id
-             JOIN claim_types ct ON sct.claim_type_id = ct.id
-             WHERE sct.recipient_id = $1 AND sct.is_dismissed = false
-             ORDER BY sct.shared_at DESC`,
-            [req.user.id]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        console.error('GET /claims/shared-templates error:', err);
-        res.status(500).json({ message: 'Error fetching shared templates' });
-    }
-});
-
-// PATCH /api/claims/shared-templates/:id/dismiss
-router.patch('/shared-templates/:id/dismiss', authenticateToken, async (req, res) => {
-    try {
-        const result = await db.query(
-            'UPDATE shared_claim_templates SET is_dismissed = true WHERE id = $1 AND recipient_id = $2 RETURNING id',
-            [req.params.id, req.user.id]
-        );
-        if (result.rowCount === 0) return res.status(404).json({ message: 'Template not found' });
-        res.json({ message: 'Dismissed' });
-    } catch (err) {
-        console.error('PATCH /claims/shared-templates/:id/dismiss error:', err);
-        res.status(500).json({ message: 'Error dismissing template' });
-    }
-});
-
-// PATCH /api/claims/shared-templates/:id/used
-router.patch('/shared-templates/:id/used', authenticateToken, async (req, res) => {
-    try {
-        const result = await db.query(
-            'UPDATE shared_claim_templates SET is_used = true WHERE id = $1 AND recipient_id = $2 RETURNING id',
-            [req.params.id, req.user.id]
-        );
-        if (result.rowCount === 0) return res.status(404).json({ message: 'Template not found' });
-        res.json({ message: 'Marked as used' });
-    } catch (err) {
-        console.error('PATCH /claims/shared-templates/:id/used error:', err);
-        res.status(500).json({ message: 'Error marking template as used' });
     }
 });
 
