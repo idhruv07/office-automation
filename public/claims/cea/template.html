@@ -122,7 +122,13 @@
         </thead>
         <tbody>
             <tr id="cea_child_row_0">
-                <td class="text-center">1st Child</td>
+                <td class="text-center">
+                    <select name="k0_seq" id="cea_k0_seq" class="nbi cea-kseq-sel" data-idx="0">
+                        <option value="0" selected>1st Child</option>
+                        <option value="1">2nd Child</option>
+                        <option value="2">3rd Child</option>
+                    </select>
+                </td>
                 <td>
                     <select name="k0n" id="cea_k0_sel" class="nbi cea-child-sel" data-idx="0">
                         <option value="">Select / Enter Name...</option>
@@ -135,8 +141,14 @@
             </tr>
             <tr id="cea_child_row_1" class="mov-hide">
                 <td class="text-center">
-                    2nd Child
-                    <button type="button" class="btn-rm-row cea-rm-child-btn no-print" data-idx="1" title="Remove 2nd Child">✖</button>
+                    <div class="cea-seq-flex">
+                        <select name="k1_seq" id="cea_k1_seq" class="nbi cea-kseq-sel" data-idx="1">
+                            <option value="0">1st Child</option>
+                            <option value="1" selected>2nd Child</option>
+                            <option value="2">3rd Child</option>
+                        </select>
+                        <button type="button" class="btn-rm-row cea-rm-child-btn no-print" data-idx="1" title="Remove 2nd Child">✖</button>
+                    </div>
                 </td>
                 <td>
                     <select name="k1n" id="cea_k1_sel" class="nbi cea-child-sel" data-idx="1">
@@ -150,8 +162,14 @@
             </tr>
             <tr id="cea_child_row_2" class="mov-hide">
                 <td class="text-center">
-                    3rd Child
-                    <button type="button" class="btn-rm-row cea-rm-child-btn no-print" data-idx="2" title="Remove 3rd Child">✖</button>
+                    <div class="cea-seq-flex">
+                        <select name="k2_seq" id="cea_k2_seq" class="nbi cea-kseq-sel" data-idx="2">
+                            <option value="0">1st Child</option>
+                            <option value="1">2nd Child</option>
+                            <option value="2" selected>3rd Child</option>
+                        </select>
+                        <button type="button" class="btn-rm-row cea-rm-child-btn no-print" data-idx="2" title="Remove 3rd Child">✖</button>
+                    </div>
                 </td>
                 <td>
                     <select name="k2n" id="cea_k2_sel" class="nbi cea-child-sel" data-idx="2">

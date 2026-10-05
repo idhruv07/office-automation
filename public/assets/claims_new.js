@@ -451,6 +451,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
 
+                // Helper: get the sequence label for child i
+                function ceaGetChildSequenceLabel(i) {
+                    const sel = document.getElementById(`cea_k${i}_seq`);
+                    if (sel) {
+                        const val = sel.value;
+                        if (val === '0') return '1st Child';
+                        if (val === '1') return '2nd Child';
+                        if (val === '2') return '3rd Child';
+                        if (sel.options && sel.selectedIndex >= 0) return sel.options[sel.selectedIndex].text;
+                    }
+                    return `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : 'rd'} Child`;
+                }
+
                 // Disabled Child Options Management
                 function updateDisabledChildDropdown() {
                     const sel = document.getElementById('cea_dchild');
@@ -460,7 +473,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     for (let i = 0; i < visibleChildrenCount; i++) {
                         const name = ceaGetChildName(i);
-                        const label = name ? `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : 'rd'} Child: ${name}` : `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : 'rd'} Child`;
+                        const ord = ceaGetChildSequenceLabel(i);
+                        const label = name ? `${ord}: ${name}` : ord;
                         const opt = document.createElement('option');
                         opt.value = name || `Child ${i + 1}`;
                         opt.textContent = label;
@@ -484,8 +498,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         for (let i = 0; i < visibleChildrenCount; i++) {
                             const name = ceaGetChildName(i);
-                            const ord = (i === 0 ? '1st' : i === 1 ? '2nd' : '3rd');
-                            const label = name ? `${ord} Child: ${name}` : `${ord} Child`;
+                            const ord = ceaGetChildSequenceLabel(i);
+                            const label = name ? `${ord}: ${name}` : ord;
                             const opt = document.createElement('option');
                             opt.value = String(i);
                             opt.textContent = label;
@@ -539,6 +553,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 function ceaRemoveChild(idx) {
                     const clearChild = (i) => {
+                        const kseq = document.getElementById(`cea_k${i}_seq`);
+                        if (kseq) kseq.value = String(i);
                         const sel = document.getElementById(`cea_k${i}_sel`);
                         if (sel) sel.value = '';
                         const txt = document.getElementById(`cea_k${i}_txt`);
@@ -558,6 +574,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const d = document.getElementById(dst);
                             if (s && d) d.value = s.value;
                         };
+                        copyVal('cea_k2_seq', 'cea_k1_seq');
                         copyVal('cea_k2_sel', 'cea_k1_sel');
                         copyVal('cea_k2_txt', 'cea_k1_txt');
                         copyVal('cea_k2d', 'cea_k1d');
@@ -688,6 +705,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     if (dobStr) dob.value = dobStr.split('T')[0];
                                 }
                             }
+                            updateDisabledChildDropdown();
+                            ceaSyncAll();
+                        }
+                        if (e.target.classList.contains('cea-kseq-sel')) {
+                            updateExpenditureChildDropdowns();
                             updateDisabledChildDropdown();
                             ceaSyncAll();
                         }

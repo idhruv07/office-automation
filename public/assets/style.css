@@ -5470,3 +5470,14 @@ body.theme-amber #sidebar-toggle:hover {
     font-size: 11px;
     color: #444;
 }
+.cea-kseq-sel {
+    font-weight: 600;
+    color: #1e293b;
+    padding: 2px 4px;
+}
+.cea-seq-flex {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
+}
