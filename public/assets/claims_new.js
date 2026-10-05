@@ -323,9 +323,97 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // ── TD (Temporary Duty) Template ──────────────────────────────────
             if (folderName === 'td') {
-                setVal('td_orders_for_move', currentUser.orders_for_move);
-                setVal('td_move_date', formatToDDMMYYYY(currentUser.move_date));
-                setVal('td_authority', currentUser.authority);
+                const urlParams = new URLSearchParams(window.location.search);
+                const sharedTemplateId = urlParams.get('shared_template_id');
+
+                if (sharedTemplateId) {
+                    try {
+                        const tRes = await fetch('/api/claims/shared-templates', { headers: { 'Authorization': `Bearer ${token}` } });
+                        if (tRes.ok) {
+                            const templates = await tRes.json();
+                            const template = templates.find(t => t.id == sharedTemplateId);
+                            if (template && template.shared_data) {
+                                // Extract shared data
+                                const sd = template.shared_data;
+                                setVal('td_orders_for_move', sd.orders_for_move);
+                                setVal('td_move_date', sd.move_date);
+                                setVal('td_authority', sd.authority);
+                                setVal('td_journey_start_from', sd.journey_start_from);
+
+                                // Populate Journey table rows if they exist
+                                if (sd.journey && Array.isArray(sd.journey)) {
+                                    const tbody = document.getElementById('ltcFinalJourneyBody');
+                                    tbody.innerHTML = ''; // clear initial empty row
+                                    
+                                    sd.journey.forEach((row, idx) => {
+                                        const rNum = idx + 1;
+                                        const tr = document.createElement('tr');
+                                        tr.innerHTML = `
+                                            <td>
+                                                <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_dep_station_${rNum}">${row.dep_station || ''}</div>
+                                                <input type="hidden" name="journey_dep_station_${rNum}" value="${row.dep_station || ''}">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="journey_dep_date_${rNum}" class="no-border-input td-date-format" placeholder="dd/mm/yy" value="${row.dep_date || ''}">
+                                                <input type="text" name="journey_dep_time_${rNum}" class="no-border-input td-time-format" placeholder="HH:MM" value="${row.dep_time || ''}">
+                                            </td>
+                                            <td>
+                                                <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_arr_station_${rNum}">${row.arr_station || ''}</div>
+                                                <input type="hidden" name="journey_arr_station_${rNum}" value="${row.arr_station || ''}">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="journey_arr_date_${rNum}" class="no-border-input td-date-format" placeholder="dd/mm/yy" value="${row.arr_date || ''}">
+                                                <input type="text" name="journey_arr_time_${rNum}" class="no-border-input td-time-format" placeholder="HH:MM" value="${row.arr_time || ''}">
+                                            </td>
+                                            <td>
+                                                <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_dist_${rNum}">${row.dist || ''}</div>
+                                                <input type="hidden" name="journey_dist_${rNum}" value="${row.dist || ''}">
+                                            </td>
+                                            <td>
+                                                <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_mode_${rNum}">${row.mode || ''}</div>
+                                                <input type="hidden" name="journey_mode_${rNum}" value="${row.mode || ''}">
+                                            </td>
+                                            <td>
+                                                <div contenteditable="true" class="editable-td ltc-journey-total-amt font-bold ltc-station-sync" data-name="journey_total_amt_${rNum}">${row.total_amt || ''}</div>
+                                                <input type="hidden" name="journey_total_amt_${rNum}" value="${row.total_amt || ''}">
+                                            </td>
+                                            <td>
+                                                <div contenteditable="true" class="editable-td ltc-station-sync" data-name="journey_ticket_no_${rNum}">${row.ticket_no || ''}</div>
+                                                <input type="hidden" name="journey_ticket_no_${rNum}" value="${row.ticket_no || ''}">
+                                            </td>
+                                            <td class="no-print"><button type="button" class="ltc-final-del-row" style="border: none; background: transparent; color: #ef4444; cursor: pointer; padding: 0; width: 100%; font-size: 14px;">✕</button></td>
+                                        `;
+                                        tbody.appendChild(tr);
+                                    });
+                                }
+
+                                // Populate Daily Expenses
+                                document.querySelector('input[name="td_hotel_days"]').value = sd.hotel_days || '';
+                                document.querySelector('input[name="td_hotel_rate"]').value = sd.hotel_rate || '';
+                                document.querySelector('input[name="td_rma_days"]').value = sd.rma_days || '';
+                                document.querySelector('input[name="td_rma_rate"]').value = sd.rma_rate || '';
+                                document.querySelector('input[name="td_food_days"]').value = sd.food_days || '';
+                                document.querySelector('input[name="td_food_rate"]').value = sd.food_rate || '';
+                                setVal('ltcFinalLessAdvance', sd.less_advance || '0');
+
+                                // Show prefill notice banner
+                                const notice = document.createElement('div');
+                                notice.className = 'td-prefill-notice no-print';
+                                notice.innerHTML = `
+                                    <span>ℹ️ Pre-filled from a template shared by <strong>${template.sender_name}</strong>. Your personal details and amounts can be modified.</span>
+                                    <button type="button" class="td-prefill-notice-close" onclick="this.parentElement.remove()">✕</button>
+                                `;
+                                document.getElementById('claim-form-container').insertAdjacentElement('afterbegin', notice);
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error loading shared template:', err);
+                    }
+                } else {
+                    setVal('td_orders_for_move', currentUser.orders_for_move);
+                    setVal('td_move_date', formatToDDMMYYYY(currentUser.move_date));
+                    setVal('td_authority', currentUser.authority);
+                }
 
                 // Format: Basic Pay + Pay Level (e.g., 56100 + Level 8)
                 const basicPay = currentUser.basic_pay || '';
@@ -2396,6 +2484,203 @@ document.addEventListener('DOMContentLoaded', async () => {
         modal.style.setProperty('display', 'flex', 'important');
     }
 
+    // ── TD Share Modal Logic ───────────────────────────────────────────────
+    const tdShareBtn = document.getElementById('tdShareBtn');
+    if (tdShareBtn) {
+        const modal = document.getElementById('tdShareModal');
+        const closeBtn = document.getElementById('tdShareModalClose');
+        const searchInput = document.getElementById('tdShareSearch');
+        const userList = document.getElementById('tdShareUserList');
+        const selectedChips = document.getElementById('tdShareSelectedChips');
+        const selectedWrap = document.getElementById('tdShareSelectedWrap');
+        const confirmBtn = document.getElementById('tdShareConfirmBtn');
+        const countSpan = document.getElementById('tdShareCount');
+        
+        let shareableUsers = [];
+        let selectedUserIds = new Set();
+
+        const renderShareUsers = (query = '') => {
+            userList.innerHTML = '';
+            const filtered = shareableUsers.filter(u => 
+                (u.name || '').toLowerCase().includes(query) || 
+                (u.personal_no || '').toLowerCase().includes(query)
+            );
+            
+            if (filtered.length === 0) {
+                userList.innerHTML = '<div style="padding:10px;color:#64748b;font-size:12px;text-align:center;">No users found.</div>';
+                return;
+            }
+
+            filtered.forEach(u => {
+                const item = document.createElement('div');
+                item.className = 'td-share-user-item' + (selectedUserIds.has(u.id) ? ' selected' : '');
+                
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'td-share-user-cb';
+                cb.checked = selectedUserIds.has(u.id);
+                
+                const initials = (u.name || 'U').substring(0, 2).toUpperCase();
+                
+                item.innerHTML = `
+                    <div class="td-share-user-avatar">${initials}</div>
+                    <div class="td-share-user-info">
+                        <div class="td-share-user-name">${u.name}</div>
+                        <div class="td-share-user-meta">${u.designation || 'No Desig'} • P.No: ${u.personal_no || 'N/A'}</div>
+                    </div>
+                `;
+                item.prepend(cb);
+                
+                item.addEventListener('click', (e) => {
+                    if (e.target !== cb) cb.checked = !cb.checked;
+                    if (cb.checked) {
+                        selectedUserIds.add(u.id);
+                        item.classList.add('selected');
+                    } else {
+                        selectedUserIds.delete(u.id);
+                        item.classList.remove('selected');
+                    }
+                    updateShareSelected();
+                });
+                userList.appendChild(item);
+            });
+        };
+
+        const updateShareSelected = () => {
+            selectedChips.innerHTML = '';
+            if (selectedUserIds.size === 0) {
+                selectedWrap.style.display = 'none';
+                confirmBtn.disabled = true;
+                countSpan.textContent = '0 selected';
+                return;
+            }
+            
+            selectedWrap.style.display = 'block';
+            confirmBtn.disabled = false;
+            countSpan.textContent = `${selectedUserIds.size} selected`;
+            
+            selectedUserIds.forEach(id => {
+                const u = shareableUsers.find(x => x.id === id);
+                if (!u) return;
+                const chip = document.createElement('div');
+                chip.className = 'td-share-chip';
+                chip.innerHTML = `
+                    ${u.name.split(' ')[0]} 
+                    <button type="button" class="td-share-chip-remove">✕</button>
+                `;
+                chip.querySelector('.td-share-chip-remove').onclick = () => {
+                    selectedUserIds.delete(id);
+                    renderShareUsers(searchInput.value.toLowerCase());
+                    updateShareSelected();
+                };
+                selectedChips.appendChild(chip);
+            });
+        };
+
+        tdShareBtn.addEventListener('click', async () => {
+            modal.style.display = 'flex';
+            userList.innerHTML = '<div style="padding:20px;text-align:center;">Loading users...</div>';
+            
+            try {
+                const res = await fetch('/api/claims/users-list', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    shareableUsers = await res.json();
+                    renderShareUsers();
+                } else {
+                    userList.innerHTML = '<div style="padding:20px;color:red;">Failed to load users</div>';
+                }
+            } catch (err) {
+                userList.innerHTML = '<div style="padding:20px;color:red;">Error connecting to server</div>';
+            }
+        });
+
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        searchInput.addEventListener('input', (e) => renderShareUsers(e.target.value.toLowerCase()));
+        
+        confirmBtn.addEventListener('click', async () => {
+            if (selectedUserIds.size === 0) return;
+            
+            // Build shared data payload
+            const formData = new FormData(document.getElementById('new-claim-form'));
+            const getVal = (name) => {
+                const el = document.querySelector(`[name="${name}"]`);
+                if (el && el.tagName.toLowerCase() === 'input') return el.value;
+                if (el && el.type === 'hidden') return el.value;
+                return formData.get(name) || '';
+            };
+
+            const journey = [];
+            const tbody = document.getElementById('ltcFinalJourneyBody');
+            if (tbody) {
+                Array.from(tbody.querySelectorAll('tr')).forEach((tr, idx) => {
+                    const rNum = idx + 1;
+                    journey.push({
+                        dep_station: getVal(`journey_dep_station_${rNum}`),
+                        dep_date: getVal(`journey_dep_date_${rNum}`),
+                        dep_time: getVal(`journey_dep_time_${rNum}`),
+                        arr_station: getVal(`journey_arr_station_${rNum}`),
+                        arr_date: getVal(`journey_arr_date_${rNum}`),
+                        arr_time: getVal(`journey_arr_time_${rNum}`),
+                        dist: getVal(`journey_dist_${rNum}`),
+                        mode: getVal(`journey_mode_${rNum}`),
+                        total_amt: getVal(`journey_total_amt_${rNum}`),
+                        ticket_no: getVal(`journey_ticket_no_${rNum}`)
+                    });
+                });
+            }
+
+            const sharedData = {
+                orders_for_move: getVal('orders_for_move'),
+                move_date: getVal('move_date'),
+                authority: getVal('authority'),
+                journey_start_from: getVal('journey_start_from'),
+                journey: journey,
+                hotel_days: getVal('td_hotel_days'),
+                hotel_rate: getVal('td_hotel_rate'),
+                rma_days: getVal('td_rma_days'),
+                rma_rate: getVal('td_rma_rate'),
+                food_days: getVal('td_food_days'),
+                food_rate: getVal('td_food_rate'),
+                less_advance: getVal('less_advance') || '0'
+            };
+
+            const payload = {
+                claim_type_id: parseInt(urlParams.get('type_id')),
+                shared_data: sharedData,
+                recipient_ids: Array.from(selectedUserIds)
+            };
+
+            try {
+                confirmBtn.textContent = 'Sharing...';
+                confirmBtn.disabled = true;
+                const res = await fetch('/api/claims/share', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    modal.style.display = 'none';
+                    // Clear state
+                    selectedUserIds.clear();
+                    updateShareSelected();
+                    renderShareUsers();
+                    searchInput.value = '';
+                    
+                    // Show small native alert or toast (simple alert for now)
+                    alert(`Claim template successfully shared with ${payload.recipient_ids.length} user(s).`);
+                } else {
+                    alert('Failed to share claim.');
+                }
+            } catch (err) {
+                alert('An error occurred while sharing.');
+            } finally {
+                confirmBtn.textContent = 'Share →';
+                confirmBtn.disabled = false;
+            }
+        });
+    }
+
     function handleSaveClick(status) {
         pendingStatus = status;
 
@@ -2426,5 +2711,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleSaveClick(isContingent ? 'Pending' : 'Draft');
     });
     document.getElementById('btn-submit').addEventListener('click', () => handleSaveClick('Pending'));
+    
+    // Auto-mark shared template as used on first save/submit
+    document.getElementById('btn-submit').addEventListener('click', async () => {
+        const sharedTemplateId = urlParams.get('shared_template_id');
+        if (sharedTemplateId) {
+            fetch(`/api/claims/shared-templates/${sharedTemplateId}/used`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).catch(e => console.error(e));
+        }
+    });
+    
     document.getElementById('new-claim-form').addEventListener('submit', (e) => e.preventDefault());
 });

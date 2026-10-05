@@ -536,4 +536,85 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarToggle.style.display = 'none';
         }
     }
+
+    // Check and render shared claim templates banner on dashboard / workspace
+    async function checkSharedTemplates() {
+        const content = document.getElementById('content');
+        if (!content || !token) return;
+
+        try {
+            const res = await fetch('/api/claims/shared-templates', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) return;
+            const templates = await res.json();
+            if (!Array.isArray(templates) || templates.length === 0) return;
+
+            // Only display unused / undismissed templates
+            const pending = templates.filter(t => !t.is_dismissed && !t.is_used);
+            if (pending.length === 0) return;
+
+            const bannerWrap = document.createElement('div');
+            bannerWrap.id = 'shared-templates-banners-container';
+            bannerWrap.className = 'no-print';
+            bannerWrap.style.marginBottom = '14px';
+
+            pending.forEach(t => {
+                const banner = document.createElement('div');
+                banner.className = 'shared-template-banner';
+                banner.id = `shared-template-${t.id}`;
+                
+                const sharedDate = new Date(t.shared_at).toLocaleDateString('en-IN', {
+                    day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+
+                banner.innerHTML = `
+                    <div class="shared-banner-icon">📤</div>
+                    <div class="shared-banner-body">
+                        <div class="shared-banner-title">
+                            Shared ${t.claim_type_name || 'Temporary Duty'} Claim Template
+                        </div>
+                        <div class="shared-banner-meta">
+                            Shared by <strong>${t.sender_name || 'A colleague'}</strong> (${t.sender_designation || 'Staff'}, P.No: ${t.sender_personal_no || '-'}) on ${sharedDate}
+                        </div>
+                        <div class="shared-banner-actions">
+                            <button type="button" class="shared-banner-use-btn" data-id="${t.id}" data-type-id="${t.claim_type_id}">
+                                Use It →
+                            </button>
+                            <button type="button" class="shared-banner-dismiss-btn" data-id="${t.id}">
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                banner.querySelector('.shared-banner-use-btn').onclick = () => {
+                    window.location.href = `/claims/new.html?type_id=${t.claim_type_id}&shared_template_id=${t.id}`;
+                };
+
+                banner.querySelector('.shared-banner-dismiss-btn').onclick = async () => {
+                    try {
+                        const dRes = await fetch(`/api/claims/shared-templates/${t.id}/dismiss`, {
+                            method: 'PATCH',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (dRes.ok) {
+                            banner.remove();
+                        }
+                    } catch (e) {
+                        console.error('Failed to dismiss template:', e);
+                    }
+                };
+
+                bannerWrap.appendChild(banner);
+            });
+
+            // Insert at top of main content area
+            content.insertAdjacentElement('afterbegin', bannerWrap);
+        } catch (err) {
+            console.error('Error checking shared templates:', err);
+        }
+    }
+
+    checkSharedTemplates();
 });

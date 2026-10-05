@@ -139,8 +139,12 @@
 </style>
 
 <div class="ltc-compact p-4">
+    <div class="td-share-topbar no-print">
+        <span class="td-share-topbar-title">Temporary Duty Claim</span>
+        <button type="button" id="tdShareBtn" class="td-share-btn">📤 Share Prefill</button>
+    </div>
     <h2>
-        <span style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 2px;">अस्थायी ड्यूटी दावा</span>
+        <span class="td-sub-title">अस्थायी ड्यूटी दावा</span>
         TEMPORARY DUTY CLAIM
     </h2>
 
@@ -445,6 +449,29 @@
                 <div style="border-bottom: 1px solid #333; height: 30px; margin-bottom: 5px;"></div>
                 Sr. AO (AT) / वरि.ले.अ. (लेप.)
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Prefill Modal -->
+<div id="tdShareModal" class="td-share-modal-overlay no-print" style="display:none;">
+    <div class="td-share-modal">
+        <div class="td-share-modal-header">
+            <h3>📤 Share TD Claim Prefill</h3>
+            <button type="button" id="tdShareModalClose" class="td-share-modal-close">✕</button>
+        </div>
+        <p class="td-share-modal-subtitle">Select colleagues to share the Orders, Journey & Daily Expenses prefill with. They can use it to start their own TD claim.</p>
+        <div class="td-share-search-wrap">
+            <input type="text" id="tdShareSearch" class="td-share-search" placeholder="🔍 Search by name or personal no...">
+        </div>
+        <div id="tdShareUserList" class="td-share-user-list"></div>
+        <div class="td-share-selected-wrap" id="tdShareSelectedWrap" style="display:none;">
+            <span class="td-share-selected-label">Sharing with:</span>
+            <div id="tdShareSelectedChips" class="td-share-chips"></div>
+        </div>
+        <div class="td-share-modal-footer">
+            <span id="tdShareCount" class="td-share-count">0 selected</span>
+            <button type="button" id="tdShareConfirmBtn" class="td-share-confirm-btn" disabled>Share →</button>
         </div>
     </div>
 </div>

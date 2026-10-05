@@ -119,6 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                                     <button class="claim-action-btn btn-edit" onclick="window.location.href='/claims/new.html?edit_id=${c.id}'" data-tooltip="Edit Claim">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                                     </button>
+                                                    ${(c.type_folder_name === 'td' || c.type_id === 2) ? `
+                                                    <button class="claim-action-btn" onclick="openShareModalForClaim(${c.id})" data-tooltip="Share Prefill" style="color: #6366f1;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                                                    </button>` : ''}
                                                     ${['Draft', 'Returned', 'Rejected'].includes(c.status) ? `
                                                     <button class="claim-action-btn btn-delete" onclick="deleteDraft(${c.id})" data-tooltip="Delete">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -234,6 +238,230 @@ document.addEventListener('DOMContentLoaded', () => {
             default: return 'var(--text-muted)';
         }
     }
+
+    // ── Share TD Claim from My Claims list ──────────────────────────────────
+    let shareableUsers = [];
+    let selectedUserIds = new Set();
+    let currentSharingClaimId = null;
+
+    function ensureShareModalInDOM() {
+        if (document.getElementById('tdShareModal')) return;
+        const modal = document.createElement('div');
+        modal.id = 'tdShareModal';
+        modal.className = 'td-share-modal-overlay no-print';
+        modal.style.display = 'none';
+        modal.innerHTML = `
+            <div class="td-share-modal">
+                <div class="td-share-modal-header">
+                    <h3>📤 Share TD Claim Prefill</h3>
+                    <button type="button" id="tdShareModalClose" class="td-share-modal-close">✕</button>
+                </div>
+                <p class="td-share-modal-subtitle">Share the Orders for Move, Journey, and Daily Expenses from this claim with colleagues.</p>
+                <div class="td-share-search-wrap">
+                    <input type="text" id="tdShareSearch" class="td-share-search" placeholder="🔍 Search by name or personal no...">
+                </div>
+                <div id="tdShareUserList" class="td-share-user-list"></div>
+                <div class="td-share-selected-wrap" id="tdShareSelectedWrap" style="display:none;">
+                    <span class="td-share-selected-label">Sharing with:</span>
+                    <div id="tdShareSelectedChips" class="td-share-chips"></div>
+                </div>
+                <div class="td-share-modal-footer">
+                    <span id="tdShareCount" class="td-share-count">0 selected</span>
+                    <button type="button" id="tdShareConfirmBtn" class="td-share-confirm-btn" disabled>Share →</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const closeBtn = document.getElementById('tdShareModalClose');
+        const searchInput = document.getElementById('tdShareSearch');
+        const confirmBtn = document.getElementById('tdShareConfirmBtn');
+
+        closeBtn.onclick = () => { modal.style.display = 'none'; };
+        searchInput.oninput = (e) => renderShareUsers(e.target.value.toLowerCase());
+        confirmBtn.onclick = handleConfirmShare;
+    }
+
+    function renderShareUsers(query = '') {
+        const userList = document.getElementById('tdShareUserList');
+        if (!userList) return;
+        userList.innerHTML = '';
+        const filtered = shareableUsers.filter(u => 
+            (u.name || '').toLowerCase().includes(query) || 
+            (u.personal_no || '').toLowerCase().includes(query)
+        );
+        if (filtered.length === 0) {
+            userList.innerHTML = '<div style="padding:10px;color:#64748b;font-size:12px;text-align:center;">No users found.</div>';
+            return;
+        }
+        filtered.forEach(u => {
+            const item = document.createElement('div');
+            item.className = 'td-share-user-item' + (selectedUserIds.has(u.id) ? ' selected' : '');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.className = 'td-share-user-cb';
+            cb.checked = selectedUserIds.has(u.id);
+            const initials = (u.name || 'U').substring(0, 2).toUpperCase();
+            item.innerHTML = `
+                <div class="td-share-user-avatar">${initials}</div>
+                <div class="td-share-user-info">
+                    <div class="td-share-user-name">${u.name}</div>
+                    <div class="td-share-user-meta">${u.designation || 'Staff'} • P.No: ${u.personal_no || 'N/A'}</div>
+                </div>
+            `;
+            item.prepend(cb);
+            item.onclick = (e) => {
+                if (e.target !== cb) cb.checked = !cb.checked;
+                if (cb.checked) {
+                    selectedUserIds.add(u.id);
+                    item.classList.add('selected');
+                } else {
+                    selectedUserIds.delete(u.id);
+                    item.classList.remove('selected');
+                }
+                updateShareSelected();
+            };
+            userList.appendChild(item);
+        });
+    }
+
+    function updateShareSelected() {
+        const selectedChips = document.getElementById('tdShareSelectedChips');
+        const selectedWrap = document.getElementById('tdShareSelectedWrap');
+        const confirmBtn = document.getElementById('tdShareConfirmBtn');
+        const countSpan = document.getElementById('tdShareCount');
+        const searchInput = document.getElementById('tdShareSearch');
+
+        selectedChips.innerHTML = '';
+        if (selectedUserIds.size === 0) {
+            selectedWrap.style.display = 'none';
+            confirmBtn.disabled = true;
+            countSpan.textContent = '0 selected';
+            return;
+        }
+
+        selectedWrap.style.display = 'block';
+        confirmBtn.disabled = false;
+        countSpan.textContent = `${selectedUserIds.size} selected`;
+
+        selectedUserIds.forEach(id => {
+            const u = shareableUsers.find(x => x.id === id);
+            if (!u) return;
+            const chip = document.createElement('div');
+            chip.className = 'td-share-chip';
+            chip.innerHTML = `
+                ${u.name.split(' ')[0]} 
+                <button type="button" class="td-share-chip-remove">✕</button>
+            `;
+            chip.querySelector('.td-share-chip-remove').onclick = () => {
+                selectedUserIds.delete(id);
+                renderShareUsers(searchInput.value.toLowerCase());
+                updateShareSelected();
+            };
+            selectedChips.appendChild(chip);
+        });
+    }
+
+    async function handleConfirmShare() {
+        if (!currentSharingClaimId || selectedUserIds.size === 0) return;
+        const claim = claimsById[currentSharingClaimId];
+        if (!claim) return;
+
+        const confirmBtn = document.getElementById('tdShareConfirmBtn');
+        const modal = document.getElementById('tdShareModal');
+
+        // Extract shareable fields from claim.data
+        const d = claim.data || {};
+        
+        // Find journey rows
+        const journey = [];
+        let r = 1;
+        while (d[`journey_dep_station_${r}`] !== undefined || d[`journey_arr_station_${r}`] !== undefined) {
+            journey.push({
+                dep_station: d[`journey_dep_station_${r}`] || '',
+                dep_date: d[`journey_dep_date_${r}`] || '',
+                dep_time: d[`journey_dep_time_${r}`] || '',
+                arr_station: d[`journey_arr_station_${r}`] || '',
+                arr_date: d[`journey_arr_date_${r}`] || '',
+                arr_time: d[`journey_arr_time_${r}`] || '',
+                dist: d[`journey_dist_${r}`] || '',
+                mode: d[`journey_mode_${r}`] || '',
+                total_amt: d[`journey_total_amt_${r}`] || '',
+                ticket_no: d[`journey_ticket_no_${r}`] || ''
+            });
+            r++;
+        }
+
+        const sharedData = {
+            orders_for_move: d.orders_for_move || '',
+            move_date: d.move_date || '',
+            authority: d.authority || '',
+            journey_start_from: d.journey_start_from || '',
+            journey: journey,
+            hotel_days: d.td_hotel_days || '',
+            hotel_rate: d.td_hotel_rate || '',
+            rma_days: d.td_rma_days || '',
+            rma_rate: d.td_rma_rate || '',
+            food_days: d.td_food_days || '',
+            food_rate: d.td_food_rate || '',
+            less_advance: d.less_advance || '0'
+        };
+
+        const payload = {
+            claim_type_id: claim.type_id,
+            shared_data: sharedData,
+            recipient_ids: Array.from(selectedUserIds)
+        };
+
+        try {
+            confirmBtn.textContent = 'Sharing...';
+            confirmBtn.disabled = true;
+            const res = await fetch('/api/claims/share', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                modal.style.display = 'none';
+                selectedUserIds.clear();
+                alert(`Claim template successfully shared with ${payload.recipient_ids.length} user(s).`);
+            } else {
+                alert('Failed to share claim.');
+            }
+        } catch (e) {
+            alert('Error communicating with server.');
+        } finally {
+            confirmBtn.textContent = 'Share →';
+            confirmBtn.disabled = false;
+        }
+    }
+
+    window.openShareModalForClaim = async function(claimId) {
+        currentSharingClaimId = claimId;
+        ensureShareModalInDOM();
+        const modal = document.getElementById('tdShareModal');
+        const userList = document.getElementById('tdShareUserList');
+        selectedUserIds.clear();
+        updateShareSelected();
+
+        modal.style.display = 'flex';
+        userList.innerHTML = '<div style="padding:20px;text-align:center;">Loading users...</div>';
+
+        try {
+            const res = await fetch('/api/claims/users-list', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                shareableUsers = await res.json();
+                renderShareUsers();
+            } else {
+                userList.innerHTML = '<div style="padding:20px;color:red;">Failed to load users</div>';
+            }
+        } catch (e) {
+            userList.innerHTML = '<div style="padding:20px;color:red;">Network error</div>';
+        }
+    };
 
     loadClaims('');
 });
